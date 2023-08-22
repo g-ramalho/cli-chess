@@ -1,0 +1,129 @@
+board[48+column] = NOTHING;
+board[column+line] = WHITE_PAWN;
+
+board[8+column] = NOTHING;
+board[column+line] = BLACK_PAWN;
+---------------------------
+    column = match san_move[0] {
+        'a' => 0,
+        'b' => 1,
+        'c' => 2,
+        'd' => 3,
+        'e' => 4,
+        'f' => 5,
+        'g' => 6,
+        'h' => 7,
+        _ => 100
+    };
+
+    //must be in reverse because we view the board as white
+    line = match san_move[1] {
+        '1' => 56,
+        '2' => 48,
+        '3' => 40,
+        '4' => 32,
+        '5' => 24,
+        '6' => 16,
+        '7' => 8,
+        '8' => 0,
+        _ => 100
+    };
+
+
+---------------------------
+    enum Movement {
+        Pawn(i8, i8),
+        Knight(i8, i8, i8, i8, i8, i8, i8, i8),
+        Rook(),
+        Bishop(),
+        Queen(),
+        King()
+    }
+
+    struct Piece {
+        symbol: char,
+        last_position: u8,
+        movement_type: Movement,
+    }
+    
+    const NOTHING: char = '.';
+    
+    //white pawns and pieces
+    let mut white_pawn1 = Piece{symbol: 'i', last_position: 48, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn2 = Piece{symbol: 'i', last_position: 49, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn3 = Piece{symbol: 'i', last_position: 50, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn4 = Piece{symbol: 'i', last_position: 51, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn5 = Piece{symbol: 'i', last_position: 52, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn6 = Piece{symbol: 'i', last_position: 53, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn7 = Piece{symbol: 'i', last_position: 54, movement_type: Movement::Pawn(-8, -16),};
+    let mut white_pawn8 = Piece{symbol: 'i', last_position: 55, movement_type: Movement::Pawn(-8, -16),};
+    
+    let mut white_rook1 = Piece{symbol: 'R', last_position: 56, movement_type: Movement::Rook(),};
+    let mut white_rook2 = Piece{symbol: 'R', last_position: 63, movement_type: Movement::Rook(),};
+    
+    let mut white_knight1 = Piece{symbol: 'N', last_position: 57, movement_type: Movement::Knight(-17, -15, -10, -6, 6, 10, 15, 17)};
+    let mut white_knight2 = Piece{symbol: 'N', last_position: 62, movement_type: Movement::Knight(-17, -15, -10, -6, 6, 10, 15, 17)};
+    
+    let mut white_bishop1 = Piece{symbol: 'B', last_position: 58, movement_type: Movement::Bishop(),};
+    let mut white_bishop2 = Piece{symbol: 'B', last_position: 61, movement_type: Movement::Bishop(),};
+    
+    let mut white_queen = Piece{symbol: 'Q', last_position: 59, movement_type: Movement::Queen(),};
+    let mut white_king = Piece{symbol: 'K', last_position: 60, movement_type: Movement::King(),};
+    
+    //black pawns and pieces
+    let mut black_pawn1 = Piece{symbol: 'j', last_position: 8, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn2 = Piece{symbol: 'j', last_position: 9, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn3 = Piece{symbol: 'j', last_position: 10, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn4 = Piece{symbol: 'j', last_position: 11, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn5 = Piece{symbol: 'j', last_position: 12, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn6 = Piece{symbol: 'j', last_position: 13, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn7 = Piece{symbol: 'j', last_position: 14, movement_type: Movement::Pawn(8, 16),};
+    let mut black_pawn8 = Piece{symbol: 'j', last_position: 15, movement_type: Movement::Pawn(8, 16),};
+    
+    let mut black_rook1 = Piece{symbol: 'r', last_position: 0, movement_type: Movement::Rook(),};
+    let mut black_rook2 = Piece{symbol: 'r', last_position: 7, movement_type: Movement::Rook(),};
+    
+    let mut black_knight1 = Piece{symbol: 'n', last_position: 1, movement_type: Movement::Knight(-17, -15, -10, -6, 6, 10, 15, 17)};
+    let mut black_knight2 = Piece{symbol: 'n', last_position: 6, movement_type: Movement::Knight(-17, -15, -10, -6, 6, 10, 15, 17)};
+    
+    let mut black_bishop1 = Piece{symbol: 'b', last_position: 2, movement_type: Movement::Bishop(),};
+    let mut black_bishop2 = Piece{symbol: 'b', last_position: 5, movement_type: Movement::Bishop(),};
+    
+    let mut black_queen = Piece{symbol: 'q', last_position: 3, movement_type: Movement::Queen(),};
+    let mut black_king = Piece{symbol: 'k', last_position: 4, movement_type: Movement::King(),};
+
+    
+    -------------------------
+
+    // pawns setup
+    // number ranges are half-open (a <= x < b), so we +1 to the last number
+    for i in 0..8 {
+        board[i+8] = black_pawn.symbol;
+        board[i+48] = white_pawn.symbol;
+    };
+
+    //rook setup 0 7 56 63
+    board[0] = rook.symbol;
+    board[7] = rook.symbol;
+    board[56] = rook.symbol;
+    board[63] = rook.symbol;
+
+    //knight setup 1 6 57 62
+    board[1] = knight.symbol;
+    board[6] = knight.symbol;
+    board[57] = knight.symbol;
+    board[62] = knight.symbol;
+
+    //bishop setup 2 5 58 61
+    board[2] = bishop.symbol;
+    board[5] = bishop.symbol;
+    board[58] = bishop.symbol;
+    board[61] = bishop.symbol;
+
+    //queen setup 3 59
+    board[3] = queen.symbol;
+    board[59] = queen.symbol;
+
+    //king setup 4 60
+    board[4] = king.symbol;
+    board[60] = king.symbol;
