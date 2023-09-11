@@ -1,6 +1,5 @@
 use std::io;
 use std::string::String;
-use std::convert::TryFrom;
 //use strum::IntoEnumIterator; 
 //use strum_macros::EnumIter;
 
@@ -140,8 +139,8 @@ fn main() {
     let mut column: usize = 0;
     let mut line: usize = 0;
 
-    if piece_to_move(san_move[0]) == true {
-
+    if is_piece(san_move[0]) == true {
+        //if the first letter indicates a piece, the move has to be described in the two next letters
         column = match san_move[1] {
             'a' => 0,
             'b' => 1,
@@ -166,6 +165,29 @@ fn main() {
             '8' => 0,
             _ => 100
         };
+
+        match san_move[0] {
+            'N' => for possible_moves in knight_move.iter() {
+                if ((column + line) as i8) == (white_knight1 as i8) + *possible_moves {
+                    //last position is freed
+                    board[white_knight1] = NOTHING;
+
+                    //piece is moved to new position
+                    board[column+line] = WHITE_KNIGHT;
+
+                    //current position is updated
+                    white_knight1 = column+line;
+
+                    break;
+                }else if ((column + line) as i8) == (white_knight2 as i8) + *possible_moves {
+                    board[white_knight2] = NOTHING;
+                    board[column+line] = WHITE_KNIGHT;
+                    white_knight2 = column+line;
+                    break;
+                }
+            },
+            _ => (),
+        }
 
     }else{
 
@@ -214,6 +236,8 @@ fn main() {
 
                             //current position is updated
                             *i = column+line;
+
+                            break;
                         }
                     }
                 };
@@ -227,6 +251,8 @@ fn main() {
 
                     //current position is updated
                     *i = column+line;
+
+                    break;
                 }
             }
         };
@@ -254,7 +280,7 @@ fn main() {
 
     san_move = player_move.trim().chars().collect();
 
-    if piece_to_move(san_move[0]) == true {
+    if is_piece(san_move[0]) == true {
         column = match san_move[1] {
             'a' => 0,
             'b' => 1,
@@ -279,6 +305,30 @@ fn main() {
             '8' => 0,
             _ => 100
         };
+
+        match san_move[0] {
+            'N' => for possible_moves in knight_move.iter() {
+                if ((column + line) as i8) == (black_knight1 as i8) + *possible_moves {
+                    //last position is freed
+                    board[black_knight1] = NOTHING;
+
+                    //piece is moved to new position
+                    board[column+line] = BLACK_KNIGHT;
+
+                    //current position is updated
+                    black_knight1 = column+line;
+
+                    break;
+                } else if ((column + line) as i8) == (black_knight2 as i8) + *possible_moves {
+                    board[black_knight2] = NOTHING;
+                    board[column+line] = BLACK_KNIGHT;
+                    black_knight2 = column+line;
+                    break;
+                }
+            },
+            _ => (),
+        }
+
     }else{
         column = match san_move[0] {
             'a' => 0,
@@ -324,6 +374,8 @@ fn main() {
 
                         //current position is updated
                         *i = column+line;
+
+                        break;
                     }
                 };
             }else if *i+8 == column+line{
@@ -335,6 +387,8 @@ fn main() {
 
                 //current position is updated
                 *i = column+line;
+
+                break;
             }else{
                 println!("Not a possible move, try again");
                 continue
@@ -363,7 +417,7 @@ fn main() {
 }
 
 
-fn piece_to_move(piece: char) -> bool {
+fn is_piece(piece: char) -> bool {
     match piece {
         'N' |
         'B' |
@@ -374,6 +428,6 @@ fn piece_to_move(piece: char) -> bool {
     }
 }
 
-fn usize_to_i8(v: usize) -> Option<i8> {
-    i8::try_from(v).ok()
-}
+// fn usize_to_i8(v: usize) -> i8 {
+//     i8::from(v)
+// }
