@@ -22,10 +22,8 @@ fn main() {
     const BLACK_KING: char = 'k';
 
     //movement stuff
-    let pawn_move_white: [usize; 2] = [8, 16];
-    let pawn_move_black: [usize; 2] = [8, 16];
-    let knight_move: [i8;8] = [-17, -15, -10, -6, 6, 10, 15, 17];
-
+    let pawn_movement: [usize; 2] = [8, 16];
+    let knight_movement: [i8;8] = [-17, -15, -10, -6, 6, 10, 15, 17];
     
 //LAST POSITION OF EACH PIECE AND PAWN:
 
@@ -124,138 +122,157 @@ fn main() {
             println!(" {} ", board[i]);
         };
     };
-    println!("White moves");
 
     let mut player_move = String::new();
-
-    io::stdin()
-        .read_line(&mut player_move)
-        .expect("Read error");
-
-    //san = short algebraic notation
-    let mut san_move: Vec<char> = player_move.trim().chars().collect();
+    let mut san_move: Vec<char> = Vec::new();
 
     //"column" also stands for the piece to be moved, since it's tied to the first letter in the SAN notation
-    let mut column: usize = 0;
-    let mut line: usize = 0;
+    let mut column: usize;
+    let mut line: usize;
 
-    if is_piece(san_move[0]) == true {
-        //if the first letter indicates a piece, the move has to be described in the two next letters
-        column = match san_move[1] {
-            'a' => 0,
-            'b' => 1,
-            'c' => 2,
-            'd' => 3,
-            'e' => 4,
-            'f' => 5,
-            'g' => 6,
-            'h' => 7,
-            _ => 100
-        };
-    
-        //must be in reverse because we view the board as white
-        line = match san_move[2] {
-            '1' => 56,
-            '2' => 48,
-            '3' => 40,
-            '4' => 32,
-            '5' => 24,
-            '6' => 16,
-            '7' => 8,
-            '8' => 0,
-            _ => 100
-        };
+    let mut try_again: bool = true;
 
-        match san_move[0] {
-            'N' => for possible_moves in knight_move.iter() {
-                if ((column + line) as i8) == (white_knight1 as i8) + *possible_moves {
-                    //last position is freed
-                    board[white_knight1] = NOTHING;
+    while try_again{
+        println!("White moves");
+            
+        io::stdin()
+            .read_line(&mut player_move)
+            .expect("Read error");
 
-                    //piece is moved to new position
-                    board[column+line] = WHITE_KNIGHT;
+        //san = short algebraic notation
+        let mut san_move: Vec<char> = player_move.trim().chars().collect();
 
-                    //current position is updated
-                    white_knight1 = column+line;
+        if is_piece(san_move[0]) == true {
+            //if the first letter indicates a piece, the move has to be described in the two next letters
+            column = match san_move[1] {
+                'a' => 0,
+                'b' => 1,
+                'c' => 2,
+                'd' => 3,
+                'e' => 4,
+                'f' => 5,
+                'g' => 6,
+                'h' => 7,
+                _ => 100
+            };
+        
+            //must be in reverse because we view the board as white
+            line = match san_move[2] {
+                '1' => 56,
+                '2' => 48,
+                '3' => 40,
+                '4' => 32,
+                '5' => 24,
+                '6' => 16,
+                '7' => 8,
+                '8' => 0,
+                _ => 100
+            };
 
-                    break;
-                }else if ((column + line) as i8) == (white_knight2 as i8) + *possible_moves {
-                    board[white_knight2] = NOTHING;
-                    board[column+line] = WHITE_KNIGHT;
-                    white_knight2 = column+line;
-                    break;
+            match san_move[0] {
+                'N' => for possible_moves in knight_movement.iter() {
+                    if ((column + line) as i8) == (white_knight1 as i8) + *possible_moves {
+                        //last position is freed
+                        board[white_knight1] = NOTHING;
+
+                        //piece is moved to new position
+                        board[column+line] = WHITE_KNIGHT;
+
+                        //current position is updated
+                        white_knight1 = column+line;
+
+                        try_again = false;
+                        break;
+                    }else if ((column + line) as i8) == (white_knight2 as i8) + *possible_moves {
+                        board[white_knight2] = NOTHING;
+                        board[column+line] = WHITE_KNIGHT;
+                        white_knight2 = column+line;
+
+                        try_again = false;
+                        break;
+                    }
+                },
+                // 'B' => 
+                _ => (),
+            }
+
+        }else{
+
+            column = match san_move[0] {
+                'a' => 0,
+                'b' => 1,
+                'c' => 2,
+                'd' => 3,
+                'e' => 4,
+                'f' => 5,
+                'g' => 6,
+                'h' => 7,
+                _ => 100
+            };
+        
+            //must be in reverse because we view the board as white
+            line = match san_move[1] {
+                '1' => 56,
+                '2' => 48,
+                '3' => 40,
+                '4' => 32,
+                '5' => 24,
+                '6' => 16,
+                '7' => 8,
+                '8' => 0,
+                _ => 100
+            };
+
+            //for each pawn in white's possession
+            //i = last position of the pawn
+            for i in white_pawns.iter_mut() {
+                //if the pawn is in it's starting position
+                if *i <= 55 {
+                    //get every move possible for a pawn
+                    //j = one of the possible moves
+                    for j in pawn_movement.iter() {
+                        //while in the starting position, pawns can move up to 2 pieces
+                        if *i >= *j{
+                        //and check if any of the pawns can go to the specified move
+                            if *i-*j == column+line {
+                                //last position is freed
+                                board[*i] = NOTHING;
+
+                                //pawn is moved to the new position
+                                board[column+line] = WHITE_PAWN;
+
+                                //current position is updated
+                                *i = column+line;
+
+                                try_again = false;
+                                break;
+                            }
+                        }
+                    };
+                }else if *i >= 55{
+                    if *i-8 == column+line{
+                        //last position is freed
+                        board[*i] = NOTHING;
+
+                        //pawn is moved to the new position
+                        board[column+line] = WHITE_PAWN;
+
+                        //current position is updated
+                        *i = column+line;
+
+                        try_again = false;
+                        break;
+                    }
                 }
-            },
-            _ => (),
+            };
+        }
+        if try_again == true{
+            println!("Not a possible move, try again!\n");
         }
 
-    }else{
-
-        column = match san_move[0] {
-            'a' => 0,
-            'b' => 1,
-            'c' => 2,
-            'd' => 3,
-            'e' => 4,
-            'f' => 5,
-            'g' => 6,
-            'h' => 7,
-            _ => 100
-        };
-    
-        //must be in reverse because we view the board as white
-        line = match san_move[1] {
-            '1' => 56,
-            '2' => 48,
-            '3' => 40,
-            '4' => 32,
-            '5' => 24,
-            '6' => 16,
-            '7' => 8,
-            '8' => 0,
-            _ => 100
-        };
-
-        //for each pawn in white's possession
-        //i = last position of the pawn
-        for i in white_pawns.iter_mut() {
-            //if the pawn is in it's starting position
-            if *i <= 55 {
-                //get every move possible for a pawn
-                //j = one of the possible moves
-                for j in pawn_move_white.iter() {
-                    //while in the starting position, pawns can move up to 2 pieces
-                    if *i >= *j{
-                    //and check if any of the pawns can go to the specified move
-                        if *i-*j == column+line {
-                            //last position is freed
-                            board[*i] = NOTHING;
-
-                            //pawn is moved to the new position
-                            board[column+line] = WHITE_PAWN;
-
-                            //current position is updated
-                            *i = column+line;
-
-                            break;
-                        }
-                    }
-                };
-            }else if *i >= 55{
-                if *i-8 == column+line{
-                    //last position is freed
-                    board[*i] = NOTHING;
-
-                    //pawn is moved to the new position
-                    board[column+line] = WHITE_PAWN;
-
-                    //current position is updated
-                    *i = column+line;
-
-                    break;
-                }
-            }
-        };
+        //has to be cleared, otherwise read_line would mut just append the string to the last move registered in player_move
+        player_move.clear();
+        san_move.clear();
     }
 
     for i in 0..board.len() {
@@ -268,132 +285,142 @@ fn main() {
             println!(" {} ", board[i]);
         };
     };
-    println!("Black moves");
 
-    //has to be cleared, otherwise read_line would mut just append the string to the last move registered in player_move
-    player_move.clear();
-    san_move.clear();
+    try_again = true;
 
-    io::stdin()
-        .read_line(&mut player_move)
-        .expect("Read error");
+    while try_again{
+        println!("Black moves");
 
-    san_move = player_move.trim().chars().collect();
+        io::stdin()
+            .read_line(&mut player_move)
+            .expect("Read error");
 
-    if is_piece(san_move[0]) == true {
-        column = match san_move[1] {
-            'a' => 0,
-            'b' => 1,
-            'c' => 2,
-            'd' => 3,
-            'e' => 4,
-            'f' => 5,
-            'g' => 6,
-            'h' => 7,
-            _ => 100
-        };
-    
-        //must be in reverse because we view the board as white
-        line = match san_move[2] {
-            '1' => 56,
-            '2' => 48,
-            '3' => 40,
-            '4' => 32,
-            '5' => 24,
-            '6' => 16,
-            '7' => 8,
-            '8' => 0,
-            _ => 100
-        };
+        san_move = player_move.trim().chars().collect();
 
-        match san_move[0] {
-            'N' => for possible_moves in knight_move.iter() {
-                if ((column + line) as i8) == (black_knight1 as i8) + *possible_moves {
-                    //last position is freed
-                    board[black_knight1] = NOTHING;
+        if is_piece(san_move[0]) == true {
+            column = match san_move[1] {
+                'a' => 0,
+                'b' => 1,
+                'c' => 2,
+                'd' => 3,
+                'e' => 4,
+                'f' => 5,
+                'g' => 6,
+                'h' => 7,
+                _ => 100
+            };
+        
+            //must be in reverse because we view the board as white
+            line = match san_move[2] {
+                '1' => 56,
+                '2' => 48,
+                '3' => 40,
+                '4' => 32,
+                '5' => 24,
+                '6' => 16,
+                '7' => 8,
+                '8' => 0,
+                _ => 100
+            };
 
-                    //piece is moved to new position
-                    board[column+line] = BLACK_KNIGHT;
-
-                    //current position is updated
-                    black_knight1 = column+line;
-
-                    break;
-                } else if ((column + line) as i8) == (black_knight2 as i8) + *possible_moves {
-                    board[black_knight2] = NOTHING;
-                    board[column+line] = BLACK_KNIGHT;
-                    black_knight2 = column+line;
-                    break;
-                }
-            },
-            _ => (),
-        }
-
-    }else{
-        column = match san_move[0] {
-            'a' => 0,
-            'b' => 1,
-            'c' => 2,
-            'd' => 3,
-            'e' => 4,
-            'f' => 5,
-            'g' => 6,
-            'h' => 7,
-            _ => 100
-        };
-    
-        //must be in reverse because we view the board as white
-        line = match san_move[1] {
-            '1' => 56,
-            '2' => 48,
-            '3' => 40,
-            '4' => 32,
-            '5' => 24,
-            '6' => 16,
-            '7' => 8,
-            '8' => 0,
-            _ => 100
-        };
-
-        //for each pawn in black's possession
-        //i = last position of the pawn
-        for i in black_pawns.iter_mut() {
-            if 8 <= *i && *i <= 15 {
-                //get every move possible for a pawn
-                //j = one of the possible moves
-                for j in pawn_move_black.iter() {
-                //if *i >= *j isnt needed, the black pawn loop doesnt subtract from the index
-                    //and check if any of the pawns can go to the specified move
-                    //(last position + possible move)
-                    if *i+*j == column+line {
+            match san_move[0] {
+                'N' => for possible_moves in knight_movement.iter() {
+                    if ((column + line) as i8) == (black_knight1 as i8) + *possible_moves {
                         //last position is freed
-                        board[*i] = NOTHING;
+                        board[black_knight1] = NOTHING;
 
-                        //pawn is moved to the new position
-                        board[column+line] = BLACK_PAWN;
+                        //piece is moved to new position
+                        board[column+line] = BLACK_KNIGHT;
 
                         //current position is updated
-                        *i = column+line;
+                        black_knight1 = column+line;
 
+                        try_again = false;
+                        break;
+                    } else if ((column + line) as i8) == (black_knight2 as i8) + *possible_moves {
+                        board[black_knight2] = NOTHING;
+                        board[column+line] = BLACK_KNIGHT;
+                        black_knight2 = column+line;
+
+                        try_again = false;
                         break;
                     }
-                };
-            }else if *i+8 == column+line{
-                //last position is freed
-                board[*i] = NOTHING;
-
-                //pawn is moved to the new position
-                board[column+line] = BLACK_PAWN;
-
-                //current position is updated
-                *i = column+line;
-
-                break;
-            }else{
-                println!("Not a possible move, try again");
-                continue
+                },
+                _ => (),
             }
-        };
+
+        }else{
+            column = match san_move[0] {
+                'a' => 0,
+                'b' => 1,
+                'c' => 2,
+                'd' => 3,
+                'e' => 4,
+                'f' => 5,
+                'g' => 6,
+                'h' => 7,
+                _ => 100
+            };
+        
+            //must be in reverse because we view the board as white
+            line = match san_move[1] {
+                '1' => 56,
+                '2' => 48,
+                '3' => 40,
+                '4' => 32,
+                '5' => 24,
+                '6' => 16,
+                '7' => 8,
+                '8' => 0,
+                _ => 100
+            };
+
+            //for each pawn in black's possession
+            //i = last position of the pawn
+            for i in black_pawns.iter_mut() {
+                if 8 <= *i && *i <= 15 {
+                    //get every move possible for a pawn
+                    //j = one of the possible moves
+                    for j in pawn_movement.iter() {
+                    //if *i >= *j isnt needed, the black pawn loop doesnt subtract from the index
+                        //and check if any of the pawns can go to the specified move
+                        //(last position + possible move)
+                        if *i+*j == column+line {
+                            //last position is freed
+                            board[*i] = NOTHING;
+
+                            //pawn is moved to the new position
+                            board[column+line] = BLACK_PAWN;
+
+                            //current position is updated
+                            *i = column+line;
+
+                            try_again = false;
+                            break;
+                        }
+                    };
+                }else if *i+8 == column+line{
+                    //last position is freed
+                    board[*i] = NOTHING;
+
+                    //pawn is moved to the new position
+                    board[column+line] = BLACK_PAWN;
+
+                    //current position is updated
+                    *i = column+line;
+
+                    try_again = false;
+                    break;
+                }
+                
+            };
+        }
+
+        if try_again == true{
+            println!("Not a possible move, try again!\n");
+        }
+        player_move.clear();
+        san_move.clear();
     }
 
         /*    
