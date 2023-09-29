@@ -44,8 +44,9 @@ fn main() {
     let mut white_knight1 = 57;
     let mut white_knight2 = 62;
     
-    let mut white_bishop1 = 58;
-    let mut white_bishop2 = 61;
+    let mut white_bishop1: usize = 58;
+    let mut white_bishop2: usize = 61;
+    let mut white_bishops: [usize;2] = [white_bishop1, white_bishop2];
     
     let mut white_queen = 59;
     let mut white_king = 60;
@@ -126,7 +127,6 @@ fn main() {
     let mut player_move = String::new();
     let mut san_move: Vec<char> = Vec::new();
 
-    //"column" also stands for the piece to be moved, since it's tied to the first letter in the SAN notation
     let mut column: usize;
     let mut line: usize;
 
@@ -171,7 +171,7 @@ fn main() {
 
             match san_move[0] {
                 'N' => for possible_moves in knight_movement.iter() {
-                    if ((column + line) as i8) == (white_knight1 as i8) + *possible_moves {
+                    if ((column + line) as i8) == (white_knight1 as i8) + *possible_moves && !is_white(board[column+line]) {
                         //last position is freed
                         board[white_knight1] = NOTHING;
 
@@ -183,7 +183,7 @@ fn main() {
 
                         try_again = false;
                         break;
-                    }else if ((column + line) as i8) == (white_knight2 as i8) + *possible_moves {
+                    }else if ((column + line) as i8) == (white_knight2 as i8) + *possible_moves && !is_white(board[column+line]) {
                         board[white_knight2] = NOTHING;
                         board[column+line] = WHITE_KNIGHT;
                         white_knight2 = column+line;
@@ -192,7 +192,130 @@ fn main() {
                         break;
                     }
                 },
-                // 'B' => 
+                // for a square to be in any diagonal of the bishop,
+                // the distance of the indexes from the initial position to the desired position
+                // must be divisible either by 7 or by 9
+
+                // this happens because:
+                // to move to the upper right diagonal of a bishop, you must subtract 7 to the index
+                // to move to the upper left diagonal, you subtract 9 to the index
+                // to move to the inferior right diagonal, you add 9 to the index
+                // and to move to the inferior left, you add 7 to the index
+
+                // this tests the dark squares bishop
+                'B' => if (white_bishop1 as i8) > ((column+line) as i8) && ((((white_bishop1 as i8) - ((column+line) as i8))%7 == 0) || (((white_bishop1 as i8) - ((column+line) as i8))%9 == 0)) {
+                        if ((white_bishop1 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop1 as i8) - diagonal*7 == ((column+line) as i8) && !upper_right_diagonal(white_bishop1, diagonal as usize) && !is_white(board[(((white_bishop1 as i8) - diagonal*7) as usize)]) {
+                                    board[white_bishop1] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop1 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((white_bishop1 as i8) - diagonal*7) as usize)]) {
+                                    break;
+                                }
+                            }
+                        }else if ((white_bishop1 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop1 as i8) - diagonal*9 == ((column+line) as i8) && !upper_left_diagonal(white_bishop1, diagonal as usize) && !is_white(board[(((white_bishop1 as i8) - diagonal*9) as usize)]){
+                                    board[white_bishop1] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop1 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((white_bishop1 as i8) - diagonal*9) as usize)]) {
+                                    break;
+                                }
+                            }
+                        }
+                    }else if (white_bishop1 as i8) < ((column+line) as i8) && (((((column+line) as i8) - (white_bishop1 as i8))%7 == 0) || ((((column+line) as i8) - (white_bishop1 as i8))%9 == 0)) {
+                        if ((white_bishop1 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop1 as i8) + diagonal*7 == ((column+line) as i8) && !inferior_left_diagonal(white_bishop1, diagonal as usize) && !is_white(board[white_bishop1 + (7*diagonal as usize)]) {
+                                    board[white_bishop1] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop1 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[white_bishop1 + (7*diagonal as usize)]) {
+                                    break;
+                                }
+                            }
+                        }else if ((white_bishop1 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop1 as i8) + diagonal*9 == ((column+line) as i8) && !inferior_right_diagonal(white_bishop1, diagonal as usize) && !is_white(board[white_bishop1 + (9*diagonal as usize)]) {
+                                    board[white_bishop1] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop1 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[white_bishop1 + (9*diagonal as usize)]) {
+                                    break;
+                                }
+                            }
+                        }
+                    }else if (white_bishop2 as i8) > ((column+line) as i8) && ((((white_bishop2 as i8) - ((column+line) as i8))%7 == 0) || (((white_bishop2 as i8) - ((column+line) as i8))%9 == 0)) {
+                        if ((white_bishop2 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop2 as i8) - diagonal*7 == ((column+line) as i8) && !upper_right_diagonal(white_bishop2, diagonal as usize) && !is_white(board[(((white_bishop2 as i8) - diagonal*7) as usize)]) {
+                                    board[white_bishop2] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((white_bishop2 as i8) - diagonal*7) as usize)]) {
+                                    break;
+                                }
+                            }
+                        }else if ((white_bishop2 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop2 as i8) - diagonal*9 == ((column+line) as i8) && !upper_left_diagonal(white_bishop2, diagonal as usize) && !is_white(board[(((white_bishop2 as i8) - diagonal*9) as usize)]){
+                                    board[white_bishop2] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((white_bishop2 as i8) - diagonal*9) as usize)]) {
+                                    break;
+                                }
+                            }
+                        }
+                    }else if (white_bishop2 as i8) < ((column+line) as i8) && (((((column+line) as i8) - (white_bishop2 as i8))%7 == 0) || ((((column+line) as i8) - (white_bishop2 as i8))%9 == 0)) {
+                        if ((white_bishop2 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop2 as i8) + diagonal*7 == ((column+line) as i8) && !inferior_left_diagonal(white_bishop2, diagonal as usize) && !is_white(board[white_bishop2 + (7*diagonal as usize)]) {
+                                    board[white_bishop2] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[white_bishop2 + (7*diagonal as usize)]) {
+                                    break;
+                                }
+                            }
+                        }else if ((white_bishop2 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (white_bishop2 as i8) + diagonal*9 == ((column+line) as i8) && !inferior_right_diagonal(white_bishop2, diagonal as usize) && !is_white(board[white_bishop2 + (9*diagonal as usize)]) {
+                                    board[white_bishop2] = NOTHING;
+                                    board[column+line] = WHITE_BISHOP;
+                                    white_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[white_bishop2 + (9*diagonal as usize)]) {
+                                    break;
+                                }
+                            }
+                        }
+                    },
                 _ => (),
             }
 
@@ -224,41 +347,42 @@ fn main() {
             };
 
             //for each pawn in white's possession
-            //i = last position of the pawn
-            for i in white_pawns.iter_mut() {
+            //pawn_position = last position of each pawn
+            for pawn_position in white_pawns.iter_mut() {
                 //if the pawn is in it's starting position
-                if *i <= 55 {
+                if *pawn_position <= 55 {
                     //get every move possible for a pawn
                     //j = one of the possible moves
-                    for j in pawn_movement.iter() {
-                        //while in the starting position, pawns can move up to 2 pieces
-                        if *i >= *j{
+                    for possible_pawn_movements in pawn_movement.iter() {
+                        //while in the starting position, pawns can move up to 2 squares
+                        if *pawn_position >= *possible_pawn_movements{
                         //and check if any of the pawns can go to the specified move
-                            if *i-*j == column+line {
+                            if *pawn_position-*possible_pawn_movements == column+line && !is_white(board[column+line]) {
                                 //last position is freed
-                                board[*i] = NOTHING;
+                                board[*pawn_position] = NOTHING;
 
                                 //pawn is moved to the new position
                                 board[column+line] = WHITE_PAWN;
 
                                 //current position is updated
-                                *i = column+line;
+                                *pawn_position = column+line;
 
                                 try_again = false;
                                 break;
                             }
                         }
                     };
-                }else if *i >= 55{
-                    if *i-8 == column+line{
+                // if it isnt in the starting position, it can only move one square
+                }else if *pawn_position >= 55{
+                    if *pawn_position-8 == column+line && !is_white(board[column+line]) {
                         //last position is freed
-                        board[*i] = NOTHING;
+                        board[*pawn_position] = NOTHING;
 
                         //pawn is moved to the new position
                         board[column+line] = WHITE_PAWN;
 
                         //current position is updated
-                        *i = column+line;
+                        *pawn_position = column+line;
 
                         try_again = false;
                         break;
@@ -325,7 +449,7 @@ fn main() {
 
             match san_move[0] {
                 'N' => for possible_moves in knight_movement.iter() {
-                    if ((column + line) as i8) == (black_knight1 as i8) + *possible_moves {
+                    if ((column + line) as i8) == (black_knight1 as i8) + *possible_moves && !is_black(board[column+line]) {
                         //last position is freed
                         board[black_knight1] = NOTHING;
 
@@ -337,7 +461,7 @@ fn main() {
 
                         try_again = false;
                         break;
-                    } else if ((column + line) as i8) == (black_knight2 as i8) + *possible_moves {
+                    } else if ((column + line) as i8) == (black_knight2 as i8) + *possible_moves && !is_black(board[column+line]) {
                         board[black_knight2] = NOTHING;
                         board[column+line] = BLACK_KNIGHT;
                         black_knight2 = column+line;
@@ -345,6 +469,36 @@ fn main() {
                         try_again = false;
                         break;
                     }
+                },
+                'B' => if column+line > black_bishop1 && (((column+line) - black_bishop1)%7 == 0 || ((column+line) - black_bishop1)%9 == 0) {
+                        board[black_bishop1] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop1 = column+line;
+
+                        try_again = false;
+                    
+                }else if column+line < black_bishop1 && ((black_bishop1 - (column+line))%7 == 0 || (black_bishop1 - (column+line))%9 == 0){
+                        board[black_bishop1] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop1 = column+line;
+
+                        try_again = false;
+                    
+                // this tests the light squares bishop
+                }else if column+line > black_bishop2 && (((column+line) - black_bishop2)%7 == 0 || ((column+line) - black_bishop2)%9 == 0){
+                        board[black_bishop2] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop2 = column+line;
+
+                        try_again = false;
+                    
+                }else if column+line < black_bishop2 && ((black_bishop2 - (column+line))%7 == 0 || (black_bishop2 - (column+line))%9 == 0){
+                        board[black_bishop2] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop2 = column+line;
+
+                        try_again = false;
+                    
                 },
                 _ => (),
             }
@@ -376,38 +530,39 @@ fn main() {
             };
 
             //for each pawn in black's possession
-            //i = last position of the pawn
-            for i in black_pawns.iter_mut() {
-                if 8 <= *i && *i <= 15 {
+            //pawn_position = last position of the pawn
+            for pawn_position in black_pawns.iter_mut() {
+                if 8 <= *pawn_position && *pawn_position <= 15 {
                     //get every move possible for a pawn
-                    //j = one of the possible moves
-                    for j in pawn_movement.iter() {
+                    //possible_pawn_moves = one of the possible moves (either two or one squares)
+                    for possible_pawn_moves in pawn_movement.iter() {
                     //if *i >= *j isnt needed, the black pawn loop doesnt subtract from the index
                         //and check if any of the pawns can go to the specified move
                         //(last position + possible move)
-                        if *i+*j == column+line {
+                        if *pawn_position+*possible_pawn_moves == column+line && !is_black(board[column+line]) {
                             //last position is freed
-                            board[*i] = NOTHING;
+                            board[*pawn_position] = NOTHING;
 
                             //pawn is moved to the new position
                             board[column+line] = BLACK_PAWN;
 
                             //current position is updated
-                            *i = column+line;
+                            *pawn_position = column+line;
 
                             try_again = false;
                             break;
                         }
                     };
-                }else if *i+8 == column+line{
+                // if it isnt in the starting position, it can only move 1 square
+                }else if *pawn_position+8 == column+line && !is_black(board[column+line]) {
                     //last position is freed
-                    board[*i] = NOTHING;
+                    board[*pawn_position] = NOTHING;
 
                     //pawn is moved to the new position
                     board[column+line] = BLACK_PAWN;
 
                     //current position is updated
-                    *i = column+line;
+                    *pawn_position = column+line;
 
                     try_again = false;
                     break;
@@ -422,25 +577,7 @@ fn main() {
         player_move.clear();
         san_move.clear();
     }
-
-        /*    
-        println!("Would you like to play default Chess or Fischer Random? (d/f)");
-
-        let mut answer = String::new();
-
-        io::stdin()
-            .read_line(&mut answer)
-            .expect("That was not a string");
-        
-        if answer.trim() == "d"{
-            board_default();
-        }else if answer.trim() == "f"{
-            //board_chess960(Pieces);
-        }else{
-            println!("That was not a possible answer.");
-        };*/
-
-    }
+    } // loop end
 }
 
 
@@ -455,6 +592,120 @@ fn is_piece(piece: char) -> bool {
     }
 }
 
-// fn usize_to_i8(v: usize) -> i8 {
-//     i8::from(v)
-// }
+fn is_white(piece: char) -> bool {
+    match piece {
+        'i' |
+        'R' |
+        'N' |
+        'B' |
+        'Q' |
+        'K' => true,
+        _ => false
+    }
+}
+
+fn is_black(piece:char) -> bool {
+    match piece {
+        'j' |
+        'r' |
+        'n' |
+        'b' |
+        'q' |
+        'k' => true,
+        _ => false
+    }
+}
+
+fn upper_right_diagonal(b: usize, i: usize) -> bool {
+    // if the index is one of the following,
+    // return true
+
+    match (b as i8) - (i as i8)*7 {
+        // a bishop cannot trace a path after it hits the board's "walls" or corners
+        56 |
+        48 |
+        40 |
+        32 |
+        24 |
+        16 |
+        8 |
+        0 |
+        // positions where subtracting to the index would exceed the array:
+        -1 |
+        -2 |
+        -3 |
+        -4 |
+        -5 |
+        -6 |
+        -7 => true,
+        _ => false
+    }
+}
+
+fn upper_left_diagonal(b: usize, i: usize) -> bool{
+    match (b as i8) - (i as i8)*9 {
+        // a bishop cannot trace a path after it hits the board's "walls" or corners
+        47 |
+        39 |
+        31 |
+        23 |
+        15 |
+        7 |
+        // positions where subtracting to the index would exceed the array:
+        -1 |
+        -2 |
+        -3 |
+        -4 |
+        -5 |
+        -6 |
+        -7 |
+        -8 |
+        -9 => true,
+        _ => false
+    }
+}
+
+fn inferior_right_diagonal(b: usize, i: usize) -> bool{
+    match b+i*9 {
+        // a bishop cannot trace a path after it hits the board's "walls" or corners
+        16 |
+        24 |
+        32 |
+        40 |
+        48 |
+        56 |
+        // positions where adding to the index would exceed the array:
+        64 |
+        65 |
+        66 |
+        67 |
+        68 |
+        69 |
+        50 |
+        51 |
+        52 => true,
+        _ => false
+    }
+}
+
+fn inferior_left_diagonal(b: usize, i: usize) -> bool{
+    match b+i*7 {
+        // a bishop cannot trace a path after it hits the board's "walls" or corners
+        7 |
+        15 |
+        23 |
+        31 |
+        39 |
+        47 |
+        55 |
+        // positions where adding to the index would exceed the array:
+        64 |
+        65 |
+        66 |
+        67 |
+        68 |
+        69 |
+        70 => true,
+        _ => false
+    }
+}

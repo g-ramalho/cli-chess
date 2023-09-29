@@ -1,3 +1,37 @@
+-------------------------
+bishop movement:
+
+if column+line > black_bishop1 && (((column+line) - black_bishop1)%7 == 0 || ((column+line) - black_bishop1)%9 == 0) {
+                        board[black_bishop1] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop1 = column+line;
+
+                        try_again = false;
+                    
+                }else if column+line < black_bishop1 && ((black_bishop1 - (column+line))%7 == 0 || (black_bishop1 - (column+line))%9 == 0){
+                        board[black_bishop1] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop1 = column+line;
+
+                        try_again = false;
+                    
+                // this tests the light squares bishop
+                }else if column+line > black_bishop2 && (((column+line) - black_bishop2)%7 == 0 || ((column+line) - black_bishop2)%9 == 0){
+                        board[black_bishop2] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop2 = column+line;
+
+                        try_again = false;
+                    
+                }else if column+line < black_bishop2 && ((black_bishop2 - (column+line))%7 == 0 || (black_bishop2 - (column+line))%9 == 0){
+                        board[black_bishop2] = NOTHING;
+                        board[column+line] = BLACK_BISHOP;
+                        black_bishop2 = column+line;
+
+                        try_again = false;
+                    
+                },
+---------------------------
 board[48+column] = NOTHING;
 board[column+line] = WHITE_PAWN;
 
