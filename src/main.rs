@@ -203,7 +203,8 @@ fn main() {
                 // and to move to the inferior left, you add 7 to the index
 
                 // this tests the dark squares bishop
-                'B' => if (white_bishop1 as i8) > ((column+line) as i8) && ((((white_bishop1 as i8) - ((column+line) as i8))%7 == 0) || (((white_bishop1 as i8) - ((column+line) as i8))%9 == 0)) {
+                'B' => {
+                    if (white_bishop1 as i8) > ((column+line) as i8) {
                         if ((white_bishop1 as i8) - ((column+line) as i8))%7 == 0 {
                             for diagonal in 1..8 {
                                 if (white_bishop1 as i8) - diagonal*7 == ((column+line) as i8) && !upper_right_diagonal(white_bishop1, diagonal as usize) && !is_white(board[(((white_bishop1 as i8) - diagonal*7) as usize)]) {
@@ -213,7 +214,7 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[(((white_bishop1 as i8) - diagonal*7) as usize)]) {
+                                }else if is_white(board[(((white_bishop1 as i8) - diagonal*7) as usize)]) || is_black(board[(((white_bishop1 as i8) - diagonal*7) as usize)]) {
                                     break;
                                 }
                             }
@@ -226,7 +227,7 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[(((white_bishop1 as i8) - diagonal*9) as usize)]) {
+                                }else if is_white(board[(((white_bishop1 as i8) - diagonal*9) as usize)]) || is_black(board[(((white_bishop1 as i8) - diagonal*9) as usize)]){
                                     break;
                                 }
                             }
@@ -241,7 +242,7 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[white_bishop1 + (7*diagonal as usize)]) {
+                                }else if is_white(board[white_bishop1 + (7*diagonal as usize)]) || is_black(board[white_bishop1 + (7*diagonal as usize)]){
                                     break;
                                 }
                             }
@@ -254,12 +255,13 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[white_bishop1 + (9*diagonal as usize)]) {
+                                }else if is_white(board[white_bishop1 + (9*diagonal as usize)]) || is_black(board[white_bishop1 + (9*diagonal as usize)]) {
                                     break;
                                 }
                             }
                         }
-                    }else if (white_bishop2 as i8) > ((column+line) as i8) && ((((white_bishop2 as i8) - ((column+line) as i8))%7 == 0) || (((white_bishop2 as i8) - ((column+line) as i8))%9 == 0)) {
+                    }
+                    if (white_bishop2 as i8) > ((column+line) as i8) {
                         if ((white_bishop2 as i8) - ((column+line) as i8))%7 == 0 {
                             for diagonal in 1..8 {
                                 if (white_bishop2 as i8) - diagonal*7 == ((column+line) as i8) && !upper_right_diagonal(white_bishop2, diagonal as usize) && !is_white(board[(((white_bishop2 as i8) - diagonal*7) as usize)]) {
@@ -269,7 +271,7 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[(((white_bishop2 as i8) - diagonal*7) as usize)]) {
+                                }else if is_white(board[(((white_bishop2 as i8) - diagonal*7) as usize)]) || is_black(board[(((white_bishop2 as i8) - diagonal*7) as usize)]){
                                     break;
                                 }
                             }
@@ -282,7 +284,7 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[(((white_bishop2 as i8) - diagonal*9) as usize)]) {
+                                }else if is_white(board[(((white_bishop2 as i8) - diagonal*9) as usize)]) || is_black(board[(((white_bishop2 as i8) - diagonal*9) as usize)]){
                                     break;
                                 }
                             }
@@ -297,7 +299,7 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[white_bishop2 + (7*diagonal as usize)]) {
+                                }else if is_white(board[white_bishop2 + (7*diagonal as usize)]) || is_black(board[white_bishop2 + (7*diagonal as usize)]){
                                     break;
                                 }
                             }
@@ -310,12 +312,13 @@ fn main() {
 
                                     try_again = false;
                                     break;
-                                }else if is_white(board[white_bishop2 + (9*diagonal as usize)]) {
+                                }else if is_white(board[white_bishop2 + (9*diagonal as usize)]) || is_black(board[white_bishop2 + (9*diagonal as usize)]) {
                                     break;
                                 }
                             }
                         }
-                    },
+                    }
+                },
                 _ => (),
             }
 
@@ -470,35 +473,121 @@ fn main() {
                         break;
                     }
                 },
-                'B' => if column+line > black_bishop1 && (((column+line) - black_bishop1)%7 == 0 || ((column+line) - black_bishop1)%9 == 0) {
-                        board[black_bishop1] = NOTHING;
-                        board[column+line] = BLACK_BISHOP;
-                        black_bishop1 = column+line;
+                'B' => {
+                    if (black_bishop1 as i8) > ((column+line) as i8) {
+                        if ((black_bishop1 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop1 as i8) - diagonal*7 == ((column+line) as i8) && !upper_right_diagonal(black_bishop1, diagonal as usize) && !is_white(board[(((black_bishop1 as i8) - diagonal*7) as usize)]) {
+                                    board[black_bishop1] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop1 = column+line;
 
-                        try_again = false;
-                    
-                }else if column+line < black_bishop1 && ((black_bishop1 - (column+line))%7 == 0 || (black_bishop1 - (column+line))%9 == 0){
-                        board[black_bishop1] = NOTHING;
-                        board[column+line] = BLACK_BISHOP;
-                        black_bishop1 = column+line;
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((black_bishop1 as i8) - diagonal*7) as usize)]) || is_black(board[(((black_bishop1 as i8) - diagonal*7) as usize)]) {
+                                    break;
+                                }
+                            }
+                        }else if ((black_bishop1 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop1 as i8) - diagonal*9 == ((column+line) as i8) && !upper_left_diagonal(black_bishop1, diagonal as usize) && !is_white(board[(((black_bishop1 as i8) - diagonal*9) as usize)]){
+                                    board[black_bishop1] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop1 = column+line;
 
-                        try_again = false;
-                    
-                // this tests the light squares bishop
-                }else if column+line > black_bishop2 && (((column+line) - black_bishop2)%7 == 0 || ((column+line) - black_bishop2)%9 == 0){
-                        board[black_bishop2] = NOTHING;
-                        board[column+line] = BLACK_BISHOP;
-                        black_bishop2 = column+line;
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((black_bishop1 as i8) - diagonal*9) as usize)]) || is_black(board[(((black_bishop1 as i8) - diagonal*9) as usize)]){
+                                    break;
+                                }
+                            }
+                        }
+                    }else if (black_bishop1 as i8) < ((column+line) as i8) && (((((column+line) as i8) - (black_bishop1 as i8))%7 == 0) || ((((column+line) as i8) - (black_bishop1 as i8))%9 == 0)) {
+                        if ((black_bishop1 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop1 as i8) + diagonal*7 == ((column+line) as i8) && !inferior_left_diagonal(black_bishop1, diagonal as usize) && !is_white(board[black_bishop1 + (7*diagonal as usize)]) {
+                                    board[black_bishop1] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop1 = column+line;
 
-                        try_again = false;
-                    
-                }else if column+line < black_bishop2 && ((black_bishop2 - (column+line))%7 == 0 || (black_bishop2 - (column+line))%9 == 0){
-                        board[black_bishop2] = NOTHING;
-                        board[column+line] = BLACK_BISHOP;
-                        black_bishop2 = column+line;
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[black_bishop1 + (7*diagonal as usize)]) || is_black(board[black_bishop1 + (7*diagonal as usize)]){
+                                    break;
+                                }
+                            }
+                        }else if ((black_bishop1 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop1 as i8) + diagonal*9 == ((column+line) as i8) && !inferior_right_diagonal(black_bishop1, diagonal as usize) && !is_white(board[black_bishop1 + (9*diagonal as usize)]) {
+                                    board[black_bishop1] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop1 = column+line;
 
-                        try_again = false;
-                    
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[black_bishop1 + (9*diagonal as usize)]) || is_black(board[black_bishop1 + (9*diagonal as usize)]) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (black_bishop2 as i8) > ((column+line) as i8) {
+                        if ((black_bishop2 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop2 as i8) - diagonal*7 == ((column+line) as i8) && !upper_right_diagonal(black_bishop2, diagonal as usize) && !is_white(board[(((black_bishop2 as i8) - diagonal*7) as usize)]) {
+                                    board[black_bishop2] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((black_bishop2 as i8) - diagonal*7) as usize)]) || is_black(board[(((black_bishop2 as i8) - diagonal*7) as usize)]){
+                                    break;
+                                }
+                            }
+                        }else if ((black_bishop2 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop2 as i8) - diagonal*9 == ((column+line) as i8) && !upper_left_diagonal(black_bishop2, diagonal as usize) && !is_white(board[(((black_bishop2 as i8) - diagonal*9) as usize)]){
+                                    board[black_bishop2] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[(((black_bishop2 as i8) - diagonal*9) as usize)]) || is_black(board[(((black_bishop2 as i8) - diagonal*9) as usize)]){
+                                    break;
+                                }
+                            }
+                        }
+                    }else if (black_bishop2 as i8) < ((column+line) as i8) && (((((column+line) as i8) - (black_bishop2 as i8))%7 == 0) || ((((column+line) as i8) - (black_bishop2 as i8))%9 == 0)) {
+                        if ((black_bishop2 as i8) - ((column+line) as i8))%7 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop2 as i8) + diagonal*7 == ((column+line) as i8) && !inferior_left_diagonal(black_bishop2, diagonal as usize) && !is_white(board[black_bishop2 + (7*diagonal as usize)]) {
+                                    board[black_bishop2] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[black_bishop2 + (7*diagonal as usize)]) || is_black(board[black_bishop2 + (7*diagonal as usize)]){
+                                    break;
+                                }
+                            }
+                        }else if ((black_bishop2 as i8) - ((column+line) as i8))%9 == 0 {
+                            for diagonal in 1..8 {
+                                if (black_bishop2 as i8) + diagonal*9 == ((column+line) as i8) && !inferior_right_diagonal(black_bishop2, diagonal as usize) && !is_white(board[black_bishop2 + (9*diagonal as usize)]) {
+                                    board[black_bishop2] = NOTHING;
+                                    board[column+line] = BLACK_BISHOP;
+                                    black_bishop2 = column+line;
+
+                                    try_again = false;
+                                    break;
+                                }else if is_white(board[black_bishop2 + (9*diagonal as usize)]) || is_black(board[black_bishop2 + (9*diagonal as usize)]) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 },
                 _ => (),
             }
