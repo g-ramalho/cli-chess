@@ -8,7 +8,7 @@ The game is viewed as whites, the moves are inputted using SAN (Short Algebraic 
 *i.e. "Nf3" to move a knight to f3*
 
 Uppercase letters indicate white pieces, while lowercase letters indicate black pieces \
-As for the pawns, " i " indicates a white pawn, while " j " is a black pawn
+As for the pawns, " i " and " j " indicate white and black pawns, respectively
 
 - " . " counts as a square with no pieces or pawns
 - " K " or " k " = king
