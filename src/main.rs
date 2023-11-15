@@ -22,7 +22,6 @@ fn main() {
 
     //movement stuff
     let pawn_movement: [usize; 2] = [8, 16];
-    let knight_movement: [i8;8] = [-17, -15, -10, -6, 6, 10, 15, 17];
 
 //LAST POSITION OF EACH PIECE AND PAWN:
 
@@ -40,8 +39,8 @@ fn main() {
     let mut white_rook1: usize = 56;
     let mut white_rook2: usize = 63;
     
-    let mut white_knight1 = 57;
-    let mut white_knight2 = 62;
+    let mut white_knight1: usize = 57;
+    let mut white_knight2: usize = 62;
     
     let mut white_bishop1: usize = 58;
     let mut white_bishop2: usize = 61;
@@ -177,26 +176,29 @@ fn main() {
                 //pieces' movement checks
                 match san_move[0] {
                     'N' => {
-                        for possible_moves in knight_movement.iter() {
-                            if ((column + line) as i8) == (white_knight1 as i8) + *possible_moves && !is_white(board[desired_position]) {
-                                //last position is freed
-                                board[white_knight1] = NOTHING;
+                        if !is_white(board[desired_position]) {   
+                            match (desired_position as i8) - (white_knight1 as i8) {
+                                -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                        //last position is freed
+                                        board[white_knight1] = NOTHING;
 
-                                //piece is moved to new position
-                                board[desired_position] = WHITE_KNIGHT;
+                                        //piece is moved to new position
+                                        board[desired_position] = WHITE_KNIGHT;
 
-                                //current position is updated
-                                white_knight1 = desired_position;
-
-                                try_again = false;
-                                break;
-                            }else if ((column + line) as i8) == (white_knight2 as i8) + *possible_moves && !is_white(board[desired_position]) {
-                                board[white_knight2] = NOTHING;
-                                board[desired_position] = WHITE_KNIGHT;
-                                white_knight2 = desired_position;
-
-                                try_again = false;
-                                break;
+                                        //current position is updated
+                                        white_knight1 = desired_position;
+                                        break;
+                                },
+                                _ => ()
+                            }
+                            match (desired_position as i8) - (white_knight2 as i8) {
+                                -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                        board[white_knight2] = NOTHING;
+                                        board[desired_position] = WHITE_KNIGHT;
+                                        white_knight2 = desired_position;
+                                        break;
+                                },
+                                _ => ()
                             }
                         }
                     },
@@ -820,26 +822,29 @@ fn main() {
 
                 match san_move[0] {
                     'N' => {
-                        for possible_moves in knight_movement.iter() {
-                            if ((column + line) as i8) == (black_knight1 as i8) + *possible_moves && !is_black(board[desired_position]) {
-                                //last position is freed
-                                board[black_knight1] = NOTHING;
+                        if !is_black(board[desired_position]) {
+                            match (desired_position as i8) - (black_knight1 as i8) {
+                                -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                        //last position is freed
+                                        board[black_knight1] = NOTHING;
 
-                                //piece is moved to new position
-                                board[desired_position] = BLACK_KNIGHT;
+                                        //piece is moved to new position
+                                        board[desired_position] = BLACK_KNIGHT;
 
-                                //current position is updated
-                                black_knight1 = desired_position;
-
-                                try_again = false;
-                                break;
-                            } else if ((column + line) as i8) == (black_knight2 as i8) + *possible_moves && !is_black(board[desired_position]) {
-                                board[black_knight2] = NOTHING;
-                                board[desired_position] = BLACK_KNIGHT;
-                                black_knight2 = desired_position;
-
-                                try_again = false;
-                                break;
+                                        //current position is updated
+                                        black_knight1 = desired_position;
+                                        break;
+                                },
+                                _ => ()
+                            }
+                            match (desired_position as i8) - (black_knight2 as i8) {
+                                -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                        board[black_knight2] = NOTHING;
+                                        board[desired_position] = BLACK_KNIGHT;
+                                        black_knight2 = desired_position;
+                                        break;
+                                },
+                                _ => ()
                             }
                         }
                     },
