@@ -613,7 +613,78 @@ fn main() {
                             }
                         }
                     },
-                    _ => (),
+                    'K' => {
+                        if !is_white(board[desired_position]) {
+                            match (desired_position as i8) - (white_king as i8) {
+                                -9 => {
+                                    if !upper_left_diagonal(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                -8 => {
+                                    if !rook_up(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                -7 => {
+                                    if !upper_right_diagonal(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                -1 => {
+                                    if !rook_left(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                1 => {
+                                    if !rook_right(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                7 => {
+                                    if !inferior_left_diagonal(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                8 => {
+                                    if !rook_down(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                9 => {
+                                    if !inferior_right_diagonal(white_king, 1) {
+                                        board[white_king] = NOTHING;
+                                        board[desired_position] = WHITE_KING;
+                                        white_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                _ => ()
+                            }
+                        }
+                    },
+                    _ => ()
                 }
 
             }else{ // pawn movement
@@ -1175,7 +1246,78 @@ fn main() {
                             }
                         }
                     },
-                    _ => (),
+                    'K' => {
+                        if !is_black(board[desired_position]) {
+                            match (desired_position as i8) - (black_king as i8) {
+                                -9 => {
+                                    if !upper_left_diagonal(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                -8 => {
+                                    if !rook_up(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                -7 => {
+                                    if !upper_right_diagonal(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                -1 => {
+                                    if !rook_left(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                1 => {
+                                    if !rook_right(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                7 => {
+                                    if !inferior_left_diagonal(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                8 => {
+                                    if !rook_down(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                9 => {
+                                    if !inferior_right_diagonal(black_king, 1) {
+                                        board[black_king] = NOTHING;
+                                        board[desired_position] = BLACK_KING;
+                                        black_king = desired_position;
+                                        try_again = false;
+                                        }
+                                    },
+                                _ => ()
+                            }
+                        }
+                    },
+                    _ => ()
                 }
 
             }else{ // pawn movement
