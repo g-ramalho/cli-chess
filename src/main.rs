@@ -1003,13 +1003,15 @@ fn main() {
                                         *pawn = desired_position;
 
                                         white_column_b.insert(0, *pawn);
+
+                                        white_column_a.remove(pawn_index);
                                         
                                         try_again = false;
                                         break;
                                     }
+                                    // goes up each time a pawn in the column vector can't go to the desired square
                                     pawn_index += 1;
                                 };
-                                white_column_a.remove(pawn_index);
                             }
                         },
                         'b' => {
@@ -1027,13 +1029,14 @@ fn main() {
                                             'c' => white_column_c.insert(0, *pawn),
                                             _ => ()
                                         }
+
+                                        white_column_b.remove(pawn_index);
                                         
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_b.remove(pawn_index);
                             }
                         },
                         'c' => {
@@ -1051,13 +1054,14 @@ fn main() {
                                             'd' => white_column_d.insert(0, *pawn),
                                             _ => ()
                                         }
+
+                                        white_column_c.remove(pawn_index);
                                         
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_c.remove(pawn_index);
                             }
                         },
                         'd' => {
@@ -1076,12 +1080,13 @@ fn main() {
                                             _ => ()
                                         }
 
+                                        white_column_d.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_d.remove(pawn_index);
                             }
                         },
                         'e' => {
@@ -1100,12 +1105,13 @@ fn main() {
                                             _ => ()
                                         }
                                         
+                                        white_column_e.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_e.remove(pawn_index);
                             }
                         },
                         'f' => {
@@ -1124,12 +1130,13 @@ fn main() {
                                             _ => ()
                                         }
                                         
+                                        white_column_f.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_f.remove(pawn_index);
                             }
                         },
                         'g' => {
@@ -1148,12 +1155,13 @@ fn main() {
                                             _ => ()
                                         }
 
+                                        white_column_g.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_g.remove(pawn_index);
                             }
                         },
                         'h' => {
@@ -1167,13 +1175,14 @@ fn main() {
                                         *pawn = desired_position;
                                         
                                         white_column_g.insert(0, *pawn);
-                                        
+
+                                        white_column_h.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                white_column_h.remove(pawn_index);
                             }
                         },
                         _ => ()
@@ -2043,12 +2052,13 @@ fn main() {
 
                                         black_column_b.insert(0, *pawn);
                                         
+                                        black_column_a.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_a.remove(pawn_index);
                             }
                         },
                         'b' => {
@@ -2067,12 +2077,13 @@ fn main() {
                                             _ => ()
                                         }
                                         
+                                        black_column_b.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_b.remove(pawn_index);
                             }
                         },
                         'c' => {
@@ -2090,13 +2101,14 @@ fn main() {
                                             'd' => black_column_d.insert(0, *pawn),
                                             _ => ()
                                         }
-                                        
+
+                                        black_column_c.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_c.remove(pawn_index);
                             }
                         },
                         'd' => {
@@ -2115,12 +2127,13 @@ fn main() {
                                             _ => ()
                                         }
 
+                                        black_column_d.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_d.remove(pawn_index);
                             }
                         },
                         'e' => {
@@ -2138,13 +2151,14 @@ fn main() {
                                             'f' => black_column_f.insert(0, *pawn),
                                             _ => ()
                                         }
-                                        
+
+                                        black_column_e.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_e.remove(pawn_index);
                             }
                         },
                         'f' => {
@@ -2162,13 +2176,14 @@ fn main() {
                                             'g' => black_column_g.insert(0, *pawn),
                                             _ => ()
                                         }
-                                        
+
+                                        black_column_f.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_f.remove(pawn_index);
                             }
                         },
                         'g' => {
@@ -2187,12 +2202,13 @@ fn main() {
                                             _ => ()
                                         }
 
+                                        black_column_g.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_g.remove(pawn_index);
                             }
                         },
                         'h' => {
@@ -2206,13 +2222,14 @@ fn main() {
                                         *pawn = desired_position;
                                         
                                         black_column_g.insert(0, *pawn);
-                                        
+
+                                        black_column_h.remove(pawn_index);
+
                                         try_again = false;
                                         break;
                                     }
                                     pawn_index += 1;
                                 };
-                                black_column_h.remove(pawn_index);
                             }
                         },
                         _ => ()
