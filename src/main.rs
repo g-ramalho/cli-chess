@@ -993,7 +993,7 @@ fn main() {
 
                     match san_move[0] {
                         'a' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_a {
@@ -1013,7 +1013,7 @@ fn main() {
                             }
                         },
                         'b' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_b {
@@ -1037,7 +1037,7 @@ fn main() {
                             }
                         },
                         'c' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every pawn in the column
                                 for pawn in &mut white_column_c {
@@ -1061,7 +1061,7 @@ fn main() {
                             }
                         },
                         'd' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_d {
@@ -1085,7 +1085,7 @@ fn main() {
                             }
                         },
                         'e' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_e {
@@ -1109,7 +1109,7 @@ fn main() {
                             }
                         },
                         'f' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_f {
@@ -1133,7 +1133,7 @@ fn main() {
                             }
                         },
                         'g' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_g {
@@ -1157,7 +1157,7 @@ fn main() {
                             }
                         },
                         'h' => {
-                            if !is_white(board[desired_position as usize]) {
+                            if is_black(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_h {
@@ -2032,7 +2032,7 @@ fn main() {
 
                     match san_move[0] {
                         'a' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_a {
@@ -2052,7 +2052,7 @@ fn main() {
                             }
                         },
                         'b' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_b {
@@ -2076,7 +2076,7 @@ fn main() {
                             }
                         },
                         'c' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every pawn in the column
                                 for pawn in &mut black_column_c {
@@ -2100,7 +2100,7 @@ fn main() {
                             }
                         },
                         'd' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_d {
@@ -2124,7 +2124,7 @@ fn main() {
                             }
                         },
                         'e' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_e {
@@ -2148,7 +2148,7 @@ fn main() {
                             }
                         },
                         'f' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_f {
@@ -2172,7 +2172,7 @@ fn main() {
                             }
                         },
                         'g' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_g {
@@ -2196,7 +2196,7 @@ fn main() {
                             }
                         },
                         'h' => {
-                            if !is_black(board[desired_position as usize]) {
+                            if is_white(board[desired_position as usize]) {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_h {
