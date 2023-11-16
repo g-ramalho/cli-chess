@@ -1,4 +1,51 @@
 -------------------------
+white pawns movement:
+
+//for each pawn in white's possession
+                //pawn_position = last position of each pawn
+                for pawn_position in white_pawns.iter_mut() {
+                    //if the pawn is in it's starting position
+                    if *pawn_position <= 55 {
+                        //get every move possible for a pawn
+                        //j = one of the possible moves
+                        for possible_pawn_movements in pawn_movement.iter() {
+                            //while in the starting position, pawns can move up to 2 squares
+                            if *pawn_position >= *possible_pawn_movements{
+                            //and check if any of the pawns can go to the specified move
+                                if *pawn_position-*possible_pawn_movements == desired_position && !is_white(board[desired_position as usize]) {
+                                    //last position is freed
+                                    board[*pawn_position as usize] = NOTHING;
+
+                                    //pawn is moved to the new position
+                                    board[desired_position as usize] = WHITE_PAWN;
+
+                                    //current position is updated
+                                    *pawn_position = desired_position;
+
+                                    try_again = false;
+                                    break;
+                                }
+                            }
+                        };
+                    // if it isnt in the starting position, it can only move one square
+                    }else if *pawn_position >= 55{
+                        if *pawn_position-8 == desired_position && !is_white(board[desired_position as usize]) {
+                            //last position is freed
+                            board[*pawn_position as usize] = NOTHING;
+
+                            //pawn is moved to the new position
+                            board[desired_position as usize] = WHITE_PAWN;
+
+                            //current position is updated
+                            *pawn_position = desired_position;
+
+                            try_again = false;
+                            break;
+                        }
+                    }
+                };
+
+-------------------------
 bishop movement:
 
 if column+line > black_bishop1 && (((column+line) - black_bishop1)%7 == 0 || ((column+line) - black_bishop1)%9 == 0) {

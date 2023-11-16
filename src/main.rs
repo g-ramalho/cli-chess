@@ -20,22 +20,58 @@ fn main() {
     const BLACK_QUEEN: char = 'q';
     const BLACK_KING: char = 'k';
 
-    //movement stuff
-    let pawn_movement: [i8; 2] = [8, 16];
-
 //LAST POSITION OF EACH PIECE AND PAWN:
-
-    //white pawns and pieces
+    //white pawns
     let white_pawn_a: i8 = 48;
-    let white_pawn_b: i8  = 49;
-    let white_pawn_c: i8  = 50;
-    let white_pawn_d: i8  = 51;
-    let white_pawn_e: i8  = 52;
-    let white_pawn_f: i8  = 53;
-    let white_pawn_g: i8  = 54;
-    let white_pawn_h: i8  = 55;
-    let mut white_pawns: [i8;8] = [white_pawn_a, white_pawn_b, white_pawn_c, white_pawn_d, white_pawn_e, white_pawn_f, white_pawn_g, white_pawn_h];
-    
+    let mut white_column_a = vec![white_pawn_a];
+
+    let white_pawn_b: i8 = 49;
+    let mut white_column_b = vec![white_pawn_b];
+
+    let white_pawn_c: i8 = 50;
+    let mut white_column_c = vec![white_pawn_c];
+
+    let white_pawn_d: i8 = 51;
+    let mut white_column_d = vec![white_pawn_d];
+
+    let white_pawn_e: i8 = 52;
+    let mut white_column_e = vec![white_pawn_e];
+
+    let white_pawn_f: i8 = 53;
+    let mut white_column_f = vec![white_pawn_f];
+
+    let white_pawn_g: i8 = 54;
+    let mut white_column_g = vec![white_pawn_g];
+
+    let white_pawn_h: i8 = 55;
+    let mut white_column_h = vec![white_pawn_h];
+
+    //black pawns
+    let black_pawn_a: i8 = 8;
+    let mut black_column_a = vec![black_pawn_a];
+
+    let black_pawn_b: i8 = 9;
+    let mut black_column_b = vec![black_pawn_b];
+
+    let black_pawn_c: i8 = 10;
+    let mut black_column_c = vec![black_pawn_c];
+
+    let black_pawn_d: i8 = 11;
+    let mut black_column_d = vec![black_pawn_d];
+
+    let black_pawn_e: i8 = 12;
+    let mut black_column_e = vec![black_pawn_e];
+
+    let black_pawn_f: i8 = 13;
+    let mut black_column_f = vec![black_pawn_f];
+
+    let black_pawn_g: i8 = 14;
+    let mut black_column_g = vec![black_pawn_g];
+
+    let black_pawn_h: i8 = 15;
+    let mut black_column_h = vec![black_pawn_h];
+
+    //white pieces
     let mut white_rook1: i8 = 56;
     let mut white_rook2: i8 = 63;
     
@@ -45,20 +81,10 @@ fn main() {
     let mut white_bishop1: i8 = 58;
     let mut white_bishop2: i8 = 61;
     
-    let mut white_queen = 59;
+    //let mut white_queen: i8 = 59;
     let mut white_king: i8 = 60;
     
-    //black pawns and pieces
-    let black_pawn_a: i8  = 8;
-    let black_pawn_b: i8  = 9;
-    let black_pawn_c: i8  = 10;
-    let black_pawn_d: i8  = 11;
-    let black_pawn_e: i8  = 12;
-    let black_pawn_f: i8  = 13;
-    let black_pawn_g: i8  = 14;
-    let black_pawn_h: i8  = 15;
-    let mut black_pawns: [i8;8] = [black_pawn_a, black_pawn_b, black_pawn_c, black_pawn_d, black_pawn_e, black_pawn_f, black_pawn_g, black_pawn_h];
-    
+    //black pieces
     let mut black_rook1: i8 = 0;
     let mut black_rook2: i8 = 7;
     
@@ -68,7 +94,7 @@ fn main() {
     let mut black_bishop1: i8 = 2;
     let mut black_bishop2: i8 = 5;
     
-    let mut black_queen = 3;
+    //let mut black_queen: i8 = 3;
     let mut black_king: i8 = 4;
 
 //create the board
@@ -690,80 +716,473 @@ fn main() {
                 }
 
             }else{ // pawn movement
+                if san_move[1] != 'x' {
+                    column = match san_move[0] {
+                        'a' => 0,
+                        'b' => 1,
+                        'c' => 2,
+                        'd' => 3,
+                        'e' => 4,
+                        'f' => 5,
+                        'g' => 6,
+                        'h' => 7,
+                        _ => 100
+                    };
+                
+                    //must be in reverse because we view the board as white
+                    line = match san_move[1] {
+                        '1' => 56,
+                        '2' => 48,
+                        '3' => 40,
+                        '4' => 32,
+                        '5' => 24,
+                        '6' => 16,
+                        '7' => 8,
+                        '8' => 0,
+                        _ => 100
+                    };
 
-                column = match san_move[0] {
-                    'a' => 0,
-                    'b' => 1,
-                    'c' => 2,
-                    'd' => 3,
-                    'e' => 4,
-                    'f' => 5,
-                    'g' => 6,
-                    'h' => 7,
-                    _ => 100
-                };
-            
-                //must be in reverse because we view the board as white
-                line = match san_move[1] {
-                    '1' => 56,
-                    '2' => 48,
-                    '3' => 40,
-                    '4' => 32,
-                    '5' => 24,
-                    '6' => 16,
-                    '7' => 8,
-                    '8' => 0,
-                    _ => 100
-                };
+                    desired_position = column + line;
 
-                desired_position = column + line;
-
-                //for each pawn in white's possession
-                //pawn_position = last position of each pawn
-                for pawn_position in white_pawns.iter_mut() {
-                    //if the pawn is in it's starting position
-                    if *pawn_position <= 55 {
-                        //get every move possible for a pawn
-                        //j = one of the possible moves
-                        for possible_pawn_movements in pawn_movement.iter() {
-                            //while in the starting position, pawns can move up to 2 squares
-                            if *pawn_position >= *possible_pawn_movements{
-                            //and check if any of the pawns can go to the specified move
-                                if *pawn_position-*possible_pawn_movements == desired_position && !is_white(board[desired_position as usize]) {
-                                    //last position is freed
-                                    board[*pawn_position as usize] = NOTHING;
-
-                                    //pawn is moved to the new position
-                                    board[desired_position as usize] = WHITE_PAWN;
-
-                                    //current position is updated
-                                    *pawn_position = desired_position;
-
-                                    try_again = false;
-                                    break;
-                                }
+                    match san_move[0] {
+                        'a' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_a {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
                             }
-                        };
-                    // if it isnt in the starting position, it can only move one square
-                    }else if *pawn_position >= 55{
-                        if *pawn_position-8 == desired_position && !is_white(board[desired_position as usize]) {
-                            //last position is freed
-                            board[*pawn_position as usize] = NOTHING;
-
-                            //pawn is moved to the new position
-                            board[desired_position as usize] = WHITE_PAWN;
-
-                            //current position is updated
-                            *pawn_position = desired_position;
-
-                            try_again = false;
-                            break;
-                        }
+                        },
+                        'b' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_b {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'c' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_c {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'd' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_d {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'e' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_e {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'f' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_f {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'g' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_g {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'h' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut white_column_h {
+                                    // if the pawn is in it's starting position
+                                    if *pawn >= 48 {
+                                        if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == -8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = WHITE_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        _ => ()
                     }
-                };
-            }
-            if try_again == true{
-                println!("Not a possible move, try again!\n");
+
+                }else{ // if the second letter in the SAN notation move is 'x' (which means a capture):
+                    column = match san_move[2] {
+                        'a' => 0,
+                        'b' => 1,
+                        'c' => 2,
+                        'd' => 3,
+                        'e' => 4,
+                        'f' => 5,
+                        'g' => 6,
+                        'h' => 7,
+                        _ => 100
+                    };
+
+                    line = match san_move[3] {
+                        '1' => 56,
+                        '2' => 48,
+                        '3' => 40,
+                        '4' => 32,
+                        '5' => 24,
+                        '6' => 16,
+                        '7' => 8,
+                        '8' => 0,
+                        _ => 100
+                    };
+
+                    desired_position = column + line;
+
+                    match san_move[0] {
+                        'a' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_a {
+                                    if desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+
+                                        white_column_b.insert(0, *pawn);
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_a.remove(pawn_index);
+                            }
+                        },
+                        'b' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_b {
+                                    if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+
+                                        match san_move[2]{
+                                            'a' => white_column_a.insert(0, *pawn),
+                                            'c' => white_column_c.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_b.remove(pawn_index);
+                            }
+                        },
+                        'c' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every pawn in the column
+                                for pawn in &mut white_column_c {
+                                    if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'b' => white_column_b.insert(0, *pawn),
+                                            'd' => white_column_d.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_c.remove(pawn_index);
+                            }
+                        },
+                        'd' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_d {
+                                    if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'c' => white_column_c.insert(0, *pawn),
+                                            'e' => white_column_e.insert(0, *pawn),
+                                            _ => ()
+                                        }
+
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_d.remove(pawn_index);
+                            }
+                        },
+                        'e' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_e {
+                                    if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'd' => white_column_d.insert(0, *pawn),
+                                            'f' => white_column_f.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_e.remove(pawn_index);
+                            }
+                        },
+                        'f' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_f {
+                                    if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'e' => white_column_e.insert(0, *pawn),
+                                            'g' => white_column_g.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_f.remove(pawn_index);
+                            }
+                        },
+                        'g' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_g {
+                                    if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'f' => white_column_f.insert(0, *pawn),
+                                            'h' => white_column_h.insert(0, *pawn),
+                                            _ => ()
+                                        }
+
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_g.remove(pawn_index);
+                            }
+                        },
+                        'h' => {
+                            if !is_white(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut white_column_h {
+                                    if desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = WHITE_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        white_column_g.insert(0, *pawn);
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                white_column_h.remove(pawn_index);
+                            }
+                        },
+                        _ => ()
+                    }
+                }
+
+                if try_again == true{
+                    println!("Not a possible move, try again!\n");
+                }
             }
         }
 
@@ -1336,73 +1755,469 @@ fn main() {
                 }
 
             }else{ // pawn movement
-                column = match san_move[0] {
-                    'a' => 0,
-                    'b' => 1,
-                    'c' => 2,
-                    'd' => 3,
-                    'e' => 4,
-                    'f' => 5,
-                    'g' => 6,
-                    'h' => 7,
-                    _ => 100
-                };
-            
-                //must be in reverse because we view the board as white
-                line = match san_move[1] {
-                    '1' => 56,
-                    '2' => 48,
-                    '3' => 40,
-                    '4' => 32,
-                    '5' => 24,
-                    '6' => 16,
-                    '7' => 8,
-                    '8' => 0,
-                    _ => 100
-                };
+                if san_move[1] != 'x' {
+                    column = match san_move[0] {
+                        'a' => 0,
+                        'b' => 1,
+                        'c' => 2,
+                        'd' => 3,
+                        'e' => 4,
+                        'f' => 5,
+                        'g' => 6,
+                        'h' => 7,
+                        _ => 100
+                    };
+                
+                    //must be in reverse because we view the board as white
+                    line = match san_move[1] {
+                        '1' => 56,
+                        '2' => 48,
+                        '3' => 40,
+                        '4' => 32,
+                        '5' => 24,
+                        '6' => 16,
+                        '7' => 8,
+                        '8' => 0,
+                        _ => 100
+                    };
 
-                desired_position = column + line;
+                    desired_position = column + line;
 
-                //for each pawn in black's possession
-                //pawn_position = last position of the pawn
-                for pawn_position in black_pawns.iter_mut() {
-                    if 8 <= *pawn_position && *pawn_position <= 15 {
-                        //get every move possible for a pawn
-                        //possible_pawn_moves = one of the possible moves (either two or one squares)
-                        for possible_pawn_moves in pawn_movement.iter() {
-                        //if *i >= *j isnt needed, the black pawn loop doesnt subtract from the index
-                            //and check if any of the pawns can go to the specified move
-                            //(last position + possible move)
-                            if *pawn_position+*possible_pawn_moves == desired_position && !is_black(board[desired_position as usize]) {
-                                //last position is freed
-                                board[*pawn_position as usize] = NOTHING;
-
-                                //pawn is moved to the new position
-                                board[desired_position as usize] = BLACK_PAWN;
-
-                                //current position is updated
-                                *pawn_position = desired_position;
-
-                                try_again = false;
-                                break;
+                    match san_move[0] {
+                        'a' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_a {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
                             }
-                        };
-                    // if it isnt in the starting position, it can only move 1 square
-                    }else if *pawn_position+8 == desired_position && !is_black(board[desired_position as usize]) {
-                        //last position is freed
-                        board[*pawn_position as usize] = NOTHING;
-
-                        //pawn is moved to the new position
-                        board[desired_position as usize] = BLACK_PAWN;
-
-                        //current position is updated
-                        *pawn_position = desired_position;
-
-                        try_again = false;
-                        break;
+                        },
+                        'b' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_b {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'c' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_c {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'd' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_d {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'e' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_e {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'f' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_f {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'g' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_g {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        'h' => {
+                            if board[desired_position as usize] == NOTHING {
+                                // for every pawn in the column
+                                for pawn in &mut black_column_h {
+                                    // if the pawn is in it's starting position
+                                    if *pawn <= 15 {
+                                        if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }else{
+                                        if desired_position - *pawn == 8 {
+                                            board[*pawn as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_PAWN;
+                                            *pawn = desired_position;
+                                            
+                                            try_again = false;
+                                            break;
+                                        }
+                                    }
+                                };
+                            }
+                        },
+                        _ => ()
                     }
-                    
-                };
+
+                }else{
+                    column = match san_move[2] {
+                        'a' => 0,
+                        'b' => 1,
+                        'c' => 2,
+                        'd' => 3,
+                        'e' => 4,
+                        'f' => 5,
+                        'g' => 6,
+                        'h' => 7,
+                        _ => 100
+                    };
+
+                    line = match san_move[3] {
+                        '1' => 56,
+                        '2' => 48,
+                        '3' => 40,
+                        '4' => 32,
+                        '5' => 24,
+                        '6' => 16,
+                        '7' => 8,
+                        '8' => 0,
+                        _ => 100
+                    };
+
+                    desired_position = column + line;
+
+                    match san_move[0] {
+                        'a' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_a {
+                                    if desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+
+                                        black_column_b.insert(0, *pawn);
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_a.remove(pawn_index);
+                            }
+                        },
+                        'b' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_b {
+                                    if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+
+                                        match san_move[2]{
+                                            'a' => black_column_a.insert(0, *pawn),
+                                            'c' => black_column_c.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_b.remove(pawn_index);
+                            }
+                        },
+                        'c' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every pawn in the column
+                                for pawn in &mut black_column_c {
+                                    if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'b' => black_column_b.insert(0, *pawn),
+                                            'd' => black_column_d.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_c.remove(pawn_index);
+                            }
+                        },
+                        'd' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_d {
+                                    if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'c' => black_column_c.insert(0, *pawn),
+                                            'e' => black_column_e.insert(0, *pawn),
+                                            _ => ()
+                                        }
+
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_d.remove(pawn_index);
+                            }
+                        },
+                        'e' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_e {
+                                    if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'd' => black_column_d.insert(0, *pawn),
+                                            'f' => black_column_f.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_e.remove(pawn_index);
+                            }
+                        },
+                        'f' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_f {
+                                    if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'e' => black_column_e.insert(0, *pawn),
+                                            'g' => black_column_g.insert(0, *pawn),
+                                            _ => ()
+                                        }
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_f.remove(pawn_index);
+                            }
+                        },
+                        'g' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_g {
+                                    if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        match san_move[2]{
+                                            'f' => black_column_f.insert(0, *pawn),
+                                            'h' => black_column_h.insert(0, *pawn),
+                                            _ => ()
+                                        }
+
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_g.remove(pawn_index);
+                            }
+                        },
+                        'h' => {
+                            if !is_black(board[desired_position as usize]) {
+                                let mut pawn_index: usize = 0;
+                                // for every *pawn in the column
+                                for pawn in &mut black_column_h {
+                                    if desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1) {
+                                        board[*pawn as usize] = NOTHING;
+                                        board[desired_position as usize] = BLACK_PAWN;
+                                        *pawn = desired_position;
+                                        
+                                        black_column_g.insert(0, *pawn);
+                                        
+                                        try_again = false;
+                                        break;
+                                    }
+                                    pawn_index += 1;
+                                };
+                                black_column_h.remove(pawn_index);
+                            }
+                        },
+                        _ => ()
+                    }
+                }
             }
 
             if try_again == true{
