@@ -167,7 +167,6 @@ fn main() {
             }
 
             if is_piece(san_move[0]) == true {
-                //if the first letter indicates a piece, the move has to be described in the next two letters
                 column = match san_move[1] {
                     'a' => 0,
                     'b' => 1,
@@ -193,11 +192,12 @@ fn main() {
                     _ => 100
                 };
 
-                desired_position = column + line;
-                if desired_position >= 100 {
+                if column >= 100 || line >= 100 {
                     println!("Not a possible move, try again!\n");
                     continue;
                 }
+
+                desired_position = column + line;
 
                 //pieces' movement checks
                 match san_move[0] {
@@ -742,6 +742,11 @@ fn main() {
                         _ => 100
                     };
 
+                    if column >= 100 || line >= 100 {
+                        println!("Not a possible move, try again!\n");
+                        continue;
+                    }
+
                     desired_position = column + line;
 
                     match san_move[0] {
@@ -964,7 +969,7 @@ fn main() {
                         _ => ()
                     }
 
-                }else{ // if the second letter in the SAN notation move is 'x' (which means a capture):
+                }else if san_move.len() >= 4 { // if the second letter in the SAN notation move is 'x' (which means a capture):
                     column = match san_move[2] {
                         'a' => 0,
                         'b' => 1,
@@ -988,6 +993,11 @@ fn main() {
                         '8' => 0,
                         _ => 100
                     };
+
+                    if column >= 100 || line >= 100 {
+                        println!("Not a possible move, try again!\n");
+                        continue;
+                    }
 
                     desired_position = column + line;
 
@@ -1242,11 +1252,12 @@ fn main() {
                     _ => 100
                 };
 
-                desired_position = column + line;
-                if desired_position >= 100 {
+                if column >= 100 || line >= 100 {
                     println!("Not a possible move, try again!\n");
                     continue;
                 }
+
+                desired_position = column + line;
 
                 match san_move[0] {
                     'N' => {
@@ -1790,6 +1801,11 @@ fn main() {
                         _ => 100
                     };
 
+                    if column >= 100 || line >= 100 {
+                        println!("Not a possible move, try again!\n");
+                        continue;
+                    }
+
                     desired_position = column + line;
 
                     match san_move[0] {
@@ -2012,7 +2028,7 @@ fn main() {
                         _ => ()
                     }
 
-                }else{
+                }else if san_move.len() >= 4 {
                     column = match san_move[2] {
                         'a' => 0,
                         'b' => 1,
@@ -2036,6 +2052,11 @@ fn main() {
                         '8' => 0,
                         _ => 100
                     };
+
+                    if column >= 100 || line >= 100 {
+                        println!("Not a possible move, try again!\n");
+                        continue;
+                    }
 
                     desired_position = column + line;
 
