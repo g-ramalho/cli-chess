@@ -568,9 +568,9 @@ fn main() {
 
                     desired_position = column + line;
 
-                    match san_move[0] {
-                        'a' => {
-                            if board[desired_position as usize] == NOTHING {
+                    if board[desired_position as usize] == NOTHING {
+                        match san_move[0] {
+                            'a' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_a {
                                     // if the pawn is in it's starting position
@@ -594,10 +594,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'b' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'b' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_b {
                                     // if the pawn is in it's starting position
@@ -621,10 +619,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'c' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'c' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_c {
                                     // if the pawn is in it's starting position
@@ -648,10 +644,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'd' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'd' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_d {
                                     // if the pawn is in it's starting position
@@ -675,10 +669,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'e' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'e' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_e {
                                     // if the pawn is in it's starting position
@@ -702,10 +694,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'f' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'f' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_f {
                                     // if the pawn is in it's starting position
@@ -729,10 +719,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'g' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'g' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_g {
                                     // if the pawn is in it's starting position
@@ -756,10 +744,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'h' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'h' => {
                                 // for every pawn in the column
                                 for pawn in &mut white_column_h {
                                     // if the pawn is in it's starting position
@@ -783,9 +769,9 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        _ => ()
+                            },
+                            _ => ()
+                        }
                     }
 
                 }else if san_move.len() >= 4 { // if the second letter in the SAN notation move is 'x' (which means a capture):
@@ -820,9 +806,9 @@ fn main() {
 
                     desired_position = column + line;
 
-                    match san_move[0] {
-                        'a' => {
-                            if is_black(board[desired_position as usize]) {
+                    if is_black(board[desired_position as usize]) {
+                        match san_move[0] {
+                            'a' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_a {
@@ -841,10 +827,8 @@ fn main() {
                                     // goes up each time a pawn in the column vector can't go to the desired square
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'b' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'b' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_b {
@@ -866,10 +850,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'c' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'c' => {
                                 let mut pawn_index: usize = 0;
                                 // for every pawn in the column
                                 for pawn in &mut white_column_c {
@@ -891,10 +873,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'd' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'd' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_d {
@@ -916,10 +896,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'e' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'e' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_e {
@@ -941,10 +919,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'f' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'f' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_f {
@@ -966,10 +942,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'g' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'g' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_g {
@@ -991,10 +965,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'h' => {
-                            if is_black(board[desired_position as usize]) {
+                            },
+                            'h' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_h {
@@ -1012,9 +984,9 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        _ => ()
+                            },
+                            _ => ()
+                        }
                     }
                 }
             }
@@ -1440,9 +1412,9 @@ fn main() {
 
                     desired_position = column + line;
 
-                    match san_move[0] {
-                        'a' => {
-                            if board[desired_position as usize] == NOTHING {
+                    if board[desired_position as usize] == NOTHING {
+                        match san_move[0] {
+                            'a' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_a {
                                     // if the pawn is in it's starting position
@@ -1466,10 +1438,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'b' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'b' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_b {
                                     // if the pawn is in it's starting position
@@ -1493,10 +1463,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'c' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'c' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_c {
                                     // if the pawn is in it's starting position
@@ -1520,10 +1488,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'd' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'd' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_d {
                                     // if the pawn is in it's starting position
@@ -1547,10 +1513,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'e' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'e' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_e {
                                     // if the pawn is in it's starting position
@@ -1574,10 +1538,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'f' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'f' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_f {
                                     // if the pawn is in it's starting position
@@ -1601,10 +1563,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'g' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'g' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_g {
                                     // if the pawn is in it's starting position
@@ -1628,10 +1588,8 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        'h' => {
-                            if board[desired_position as usize] == NOTHING {
+                            },
+                            'h' => {
                                 // for every pawn in the column
                                 for pawn in &mut black_column_h {
                                     // if the pawn is in it's starting position
@@ -1655,9 +1613,9 @@ fn main() {
                                         }
                                     }
                                 };
-                            }
-                        },
-                        _ => ()
+                            },
+                            _ => ()
+                        }
                     }
 
                 }else if san_move.len() >= 4 {
@@ -1692,9 +1650,9 @@ fn main() {
 
                     desired_position = column + line;
 
-                    match san_move[0] {
-                        'a' => {
-                            if is_white(board[desired_position as usize]) {
+                    if is_white(board[desired_position as usize]) {
+                        match san_move[0] {
+                            'a' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_a {
@@ -1712,10 +1670,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'b' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'b' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_b {
@@ -1737,10 +1693,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'c' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'c' => {
                                 let mut pawn_index: usize = 0;
                                 // for every pawn in the column
                                 for pawn in &mut black_column_c {
@@ -1762,10 +1716,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'd' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'd' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_d {
@@ -1787,10 +1739,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'e' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'e' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_e {
@@ -1812,10 +1762,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'f' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'f' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_f {
@@ -1837,10 +1785,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'g' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'g' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_g {
@@ -1862,10 +1808,8 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        'h' => {
-                            if is_white(board[desired_position as usize]) {
+                            },
+                            'h' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
                                 for pawn in &mut black_column_h {
@@ -1883,9 +1827,9 @@ fn main() {
                                     }
                                     pawn_index += 1;
                                 };
-                            }
-                        },
-                        _ => ()
+                            },
+                            _ => ()
+                        }
                     }
                 }
             }
