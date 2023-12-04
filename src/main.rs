@@ -21,54 +21,43 @@ fn main() {
     const BLACK_KING: char = 'k';
 
 //LAST POSITION OF EACH PIECE AND PAWN:
+
     //white pawns
     let white_pawn_a: i8 = 48;
-    let mut white_column_a = vec![white_pawn_a];
-
     let white_pawn_b: i8 = 49;
-    let mut white_column_b = vec![white_pawn_b];
-
     let white_pawn_c: i8 = 50;
-    let mut white_column_c = vec![white_pawn_c];
-
     let white_pawn_d: i8 = 51;
-    let mut white_column_d = vec![white_pawn_d];
-
     let white_pawn_e: i8 = 52;
-    let mut white_column_e = vec![white_pawn_e];
-
     let white_pawn_f: i8 = 53;
-    let mut white_column_f = vec![white_pawn_f];
-
     let white_pawn_g: i8 = 54;
-    let mut white_column_g = vec![white_pawn_g];
-
     let white_pawn_h: i8 = 55;
+
+    let mut white_column_a = vec![white_pawn_a];
+    let mut white_column_b = vec![white_pawn_b];
+    let mut white_column_c = vec![white_pawn_c];
+    let mut white_column_d = vec![white_pawn_d];
+    let mut white_column_e = vec![white_pawn_e];
+    let mut white_column_f = vec![white_pawn_f];
+    let mut white_column_g = vec![white_pawn_g];
     let mut white_column_h = vec![white_pawn_h];
 
     //black pawns
     let black_pawn_a: i8 = 8;
-    let mut black_column_a = vec![black_pawn_a];
-
     let black_pawn_b: i8 = 9;
-    let mut black_column_b = vec![black_pawn_b];
-
     let black_pawn_c: i8 = 10;
-    let mut black_column_c = vec![black_pawn_c];
-
     let black_pawn_d: i8 = 11;
-    let mut black_column_d = vec![black_pawn_d];
-
     let black_pawn_e: i8 = 12;
-    let mut black_column_e = vec![black_pawn_e];
-
     let black_pawn_f: i8 = 13;
-    let mut black_column_f = vec![black_pawn_f];
-
     let black_pawn_g: i8 = 14;
-    let mut black_column_g = vec![black_pawn_g];
-
     let black_pawn_h: i8 = 15;
+    
+    let mut black_column_a = vec![black_pawn_a];
+    let mut black_column_b = vec![black_pawn_b];
+    let mut black_column_c = vec![black_pawn_c];
+    let mut black_column_d = vec![black_pawn_d];
+    let mut black_column_e = vec![black_pawn_e];
+    let mut black_column_f = vec![black_pawn_f];
+    let mut black_column_g = vec![black_pawn_g];
     let mut black_column_h = vec![black_pawn_h];
 
     //white pieces
@@ -84,7 +73,9 @@ fn main() {
     let white_bishop2: i8 = 61;
     let mut white_bishops = vec![white_bishop1, white_bishop2];
     
-    //let mut white_queen: i8 = 59;
+    let white_queen: i8 = 59;
+    let mut white_queens = vec![white_queen];
+
     let mut white_king: i8 = 60;
     
     //black pieces
@@ -100,7 +91,9 @@ fn main() {
     let black_bishop2: i8 = 5;
     let mut black_bishops = vec![black_bishop1, black_bishop2];
     
-    //let mut black_queen: i8 = 3;
+    let black_queen: i8 = 3;
+    let mut black_queens = vec![black_queen];
+
     let mut black_king: i8 = 4;
 
 //create the board
@@ -209,92 +202,257 @@ fn main() {
                 if !is_white(board[desired_position as usize]) {
                     match san_move[0] {
                         'N' => {
-                            for w_knight in white_knights.iter_mut() {
-                                match *w_knight - desired_position {
-                                    -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            //last position is freed
-                                            board[*w_knight as usize] = NOTHING;
+                            if test_multiple_knights(&mut white_knights, desired_position) {
+                                println!("Specify the current square of the knight to be moved");
+                                player_move.clear();
+                                san_move.clear();
+                            
+                                io::stdin()
+                                        .read_line(&mut player_move)
+                                        .expect("Read error");
+                                
+                                san_move = player_move.trim().chars().collect();
+                            
+                                let knight_column: i8 = match san_move[0] {
+                                            'a' => 0,
+                                            'b' => 1,
+                                            'c' => 2,
+                                            'd' => 3,
+                                            'e' => 4,
+                                            'f' => 5,
+                                            'g' => 6,
+                                            'h' => 7,
+                                            _ => 100
+                                        };
+                                    
+                                //must be in reverse because we view the board as white
+                                let knight_line: i8 = match san_move[1] {
+                                            '1' => 56,
+                                            '2' => 48,
+                                            '3' => 40,
+                                            '4' => 32,
+                                            '5' => 24,
+                                            '6' => 16,
+                                            '7' => 8,
+                                            '8' => 0,
+                                            _ => 100
+                                        };
 
-                                            //piece is moved to new position
-                                            board[desired_position as usize] = WHITE_KNIGHT;
+                                for w_knight in white_knights.iter_mut() {
+                                    if knight_column + knight_line == *w_knight {
+                                        match *w_knight - desired_position {
+                                            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                                    //last position is freed
+                                                    board[*w_knight as usize] = NOTHING;
 
-                                            //current position is updated
-                                            *w_knight = desired_position;
+                                                    //piece is moved to new position
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
 
-                                            try_again = false;
-                                            break;
-                                    },
-                                    _ => ()
+                                                    //current position is updated
+                                                    *w_knight = desired_position;
+
+                                                    try_again = false;
+                                                    break;
+                                            },
+                                            _ => ()
+                                        }
+                                    }
                                 }
+                            }else{
+                                for w_knight in white_knights.iter_mut() {
+                                    match *w_knight - desired_position {
+                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                                //last position is freed
+                                                board[*w_knight as usize] = NOTHING;
+
+                                                //piece is moved to new position
+                                                board[desired_position as usize] = WHITE_KNIGHT;
+
+                                                //current position is updated
+                                                *w_knight = desired_position;
+
+                                                try_again = false;
+                                                break;
+                                        },
+                                        _ => ()
+                                    }
+                                };
                             }
                         },
                         'B' => {
-                            for w_bishop in white_bishops.iter_mut() {
-                                    // if the desired square is "above" the initial position
-                                if *w_bishop > desired_position {
-                                    // and if the distance is divisible by 7
-                                    if (*w_bishop - desired_position)%7 == 0 {
-                                        for diagonal in 1..8 {
-                                            // count each possible diagonal (until the maximum of 7 diagonals)
-                                            if *w_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*w_bishop, diagonal) {
-                                                // check if any of the squares in the bishop's diagonal is the desired square,
-                                                // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
-                                                // and finally, check if the desired square has no white pieces that may block the movement
-                                                // if all of those checks are true, the bishop may be moved
-                                                board[*w_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = WHITE_BISHOP;
-                                                *w_bishop = desired_position;
-
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*w_bishop - diagonal*7) as usize]) || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
-                                                // otherwise, if there are any white/black pieces on the way, the square is unreachable
-                                                break;
+                            if test_multiple_bishops(&mut white_bishops, desired_position) == true {
+                                println!("Specify the current square of the bishop to be moved");
+                                player_move.clear();
+                                san_move.clear();
+                            
+                                io::stdin()
+                                        .read_line(&mut player_move)
+                                        .expect("Read error");
+                                
+                                san_move = player_move.trim().chars().collect();
+                            
+                                let bishop_column: i8 = match san_move[0] {
+                                            'a' => 0,
+                                            'b' => 1,
+                                            'c' => 2,
+                                            'd' => 3,
+                                            'e' => 4,
+                                            'f' => 5,
+                                            'g' => 6,
+                                            'h' => 7,
+                                            _ => 100
+                                        };
+                                    
+                                //must be in reverse because we view the board as white
+                                let bishop_line: i8 = match san_move[1] {
+                                            '1' => 56,
+                                            '2' => 48,
+                                            '3' => 40,
+                                            '4' => 32,
+                                            '5' => 24,
+                                            '6' => 16,
+                                            '7' => 8,
+                                            '8' => 0,
+                                            _ => 100
+                                        };
+                                
+                                for w_bishop in white_bishops.iter_mut() {
+                                    if bishop_line + bishop_column == *w_bishop {
+                                            // if the desired square is "above" the initial position
+                                        if *w_bishop > desired_position {
+                                            // and if the distance is divisible by 7
+                                            if (*w_bishop - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    // count each possible diagonal (until the maximum of 7 diagonals)
+                                                    if *w_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*w_bishop, diagonal) {
+                                                        // check if any of the squares in the bishop's diagonal is the desired square,
+                                                        // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
+                                                        // and finally, check if the desired square has no white pieces that may block the movement
+                                                        // if all of those checks are true, the bishop may be moved
+                                                        board[*w_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_BISHOP;
+                                                        *w_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_bishop - diagonal*7) as usize]) || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
+                                                        // otherwise, if there are any white/black pieces on the way, the square is unreachable
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*w_bishop - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*w_bishop, diagonal) {
+                                                        board[*w_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_BISHOP;
+                                                        *w_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_bishop - diagonal*9) as usize]) || is_black(board[((*w_bishop - diagonal*9) as usize)]){
+                                                        break;
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }else if (*w_bishop - desired_position)%9 == 0 {
-                                        for diagonal in 1..8 {
-                                            if *w_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*w_bishop, diagonal) {
-                                                board[*w_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = WHITE_BISHOP;
-                                                *w_bishop = desired_position;
-
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*w_bishop - diagonal*9) as usize]) || is_black(board[((*w_bishop - diagonal*9) as usize)]){
-                                                break;
+                                        }else if *w_bishop < desired_position {
+                                            if (*w_bishop - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*w_bishop, diagonal) {
+                                                        board[*w_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_BISHOP;
+                                                        *w_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) || is_black(board[(*w_bishop + 7*diagonal) as usize]){
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*w_bishop - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*w_bishop, diagonal) {
+                                                        board[*w_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_BISHOP;
+                                                        *w_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
+                                                        break;
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                }else if *w_bishop < desired_position  && (((desired_position - *w_bishop)%7 == 0) || ((desired_position - *w_bishop)%9 == 0)) {
-                                    if (*w_bishop - desired_position)%7 == 0 {
-                                        for diagonal in 1..8 {
-                                            if *w_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*w_bishop, diagonal) {
-                                                board[*w_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = WHITE_BISHOP;
-                                                *w_bishop = desired_position;
+                                };
+                            }else{
+                                for w_bishop in white_bishops.iter_mut() {
+                                        // if the desired square is "above" the initial position
+                                    if *w_bishop > desired_position {
+                                        // and if the distance is divisible by 7
+                                        if (*w_bishop - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                // count each possible diagonal (until the maximum of 7 diagonals)
+                                                if *w_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*w_bishop, diagonal) {
+                                                    // check if any of the squares in the bishop's diagonal is the desired square,
+                                                    // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
+                                                    // and finally, check if the desired square has no white pieces that may block the movement
+                                                    // if all of those checks are true, the bishop may be moved
+                                                    board[*w_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    *w_bishop = desired_position;
 
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) || is_black(board[(*w_bishop + 7*diagonal) as usize]){
-                                                break;
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_bishop - diagonal*7) as usize]) || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
+                                                    // otherwise, if there are any white/black pieces on the way, the square is unreachable
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*w_bishop - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*w_bishop, diagonal) {
+                                                    board[*w_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    *w_bishop = desired_position;
+
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_bishop - diagonal*9) as usize]) || is_black(board[((*w_bishop - diagonal*9) as usize)]){
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }else if (*w_bishop - desired_position)%9 == 0 {
-                                        for diagonal in 1..8 {
-                                            if *w_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*w_bishop, diagonal) {
-                                                board[*w_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = WHITE_BISHOP;
-                                                *w_bishop = desired_position;
+                                    }else if *w_bishop < desired_position {
+                                        if (*w_bishop - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*w_bishop, diagonal) {
+                                                    board[*w_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    *w_bishop = desired_position;
 
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
-                                                break;
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) || is_black(board[(*w_bishop + 7*diagonal) as usize]){
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*w_bishop - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*w_bishop, diagonal) {
+                                                    board[*w_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    *w_bishop = desired_position;
+
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
-                                }
+                                };
                             }
                         },
                         'R' => {
@@ -338,7 +496,7 @@ fn main() {
                                     if rook_column + rook_line == *w_rook {
                                         if *w_rook > desired_position {
                                             // if the desired square is on the same rank as the initial position
-                                            if *w_rook - desired_position <= 7 {
+                                            if get_line(*w_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_rook - square == desired_position && !rook_left(*w_rook, square) {
                                                         board[*w_rook as usize] = NOTHING;
@@ -367,7 +525,7 @@ fn main() {
                                                 }
                                             }
                                         }else if *w_rook < desired_position {
-                                            if desired_position - *w_rook <= 7 {
+                                            if get_line(*w_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_rook + square == desired_position && !rook_right(*w_rook, square) {
                                                         board[*w_rook as usize] = NOTHING;
@@ -396,12 +554,12 @@ fn main() {
                                             }
                                         }
                                     }
-                                }
+                                };
                             }else{ // only one rook may reach the desired square
                                 for w_rook in &mut white_rooks.iter_mut() {    
                                     if *w_rook > desired_position {
                                         // if the desired square is on the same rank as the initial position
-                                        if *w_rook - desired_position <= 7 {
+                                        if get_line(*w_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_rook - square == desired_position && !rook_left(*w_rook, square) {
                                                     board[*w_rook as usize] = NOTHING;
@@ -430,7 +588,7 @@ fn main() {
                                             }
                                         }
                                     }else if *w_rook < desired_position {
-                                        if desired_position - *w_rook <= 7 {
+                                        if get_line(*w_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_rook + square == desired_position && !rook_right(*w_rook, square) {
                                                     board[*w_rook as usize] = NOTHING;
@@ -458,7 +616,7 @@ fn main() {
                                             }
                                         }
                                     }
-                                }
+                                };
                             }
                         },
                         'K' => {
@@ -528,6 +686,285 @@ fn main() {
                                         }
                                     },
                                 _ => ()
+                            }
+                        },
+                        'Q' => {
+                            if test_multiple_rooks(&mut white_queens, desired_position) == true 
+                            || test_multiple_bishops(&mut white_queens, desired_position) == true {
+                                println!("Specify the current square of the queen to be moved");
+                                player_move.clear();
+                                san_move.clear();
+                            
+                                io::stdin()
+                                        .read_line(&mut player_move)
+                                        .expect("Read error");
+                                
+                                san_move = player_move.trim().chars().collect();
+                            
+                                let queen_column: i8 = match san_move[0] {
+                                            'a' => 0,
+                                            'b' => 1,
+                                            'c' => 2,
+                                            'd' => 3,
+                                            'e' => 4,
+                                            'f' => 5,
+                                            'g' => 6,
+                                            'h' => 7,
+                                            _ => 100
+                                        };
+                                    
+                                //must be in reverse because we view the board as white
+                                let queen_line: i8 = match san_move[1] {
+                                            '1' => 56,
+                                            '2' => 48,
+                                            '3' => 40,
+                                            '4' => 32,
+                                            '5' => 24,
+                                            '6' => 16,
+                                            '7' => 8,
+                                            '8' => 0,
+                                            _ => 100
+                                        };
+                                
+                                for w_queen in white_queens.iter_mut() {
+                                    if queen_column + queen_line == *w_queen {
+                                        if *w_queen > desired_position {
+                                            // DIAGONAL MOVEMENT:
+                                            if (*w_queen - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_queen - diagonal*7 == desired_position && !upper_right_diagonal(*w_queen, diagonal) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen - diagonal*7) as usize]) || is_black(board[((*w_queen - diagonal*7) as usize)]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*w_queen - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_queen - diagonal*9 == desired_position && !upper_left_diagonal(*w_queen, diagonal) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen - diagonal*9) as usize]) || is_black(board[((*w_queen - diagonal*9) as usize)]){
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            // ROOK-LIKE MOVEMENT:
+                                            if get_line(*w_queen) == get_line(desired_position) {
+                                                for square in 1..8 {
+                                                    if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen - square) as usize]) || is_black(board[(*w_queen - square) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*w_queen - desired_position)%8 == 0 {
+                                                // otherwise, test if it is on the same file
+                                                for square in 1..8 {
+                                                    if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen - square*8) as usize]) || is_black(board[(*w_queen - square*8) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }else if *w_queen < desired_position {
+                                            // DIAGONAL MOVEMENT:
+                                            if (*w_queen - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*w_queen, diagonal) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen + 7*diagonal) as usize]) || is_black(board[(*w_queen + 7*diagonal) as usize]){
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*w_queen - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *w_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*w_queen, diagonal) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen + 9*diagonal) as usize]) || is_black(board[(*w_queen + 9*diagonal) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            // ROOK-LIKE MOVEMENT:
+                                            if get_line(*w_queen) == get_line(desired_position) {
+                                                for square in 1..8 {
+                                                    if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen + square) as usize]) || is_black(board[(*w_queen + square) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (desired_position - *w_queen)%8 == 0 {
+                                                for square in 1..8 {
+                                                    if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                        board[*w_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = WHITE_QUEEN;
+                                                        *w_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*w_queen + square*8) as usize]) || is_black(board[(*w_queen + square*8) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                            }else{
+                                for w_queen in white_queens.iter_mut() {
+                                    if *w_queen > desired_position {
+                                        // DIAGONAL MOVEMENT:
+                                        if (*w_queen - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_queen - diagonal*7 == desired_position && !upper_right_diagonal(*w_queen, diagonal) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen - diagonal*7) as usize]) || is_black(board[((*w_queen - diagonal*7) as usize)]) {
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*w_queen - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_queen - diagonal*9 == desired_position && !upper_left_diagonal(*w_queen, diagonal) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen - diagonal*9) as usize]) || is_black(board[((*w_queen - diagonal*9) as usize)]){
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        // ROOK-LIKE MOVEMENT:
+                                        if get_line(*w_queen) == get_line(desired_position) {
+                                            for square in 1..8 {
+                                                if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen - square) as usize]) || is_black(board[(*w_queen - square) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*w_queen - desired_position)%8 == 0 {
+                                            // otherwise, test if it is on the same file
+                                            for square in 1..8 {
+                                                if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen - square*8) as usize]) || is_black(board[(*w_queen - square*8) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }else if *w_queen < desired_position {
+                                        // DIAGONAL MOVEMENT:
+                                        if (*w_queen - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*w_queen, diagonal) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen + 7*diagonal) as usize]) || is_black(board[(*w_queen + 7*diagonal) as usize]){
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*w_queen - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *w_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*w_queen, diagonal) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen + 9*diagonal) as usize]) || is_black(board[(*w_queen + 9*diagonal) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        // ROOK-LIKE MOVEMENT:
+                                        if get_line(*w_queen) == get_line(desired_position) {
+                                            for square in 1..8 {
+                                                if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen + square) as usize]) || is_black(board[(*w_queen + square) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }else if (desired_position - *w_queen)%8 == 0 {
+                                            for square in 1..8 {
+                                                if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                    board[*w_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_QUEEN;
+                                                    *w_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*w_queen + square*8) as usize]) || is_black(board[(*w_queen + square*8) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         },
                         _ => ()
@@ -1053,92 +1490,257 @@ fn main() {
                 if !is_black(board[desired_position as usize]) {
                     match san_move[0] {
                         'N' => {
-                            for b_knight in black_knights.iter_mut() {
-                                match *b_knight - desired_position {
-                                    -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            //last position is freed
-                                            board[*b_knight as usize] = NOTHING;
+                            if test_multiple_knights(&mut black_knights, desired_position) {
+                                println!("Specify the current square of the knight to be moved");
+                                player_move.clear();
+                                san_move.clear();
+                            
+                                io::stdin()
+                                        .read_line(&mut player_move)
+                                        .expect("Read error");
+                                
+                                san_move = player_move.trim().chars().collect();
+                            
+                                let knight_column: i8 = match san_move[0] {
+                                            'a' => 0,
+                                            'b' => 1,
+                                            'c' => 2,
+                                            'd' => 3,
+                                            'e' => 4,
+                                            'f' => 5,
+                                            'g' => 6,
+                                            'h' => 7,
+                                            _ => 100
+                                        };
+                                    
+                                //must be in reverse because we view the board as white
+                                let knight_line: i8 = match san_move[1] {
+                                            '1' => 56,
+                                            '2' => 48,
+                                            '3' => 40,
+                                            '4' => 32,
+                                            '5' => 24,
+                                            '6' => 16,
+                                            '7' => 8,
+                                            '8' => 0,
+                                            _ => 100
+                                        };
 
-                                            //piece is moved to new position
-                                            board[desired_position as usize] = BLACK_KNIGHT;
+                                for b_knight in black_knights.iter_mut() {
+                                    if knight_column + knight_line == *b_knight {
+                                        match *b_knight - desired_position {
+                                            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                                    //last position is freed
+                                                    board[*b_knight as usize] = NOTHING;
 
-                                            //current position is updated
-                                            *b_knight = desired_position;
+                                                    //piece is moved to new position
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
 
-                                            try_again = false;
-                                            break;
-                                    },
-                                    _ => ()
+                                                    //current position is updated
+                                                    *b_knight = desired_position;
+
+                                                    try_again = false;
+                                                    break;
+                                            },
+                                            _ => ()
+                                        }
+                                    }
                                 }
+                            }else{
+                                for b_knight in black_knights.iter_mut() {
+                                    match *b_knight - desired_position {
+                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                                //last position is freed
+                                                board[*b_knight as usize] = NOTHING;
+
+                                                //piece is moved to new position
+                                                board[desired_position as usize] = BLACK_KNIGHT;
+
+                                                //current position is updated
+                                                *b_knight = desired_position;
+
+                                                try_again = false;
+                                                break;
+                                        },
+                                        _ => ()
+                                    }
+                                };
                             }
                         },
                         'B' => {
-                            for b_bishop in black_bishops.iter_mut() {
-                                    // if the desired square is "above" the initial position
-                                if *b_bishop > desired_position {
-                                    // and if the distance is divisible by 7
-                                    if (*b_bishop - desired_position)%7 == 0 {
-                                        for diagonal in 1..8 {
-                                            // count each possible diagonal (until the maximum of 7 diagonals)
-                                            if *b_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*b_bishop, diagonal) {
-                                                // check if any of the squares in the bishop's diagonal is the desired square,
-                                                // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
-                                                // and finally, check if the desired square has no white pieces that may block the movement
-                                                // if all of those checks are true, the bishop may be moved
-                                                board[*b_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = BLACK_BISHOP;
-                                                *b_bishop = desired_position;
-
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*b_bishop - diagonal*7) as usize]) || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
-                                                // otherwise, if there are any white/black pieces on the way, the square is unreachable
-                                                break;
+                            if test_multiple_bishops(&mut black_bishops, desired_position) == true {
+                                println!("Specify the current square of the bishop to be moved");
+                                player_move.clear();
+                                san_move.clear();
+                            
+                                io::stdin()
+                                        .read_line(&mut player_move)
+                                        .expect("Read error");
+                                
+                                san_move = player_move.trim().chars().collect();
+                            
+                                let bishop_column: i8 = match san_move[0] {
+                                            'a' => 0,
+                                            'b' => 1,
+                                            'c' => 2,
+                                            'd' => 3,
+                                            'e' => 4,
+                                            'f' => 5,
+                                            'g' => 6,
+                                            'h' => 7,
+                                            _ => 100
+                                        };
+                                    
+                                //must be in reverse because we view the board as white
+                                let bishop_line: i8 = match san_move[1] {
+                                            '1' => 56,
+                                            '2' => 48,
+                                            '3' => 40,
+                                            '4' => 32,
+                                            '5' => 24,
+                                            '6' => 16,
+                                            '7' => 8,
+                                            '8' => 0,
+                                            _ => 100
+                                        };
+                                
+                                for b_bishop in black_bishops.iter_mut() {
+                                    if bishop_line + bishop_column == *b_bishop {
+                                            // if the desired square is "above" the initial position
+                                        if *b_bishop > desired_position {
+                                            // and if the distance is divisible by 7
+                                            if (*b_bishop - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    // count each possible diagonal (until the maximum of 7 diagonals)
+                                                    if *b_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*b_bishop, diagonal) {
+                                                        // check if any of the squares in the bishop's diagonal is the desired square,
+                                                        // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
+                                                        // and finally, check if the desired square has no white pieces that may block the movement
+                                                        // if all of those checks are true, the bishop may be moved
+                                                        board[*b_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_BISHOP;
+                                                        *b_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_bishop - diagonal*7) as usize]) || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
+                                                        // otherwise, if there are any white/black pieces on the way, the square is unreachable
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*b_bishop - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*b_bishop, diagonal) {
+                                                        board[*b_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_BISHOP;
+                                                        *b_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_bishop - diagonal*9) as usize]) || is_black(board[((*b_bishop - diagonal*9) as usize)]){
+                                                        break;
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }else if (*b_bishop - desired_position)%9 == 0 {
-                                        for diagonal in 1..8 {
-                                            if *b_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*b_bishop, diagonal) {
-                                                board[*b_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = BLACK_BISHOP;
-                                                *b_bishop = desired_position;
-
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*b_bishop - diagonal*9) as usize]) || is_black(board[((*b_bishop - diagonal*9) as usize)]){
-                                                break;
+                                        }else if *b_bishop < desired_position {
+                                            if (*b_bishop - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*b_bishop, diagonal) {
+                                                        board[*b_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_BISHOP;
+                                                        *b_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) || is_black(board[(*b_bishop + 7*diagonal) as usize]){
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*b_bishop - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*b_bishop, diagonal) {
+                                                        board[*b_bishop as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_BISHOP;
+                                                        *b_bishop = desired_position;
+    
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
+                                                        break;
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                }else if *b_bishop < desired_position  && (((desired_position - *b_bishop)%7 == 0) || ((desired_position - *b_bishop)%9 == 0)) {
-                                    if (*b_bishop - desired_position)%7 == 0 {
-                                        for diagonal in 1..8 {
-                                            if *b_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*b_bishop, diagonal) {
-                                                board[*b_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = BLACK_BISHOP;
-                                                *b_bishop = desired_position;
+                                };
+                            }else{
+                                for b_bishop in black_bishops.iter_mut() {
+                                        // if the desired square is "above" the initial position
+                                    if *b_bishop > desired_position {
+                                        // and if the distance is divisible by 7
+                                        if (*b_bishop - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                // count each possible diagonal (until the maximum of 7 diagonals)
+                                                if *b_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*b_bishop, diagonal) {
+                                                    // check if any of the squares in the bishop's diagonal is the desired square,
+                                                    // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
+                                                    // and finally, check if the desired square has no white pieces that may block the movement
+                                                    // if all of those checks are true, the bishop may be moved
+                                                    board[*b_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    *b_bishop = desired_position;
 
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) || is_black(board[(*b_bishop + 7*diagonal) as usize]){
-                                                break;
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_bishop - diagonal*7) as usize]) || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
+                                                    // otherwise, if there are any white/black pieces on the way, the square is unreachable
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*b_bishop - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*b_bishop, diagonal) {
+                                                    board[*b_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    *b_bishop = desired_position;
+
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_bishop - diagonal*9) as usize]) || is_black(board[((*b_bishop - diagonal*9) as usize)]){
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }else if (*b_bishop - desired_position)%9 == 0 {
-                                        for diagonal in 1..8 {
-                                            if *b_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*b_bishop, diagonal) {
-                                                board[*b_bishop as usize] = NOTHING;
-                                                board[desired_position as usize] = BLACK_BISHOP;
-                                                *b_bishop = desired_position;
+                                    }else if *b_bishop < desired_position {
+                                        if (*b_bishop - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*b_bishop, diagonal) {
+                                                    board[*b_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    *b_bishop = desired_position;
 
-                                                try_again = false;
-                                                break;
-                                            }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
-                                                break;
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) || is_black(board[(*b_bishop + 7*diagonal) as usize]){
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*b_bishop - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*b_bishop, diagonal) {
+                                                    board[*b_bishop as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    *b_bishop = desired_position;
+
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
-                                }
+                                };
                             }
                         },
                         'R' => {
@@ -1182,7 +1784,7 @@ fn main() {
                                     if rook_column + rook_line == *b_rook {
                                         if *b_rook > desired_position {
                                             // if the desired square is on the same rank as the initial position
-                                            if *b_rook - desired_position <= 7 {
+                                            if get_line(*b_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_rook - square == desired_position && !rook_left(*b_rook, square) {
                                                         board[*b_rook as usize] = NOTHING;
@@ -1211,7 +1813,7 @@ fn main() {
                                                 }
                                             }
                                         }else if *b_rook < desired_position {
-                                            if desired_position - *b_rook <= 7 {
+                                            if get_line(*b_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_rook + square == desired_position && !rook_right(*b_rook, square) {
                                                         board[*b_rook as usize] = NOTHING;
@@ -1240,12 +1842,12 @@ fn main() {
                                             }
                                         }
                                     }
-                                }
+                                };
                             }else{ // only one rook may reach the desired square
                                 for b_rook in &mut black_rooks.iter_mut() {    
                                     if *b_rook > desired_position && !is_black(board[desired_position as usize]) {
                                         // if the desired square is on the same rank as the initial position
-                                        if *b_rook - desired_position <= 7 {
+                                        if get_line(*b_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_rook - square == desired_position && !rook_left(*b_rook, square) {
                                                     board[*b_rook as usize] = NOTHING;
@@ -1274,7 +1876,7 @@ fn main() {
                                             }
                                         }
                                     }else if *b_rook < desired_position && !is_black(board[desired_position as usize]) {
-                                        if desired_position - *b_rook <= 7 {
+                                        if get_line(*b_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_rook + square == desired_position && !rook_right(*b_rook, square) {
                                                     board[*b_rook as usize] = NOTHING;
@@ -1302,7 +1904,7 @@ fn main() {
                                             }
                                         }
                                     }
-                                }
+                                };
                             }
                         },
                         'K' => {
@@ -1372,6 +1974,285 @@ fn main() {
                                         }
                                     },
                                 _ => ()
+                            }
+                        },
+                        'Q' => {
+                            if test_multiple_rooks(&mut black_queens, desired_position) == true 
+                            || test_multiple_bishops(&mut black_queens, desired_position) == true {
+                                println!("Specify the current square of the queen to be moved");
+                                player_move.clear();
+                                san_move.clear();
+                            
+                                io::stdin()
+                                        .read_line(&mut player_move)
+                                        .expect("Read error");
+                                
+                                san_move = player_move.trim().chars().collect();
+                            
+                                let queen_column: i8 = match san_move[0] {
+                                            'a' => 0,
+                                            'b' => 1,
+                                            'c' => 2,
+                                            'd' => 3,
+                                            'e' => 4,
+                                            'f' => 5,
+                                            'g' => 6,
+                                            'h' => 7,
+                                            _ => 100
+                                        };
+                                    
+                                //must be in reverse because we view the board as white
+                                let queen_line: i8 = match san_move[1] {
+                                            '1' => 56,
+                                            '2' => 48,
+                                            '3' => 40,
+                                            '4' => 32,
+                                            '5' => 24,
+                                            '6' => 16,
+                                            '7' => 8,
+                                            '8' => 0,
+                                            _ => 100
+                                        };
+                                
+                                for b_queen in black_queens.iter_mut() {
+                                    if queen_column + queen_line == *b_queen {
+                                        if *b_queen > desired_position {
+                                            // DIAGONAL MOVEMENT:
+                                            if (*b_queen - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_queen - diagonal*7 == desired_position && !upper_right_diagonal(*b_queen, diagonal) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen - diagonal*7) as usize]) || is_black(board[((*b_queen - diagonal*7) as usize)]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*b_queen - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_queen - diagonal*9 == desired_position && !upper_left_diagonal(*b_queen, diagonal) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen - diagonal*9) as usize]) || is_black(board[((*b_queen - diagonal*9) as usize)]){
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            // ROOK-LIKE MOVEMENT:
+                                            if get_line(*b_queen) == get_line(desired_position) {
+                                                for square in 1..8 {
+                                                    if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen - square) as usize]) || is_black(board[(*b_queen - square) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*b_queen - desired_position)%8 == 0 {
+                                                // otherwise, test if it is on the same file
+                                                for square in 1..8 {
+                                                    if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen - square*8) as usize]) || is_black(board[(*b_queen - square*8) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }else if *b_queen < desired_position {
+                                            // DIAGONAL MOVEMENT:
+                                            if (*b_queen - desired_position)%7 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*b_queen, diagonal) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen + 7*diagonal) as usize]) || is_black(board[(*b_queen + 7*diagonal) as usize]){
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (*b_queen - desired_position)%9 == 0 {
+                                                for diagonal in 1..8 {
+                                                    if *b_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*b_queen, diagonal) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+        
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen + 9*diagonal) as usize]) || is_black(board[(*b_queen + 9*diagonal) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            // ROOK-LIKE MOVEMENT:
+                                            if get_line(*b_queen) == get_line(desired_position) {
+                                                for square in 1..8 {
+                                                    if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen + square) as usize]) || is_black(board[(*b_queen + square) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }else if (desired_position - *b_queen)%8 == 0 {
+                                                for square in 1..8 {
+                                                    if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                        board[*b_queen as usize] = NOTHING;
+                                                        board[desired_position as usize] = BLACK_QUEEN;
+                                                        *b_queen = desired_position;
+                
+                                                        try_again = false;
+                                                        break;
+                                                    }else if is_white(board[(*b_queen + square*8) as usize]) || is_black(board[(*b_queen + square*8) as usize]) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                            }else{
+                                for b_queen in black_queens.iter_mut() {
+                                    if *b_queen > desired_position {
+                                        // DIAGONAL MOVEMENT:
+                                        if (*b_queen - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_queen - diagonal*7 == desired_position && !upper_right_diagonal(*b_queen, diagonal) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen - diagonal*7) as usize]) || is_black(board[((*b_queen - diagonal*7) as usize)]) {
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*b_queen - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_queen - diagonal*9 == desired_position && !upper_left_diagonal(*b_queen, diagonal) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen - diagonal*9) as usize]) || is_black(board[((*b_queen - diagonal*9) as usize)]){
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        // ROOK-LIKE MOVEMENT:
+                                        if get_line(*b_queen) == get_line(desired_position) {
+                                            for square in 1..8 {
+                                                if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen - square) as usize]) || is_black(board[(*b_queen - square) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*b_queen - desired_position)%8 == 0 {
+                                            // otherwise, test if it is on the same file
+                                            for square in 1..8 {
+                                                if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen - square*8) as usize]) || is_black(board[(*b_queen - square*8) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }else if *b_queen < desired_position {
+                                        // DIAGONAL MOVEMENT:
+                                        if (*b_queen - desired_position)%7 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*b_queen, diagonal) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen + 7*diagonal) as usize]) || is_black(board[(*b_queen + 7*diagonal) as usize]){
+                                                    break;
+                                                }
+                                            }
+                                        }else if (*b_queen - desired_position)%9 == 0 {
+                                            for diagonal in 1..8 {
+                                                if *b_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*b_queen, diagonal) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen + 9*diagonal) as usize]) || is_black(board[(*b_queen + 9*diagonal) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        // ROOK-LIKE MOVEMENT:
+                                        if get_line(*b_queen) == get_line(desired_position) {
+                                            for square in 1..8 {
+                                                if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen + square) as usize]) || is_black(board[(*b_queen + square) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }else if (desired_position - *b_queen)%8 == 0 {
+                                            for square in 1..8 {
+                                                if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                    board[*b_queen as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_QUEEN;
+                                                    *b_queen = desired_position;
+            
+                                                    try_again = false;
+                                                    break;
+                                                }else if is_white(board[(*b_queen + square*8) as usize]) || is_black(board[(*b_queen + square*8) as usize]) {
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         },
                         _ => ()
@@ -2074,6 +2955,50 @@ fn test_multiple_rooks(pieces: &mut Vec<i8>, position: i8) -> bool {
         if get_line(pieces[i]) == get_line(position) || (position - pieces[i])%8 == 0 {
             counter += 1
         }
+        if counter >= 2 {
+            return true
+        }
+    }
+
+    return false
+}
+
+fn test_multiple_bishops(pieces: &mut Vec<i8>, position: i8) -> bool {
+    // this tests every rook or piece with rook-like 
+    // movement inside a vector to see if more than one
+    // of them can reach the same square
+
+    // true = multiple pieces may go to the desired square
+    let mut counter = 0;
+
+    for i in 0..pieces.len() {
+        if (position - pieces[i])%7 == 0 || (position - pieces[i])%9 == 0 {
+            counter += 1
+        }
+        if counter >= 2 {
+            return true
+        }
+    }
+
+    return false
+}
+
+fn test_multiple_knights(pieces: &mut Vec<i8>, position: i8) -> bool {
+    // this tests every rook or piece with rook-like 
+    // movement inside a vector to see if more than one
+    // of them can reach the same square
+
+    // true = multiple pieces may go to the desired square
+    let mut counter = 0;
+
+    for i in 0..pieces.len() {
+        match position - pieces[i]{
+            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                counter += 1;
+            },
+            _ => ()
+        }
+
         if counter >= 2 {
             return true
         }
