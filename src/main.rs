@@ -200,6 +200,8 @@ fn main() {
 
                 //pieces' movement checks
                 if !is_white(board[desired_position as usize]) {
+                    let captured_piece = board[desired_position as usize];
+
                     match san_move[0] {
                         'N' => {
                             if test_multiple_knights(&mut white_knights, desired_position) {
@@ -969,6 +971,113 @@ fn main() {
                         },
                         _ => ()
                     }
+
+                    if try_again == false { // prevents captured pawns/pieces to be moved later
+                        match captured_piece {
+                            'j' => {
+                                match san_move[1] {
+                                    'a' => {
+                                        for pawn in 0..black_column_a.len() {
+                                            if black_column_a[pawn] == desired_position {
+                                                black_column_a.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'b' => {
+                                        for pawn in 0..black_column_b.len() {
+                                            if black_column_b[pawn] == desired_position {
+                                                black_column_b.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'c' => {
+                                        for pawn in 0..black_column_c.len() {
+                                            if black_column_c[pawn] == desired_position {
+                                                black_column_c.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'd' => {
+                                        for pawn in 0..black_column_d.len() {
+                                            if black_column_d[pawn] == desired_position {
+                                                black_column_d.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'e' => {
+                                        for pawn in 0..black_column_e.len() {
+                                            if black_column_e[pawn] == desired_position {
+                                                black_column_e.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'f' => {
+                                        for pawn in 0..black_column_f.len() {
+                                            if black_column_f[pawn] == desired_position {
+                                                black_column_f.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'g' => {
+                                        for pawn in 0..black_column_g.len() {
+                                            if black_column_g[pawn] == desired_position {
+                                                black_column_g.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'h' => {
+                                        for pawn in 0..black_column_h.len() {
+                                            if black_column_h[pawn] == desired_position {
+                                                black_column_h.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    _ => ()
+                                }
+                            },
+                            'q' => {
+                                for i in 0..black_queens.len() {
+                                    if black_queens[i] == desired_position {
+                                        black_queens.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            'b' => {
+                                for i in 0..black_bishops.len() {
+                                    if black_bishops[i] == desired_position {
+                                        black_bishops.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            'n' => {
+                                for i in 0..black_knights.len() {
+                                    if black_knights[i] == desired_position {
+                                        black_knights.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            'r' => {
+                                for i in 0..black_rooks.len() {
+                                    if black_rooks[i] == desired_position {
+                                        black_rooks.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            _ => ()
+                        }
+                    }
                 }
 
             }else{ // pawn movement
@@ -1009,7 +1118,7 @@ fn main() {
                         match san_move[0] {
                             'a' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_a {
+                                for pawn in &mut white_column_a.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1034,7 +1143,7 @@ fn main() {
                             },
                             'b' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_b {
+                                for pawn in &mut white_column_b.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1059,7 +1168,7 @@ fn main() {
                             },
                             'c' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_c {
+                                for pawn in &mut white_column_c.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1084,7 +1193,7 @@ fn main() {
                             },
                             'd' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_d {
+                                for pawn in &mut white_column_d.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1109,7 +1218,7 @@ fn main() {
                             },
                             'e' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_e {
+                                for pawn in &mut white_column_e.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1134,7 +1243,7 @@ fn main() {
                             },
                             'f' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_f {
+                                for pawn in &mut white_column_f.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1159,7 +1268,7 @@ fn main() {
                             },
                             'g' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_g {
+                                for pawn in &mut white_column_g.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1184,7 +1293,7 @@ fn main() {
                             },
                             'h' => {
                                 // for every pawn in the column
-                                for pawn in &mut white_column_h {
+                                for pawn in &mut white_column_h.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 || desired_position - *pawn == -8 {
@@ -1208,7 +1317,7 @@ fn main() {
                                 };
                             },
                             _ => ()
-                        }
+                        };
                     }
 
                 }else if san_move.len() >= 4 { // if the second letter in the SAN notation move is 'x' (which means a capture):
@@ -1244,11 +1353,13 @@ fn main() {
                     desired_position = column + line;
 
                     if is_black(board[desired_position as usize]) {
+                        let captured_piece = board[desired_position as usize];
+
                         match san_move[0] {
                             'a' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_a {
+                                for pawn in &mut white_column_a.iter_mut() {
                                     if desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1268,7 +1379,7 @@ fn main() {
                             'b' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_b {
+                                for pawn in &mut white_column_b.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1291,7 +1402,7 @@ fn main() {
                             'c' => {
                                 let mut pawn_index: usize = 0;
                                 // for every pawn in the column
-                                for pawn in &mut white_column_c {
+                                for pawn in &mut white_column_c.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1314,7 +1425,7 @@ fn main() {
                             'd' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_d {
+                                for pawn in &mut white_column_d.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1337,7 +1448,7 @@ fn main() {
                             'e' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_e {
+                                for pawn in &mut white_column_e.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1360,7 +1471,7 @@ fn main() {
                             'f' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_f {
+                                for pawn in &mut white_column_f.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1383,7 +1494,7 @@ fn main() {
                             'g' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_g {
+                                for pawn in &mut white_column_g.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1406,7 +1517,7 @@ fn main() {
                             'h' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut white_column_h {
+                                for pawn in &mut white_column_h.iter_mut() {
                                     if desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_PAWN;
@@ -1423,6 +1534,113 @@ fn main() {
                                 };
                             },
                             _ => ()
+                        }
+                    
+                        if try_again == false {
+                            match captured_piece {
+                                'j' => {
+                                    match san_move[2] {
+                                        'a' => {
+                                            for pawn in 0..black_column_a.len() {
+                                                if black_column_a[pawn] == desired_position {
+                                                    black_column_a.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'b' => {
+                                            for pawn in 0..black_column_b.len() {
+                                                if black_column_b[pawn] == desired_position {
+                                                    black_column_b.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'c' => {
+                                            for pawn in 0..black_column_c.len() {
+                                                if black_column_c[pawn] == desired_position {
+                                                    black_column_c.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'd' => {
+                                            for pawn in 0..black_column_d.len() {
+                                                if black_column_d[pawn] == desired_position {
+                                                    black_column_d.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'e' => {
+                                            for pawn in 0..black_column_e.len() {
+                                                if black_column_e[pawn] == desired_position {
+                                                    black_column_e.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'f' => {
+                                            for pawn in 0..black_column_f.len() {
+                                                if black_column_f[pawn] == desired_position {
+                                                    black_column_f.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'g' => {
+                                            for pawn in 0..black_column_g.len() {
+                                                if black_column_g[pawn] == desired_position {
+                                                    black_column_g.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'h' => {
+                                            for pawn in 0..black_column_h.len() {
+                                                if black_column_h[pawn] == desired_position {
+                                                    black_column_h.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        _ => ()
+                                    }
+                                },
+                                'q' => {
+                                    for i in 0..black_queens.len() {
+                                        if black_queens[i] == desired_position {
+                                            black_queens.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                'b' => {
+                                    for i in 0..black_bishops.len() {
+                                        if black_bishops[i] == desired_position {
+                                            black_bishops.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                'n' => {
+                                    for i in 0..black_knights.len() {
+                                        if black_knights[i] == desired_position {
+                                            black_knights.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                'r' => {
+                                    for i in 0..black_rooks.len() {
+                                        if black_rooks[i] == desired_position {
+                                            black_rooks.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                _ => ()
+                            }
                         }
                     }
                 }
@@ -1488,6 +1706,8 @@ fn main() {
                 desired_position = column + line;
 
                 if !is_black(board[desired_position as usize]) {
+                    let captured_piece = board[desired_position as usize];
+
                     match san_move[0] {
                         'N' => {
                             if test_multiple_knights(&mut black_knights, desired_position) {
@@ -2257,6 +2477,113 @@ fn main() {
                         },
                         _ => ()
                     }
+
+                    if try_again == false {
+                        match captured_piece {
+                            'i' => {
+                                match san_move[1] {
+                                    'a' => {
+                                        for pawn in 0..white_column_a.len() {
+                                            if white_column_a[pawn] == desired_position {
+                                                white_column_a.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'b' => {
+                                        for pawn in 0..white_column_b.len() {
+                                            if white_column_b[pawn] == desired_position {
+                                                white_column_b.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'c' => {
+                                        for pawn in 0..white_column_c.len() {
+                                            if white_column_c[pawn] == desired_position {
+                                                white_column_c.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'd' => {
+                                        for pawn in 0..white_column_d.len() {
+                                            if white_column_d[pawn] == desired_position {
+                                                white_column_d.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'e' => {
+                                        for pawn in 0..white_column_e.len() {
+                                            if white_column_e[pawn] == desired_position {
+                                                white_column_e.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'f' => {
+                                        for pawn in 0..white_column_f.len() {
+                                            if white_column_f[pawn] == desired_position {
+                                                white_column_f.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'g' => {
+                                        for pawn in 0..white_column_g.len() {
+                                            if white_column_g[pawn] == desired_position {
+                                                white_column_g.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    'h' => {
+                                        for pawn in 0..white_column_h.len() {
+                                            if white_column_h[pawn] == desired_position {
+                                                white_column_h.swap_remove(pawn);
+                                                break;
+                                            }
+                                        };
+                                    },
+                                    _ => ()
+                                }
+                            },
+                            'Q' => {
+                                for i in 0..white_queens.len() {
+                                    if white_queens[i] == desired_position {
+                                        white_queens.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            'B' => {
+                                for i in 0..white_bishops.len() {
+                                    if white_bishops[i] == desired_position {
+                                        white_bishops.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            'N' => {
+                                for i in 0..white_knights.len() {
+                                    if white_knights[i] == desired_position {
+                                        white_knights.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            'R' => {
+                                for i in 0..white_rooks.len() {
+                                    if white_rooks[i] == desired_position {
+                                        white_rooks.swap_remove(i);
+                                        break;
+                                    }
+                                };
+                            },
+                            _ => ()
+                        }
+                    }
                 }
 
             }else{ // pawn movement
@@ -2297,7 +2624,7 @@ fn main() {
                         match san_move[0] {
                             'a' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_a {
+                                for pawn in &mut black_column_a.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2322,7 +2649,7 @@ fn main() {
                             },
                             'b' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_b {
+                                for pawn in &mut black_column_b.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2347,7 +2674,7 @@ fn main() {
                             },
                             'c' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_c {
+                                for pawn in &mut black_column_c.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2372,7 +2699,7 @@ fn main() {
                             },
                             'd' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_d {
+                                for pawn in &mut black_column_d.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2397,7 +2724,7 @@ fn main() {
                             },
                             'e' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_e {
+                                for pawn in &mut black_column_e.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2422,7 +2749,7 @@ fn main() {
                             },
                             'f' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_f {
+                                for pawn in &mut black_column_f.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2447,7 +2774,7 @@ fn main() {
                             },
                             'g' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_g {
+                                for pawn in &mut black_column_g.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2472,7 +2799,7 @@ fn main() {
                             },
                             'h' => {
                                 // for every pawn in the column
-                                for pawn in &mut black_column_h {
+                                for pawn in &mut black_column_h.iter_mut() {
                                     // if the pawn is in it's starting position
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 || desired_position - *pawn == 8 {
@@ -2496,7 +2823,7 @@ fn main() {
                                 };
                             },
                             _ => ()
-                        }
+                        };
                     }
 
                 }else if san_move.len() >= 4 {
@@ -2532,11 +2859,13 @@ fn main() {
                     desired_position = column + line;
 
                     if is_white(board[desired_position as usize]) {
+                        let captured_piece = board[desired_position as usize];
+
                         match san_move[0] {
                             'a' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_a {
+                                for pawn in &mut black_column_a.iter_mut() {
                                     if desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2555,7 +2884,7 @@ fn main() {
                             'b' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_b {
+                                for pawn in &mut black_column_b.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2578,7 +2907,7 @@ fn main() {
                             'c' => {
                                 let mut pawn_index: usize = 0;
                                 // for every pawn in the column
-                                for pawn in &mut black_column_c {
+                                for pawn in &mut black_column_c.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2601,7 +2930,7 @@ fn main() {
                             'd' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_d {
+                                for pawn in &mut black_column_d.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2624,7 +2953,7 @@ fn main() {
                             'e' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_e {
+                                for pawn in &mut black_column_e.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2647,7 +2976,7 @@ fn main() {
                             'f' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_f {
+                                for pawn in &mut black_column_f.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2670,7 +2999,7 @@ fn main() {
                             'g' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_g {
+                                for pawn in &mut black_column_g.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2693,7 +3022,7 @@ fn main() {
                             'h' => {
                                 let mut pawn_index: usize = 0;
                                 // for every *pawn in the column
-                                for pawn in &mut black_column_h {
+                                for pawn in &mut black_column_h.iter_mut() {
                                     if desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1) {
                                         board[*pawn as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_PAWN;
@@ -2710,6 +3039,113 @@ fn main() {
                                 };
                             },
                             _ => ()
+                        }
+                    
+                        if try_again == false {
+                            match captured_piece {
+                                'i' => {
+                                    match san_move[2] {
+                                        'a' => {
+                                            for pawn in 0..white_column_a.len() {
+                                                if white_column_a[pawn] == desired_position {
+                                                    white_column_a.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'b' => {
+                                            for pawn in 0..white_column_b.len() {
+                                                if white_column_b[pawn] == desired_position {
+                                                    white_column_b.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'c' => {
+                                            for pawn in 0..white_column_c.len() {
+                                                if white_column_c[pawn] == desired_position {
+                                                    white_column_c.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'd' => {
+                                            for pawn in 0..white_column_d.len() {
+                                                if white_column_d[pawn] == desired_position {
+                                                    white_column_d.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'e' => {
+                                            for pawn in 0..white_column_e.len() {
+                                                if white_column_e[pawn] == desired_position {
+                                                    white_column_e.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'f' => {
+                                            for pawn in 0..white_column_f.len() {
+                                                if white_column_f[pawn] == desired_position {
+                                                    white_column_f.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'g' => {
+                                            for pawn in 0..white_column_g.len() {
+                                                if white_column_g[pawn] == desired_position {
+                                                    white_column_g.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        'h' => {
+                                            for pawn in 0..white_column_h.len() {
+                                                if white_column_h[pawn] == desired_position {
+                                                    white_column_h.swap_remove(pawn);
+                                                    break;
+                                                }
+                                            };
+                                        },
+                                        _ => ()
+                                    }
+                                },
+                                'Q' => {
+                                    for i in 0..white_queens.len() {
+                                        if white_queens[i] == desired_position {
+                                            white_queens.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                'B' => {
+                                    for i in 0..white_bishops.len() {
+                                        if white_bishops[i] == desired_position {
+                                            white_bishops.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                'N' => {
+                                    for i in 0..white_knights.len() {
+                                        if white_knights[i] == desired_position {
+                                            white_knights.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                'R' => {
+                                    for i in 0..white_rooks.len() {
+                                        if white_rooks[i] == desired_position {
+                                            white_rooks.swap_remove(i);
+                                            break;
+                                        }
+                                    };
+                                },
+                                _ => ()
+                            }
                         }
                     }
                 }
