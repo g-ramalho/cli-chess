@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::io;
 use std::string::String;
 
@@ -23,76 +22,48 @@ fn main() {
 //LAST POSITION OF EACH PIECE AND PAWN:
 
     //white pawns
-    let white_pawn_a: i8 = 48;
-    let white_pawn_b: i8 = 49;
-    let white_pawn_c: i8 = 50;
-    let white_pawn_d: i8 = 51;
-    let white_pawn_e: i8 = 52;
-    let white_pawn_f: i8 = 53;
-    let white_pawn_g: i8 = 54;
-    let white_pawn_h: i8 = 55;
 
-    let mut white_column_a = vec![white_pawn_a];
-    let mut white_column_b = vec![white_pawn_b];
-    let mut white_column_c = vec![white_pawn_c];
-    let mut white_column_d = vec![white_pawn_d];
-    let mut white_column_e = vec![white_pawn_e];
-    let mut white_column_f = vec![white_pawn_f];
-    let mut white_column_g = vec![white_pawn_g];
-    let mut white_column_h = vec![white_pawn_h];
+    let mut white_column_a = vec![48];
+    let mut white_column_b = vec![49];
+    let mut white_column_c = vec![50];
+    let mut white_column_d = vec![51];
+    let mut white_column_e = vec![52];
+    let mut white_column_f = vec![53];
+    let mut white_column_g = vec![54];
+    let mut white_column_h = vec![55];
 
     //black pawns
-    let black_pawn_a: i8 = 8;
-    let black_pawn_b: i8 = 9;
-    let black_pawn_c: i8 = 10;
-    let black_pawn_d: i8 = 11;
-    let black_pawn_e: i8 = 12;
-    let black_pawn_f: i8 = 13;
-    let black_pawn_g: i8 = 14;
-    let black_pawn_h: i8 = 15;
     
-    let mut black_column_a = vec![black_pawn_a];
-    let mut black_column_b = vec![black_pawn_b];
-    let mut black_column_c = vec![black_pawn_c];
-    let mut black_column_d = vec![black_pawn_d];
-    let mut black_column_e = vec![black_pawn_e];
-    let mut black_column_f = vec![black_pawn_f];
-    let mut black_column_g = vec![black_pawn_g];
-    let mut black_column_h = vec![black_pawn_h];
+    let mut black_column_a = vec![8];
+    let mut black_column_b = vec![9];
+    let mut black_column_c = vec![10];
+    let mut black_column_d = vec![11];
+    let mut black_column_e = vec![12];
+    let mut black_column_f = vec![13];
+    let mut black_column_g = vec![14];
+    let mut black_column_h = vec![15];
 
     //white pieces
-    let white_rook1: i8 = 56;
-    let white_rook2: i8 = 63;
-    let mut white_rooks: Vec<i8> = vec![white_rook1, white_rook2];
+
+    let mut white_rooks: Vec<i8> = vec![56, 63];
     
-    let white_knight1: i8 = 57;
-    let white_knight2: i8 = 62;
-    let mut white_knights = vec![white_knight1, white_knight2];
+    let mut white_knights = vec![57, 62];
     
-    let white_bishop1: i8 = 58;
-    let white_bishop2: i8 = 61;
-    let mut white_bishops = vec![white_bishop1, white_bishop2];
+    let mut white_bishops = vec![58, 61];
     
-    let white_queen: i8 = 59;
-    let mut white_queens = vec![white_queen];
+    let mut white_queens = vec![59];
 
     let mut white_king: i8 = 60;
     
     //black pieces
-    let black_rook1: i8 = 0;
-    let black_rook2: i8 = 7;
-    let mut black_rooks: Vec<i8> = vec![black_rook1, black_rook2];
+
+    let mut black_rooks: Vec<i8> = vec![0, 7];
     
-    let black_knight1: i8 = 1;
-    let black_knight2: i8 = 6;
-    let mut black_knights = vec![black_knight1, black_knight2];
+    let mut black_knights = vec![1, 6];
     
-    let black_bishop1: i8 = 2;
-    let black_bishop2: i8 = 5;
-    let mut black_bishops = vec![black_bishop1, black_bishop2];
+    let mut black_bishops = vec![2, 5];
     
-    let black_queen: i8 = 3;
-    let mut black_queens = vec![black_queen];
+    let mut black_queens = vec![3];
 
     let mut black_king: i8 = 4;
 
@@ -200,9 +171,10 @@ fn main() {
 
                 //pieces' movement checks
                 if !is_white(board[desired_position as usize]) {
+                    // check and store the piece that is about to be captured:
                     let captured_piece = board[desired_position as usize];
 
-                    match san_move[0] {
+                    match san_move[0] { // check if the piece can actually be captured (and capture it)
                         'N' => {
                             if test_multiple_knights(&mut white_knights, desired_position) {
                                 println!("Specify the current square of the knight to be moved");
@@ -1115,6 +1087,7 @@ fn main() {
                     desired_position = column + line;
 
                     if board[desired_position as usize] == NOTHING {
+
                         match san_move[0] {
                             'a' => {
                                 // for every pawn in the column
@@ -1318,9 +1291,240 @@ fn main() {
                             },
                             _ => ()
                         };
+
+                        if line == 0 && try_again == false{ // if the pawn moved to the other side of the board successfully
+                            println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
+                            println!("'N'=Knight,'R'=Rook,'B'=Bishop");
+                            let mut promotion_move = String::new();
+                            let mut prom_loop: bool = true;
+
+                            while prom_loop {
+                                io::stdin()
+                                    .read_line(&mut promotion_move)
+                                    .expect("Read error");
+                                
+                                let prom_vec: Vec<char> = promotion_move.trim().chars().collect();
+
+                                if prom_vec.len() > 0 {
+                                    match san_move[0] {
+                                        'a' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_a.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_a.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_a.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'b' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_b.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_b.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_b.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'c' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_c.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_c.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_c.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'd' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_d.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_d.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_d.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'e' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_e.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_e.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_e.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'f' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_f.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_f.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_f.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'g' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_g.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_g.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_g.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        _ => ()
+                                    };
+                                }else{ // queen promotion (Enter key doesnt add a character to the vector, so it's lenght stays 0)
+                                    match san_move[0] {
+                                        'a' => {
+                                            white_column_a.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'b' => {
+                                            white_column_b.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'c' => {
+                                            white_column_c.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'd' => {
+                                            white_column_d.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'e' => {
+                                            white_column_e.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'f' => {
+                                            white_column_f.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'g' => {
+                                            white_column_g.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        _ => ()
+                                    };
+                                }
+                                if prom_loop == true {
+                                    println!("Not a possible promotion, try again!\n");
+                                }
+                            }
+                        }
                     }
 
-                }else if san_move.len() >= 4 { // if the second letter in the SAN notation move is 'x' (which means a capture):
+                }else if san_move.len() >= 4 { // if the second letter in the SAN notation move is 'x' (which means a capture) AND is longer than 3 characters:
                     column = match san_move[2] {
                         'a' => 0,
                         'b' => 1,
@@ -1640,6 +1844,237 @@ fn main() {
                                     };
                                 },
                                 _ => ()
+                            }
+                        }
+
+                        if line == 0 && try_again == false{ // if the pawn moved to the other side of the board successfully
+                            println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
+                            println!("'N'=Knight,'R'=Rook,'B'=Bishop");
+                            let mut promotion_move = String::new();
+                            let mut prom_loop: bool = true;
+
+                            while prom_loop {
+                                io::stdin()
+                                    .read_line(&mut promotion_move)
+                                    .expect("Read error");
+                                
+                                let prom_vec: Vec<char> = promotion_move.trim().chars().collect();
+
+                                if prom_vec.len() > 0 {
+                                    match san_move[0] {
+                                        'a' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_a.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_a.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_a.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'b' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_b.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_b.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_b.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'c' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_c.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_c.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_c.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'd' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_d.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_d.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_d.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'e' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_e.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_e.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_e.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'f' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_f.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_f.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_f.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'g' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    white_column_g.remove(0);
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    white_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    white_column_g.remove(0);
+                                                    board[desired_position as usize] = WHITE_ROOK;
+                                                    white_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    white_column_g.remove(0);
+                                                    board[desired_position as usize] = WHITE_BISHOP;
+                                                    white_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        _ => ()
+                                    };
+                                }else{ // queen promotion (Enter key doesnt add a character to the vector, so it's lenght stays 0)
+                                    match san_move[0] {
+                                        'a' => {
+                                            white_column_a.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'b' => {
+                                            white_column_b.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'c' => {
+                                            white_column_c.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'd' => {
+                                            white_column_d.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'e' => {
+                                            white_column_e.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'f' => {
+                                            white_column_f.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'g' => {
+                                            white_column_g.remove(0);
+                                            board[desired_position as usize] = WHITE_QUEEN;
+                                            white_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        _ => ()
+                                    };
+                                }
+                                if prom_loop == true {
+                                    println!("Not a possible promotion, try again!\n");
+                                }
                             }
                         }
                     }
@@ -2824,6 +3259,237 @@ fn main() {
                             },
                             _ => ()
                         };
+
+                        if line == 56 && try_again == false{ // if the pawn moved to the other side of the board successfully
+                            println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
+                            println!("'N'=Knight,'R'=Rook,'B'=Bishop");
+                            let mut promotion_move = String::new();
+                            let mut prom_loop: bool = true;
+
+                            while prom_loop {
+                                io::stdin()
+                                    .read_line(&mut promotion_move)
+                                    .expect("Read error");
+                                
+                                let prom_vec: Vec<char> = promotion_move.trim().chars().collect();
+
+                                if prom_vec.len() > 0 {
+                                    match san_move[0] {
+                                        'a' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_a.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_a.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_a.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'b' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_b.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_b.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_b.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'c' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_c.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_c.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_c.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'd' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_d.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_d.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_d.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'e' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_e.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_e.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_e.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'f' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_f.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_f.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_f.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'g' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_g.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_g.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_g.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        _ => ()
+                                    };
+                                }else{ // queen promotion (Enter key doesnt add a character to the vector, so it's lenght stays 0)
+                                    match san_move[0] {
+                                        'a' => {
+                                            black_column_a.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'b' => {
+                                            black_column_b.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'c' => {
+                                            black_column_c.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'd' => {
+                                            black_column_d.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'e' => {
+                                            black_column_e.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'f' => {
+                                            black_column_f.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'g' => {
+                                            black_column_g.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        _ => ()
+                                    };
+                                }
+                                if prom_loop == true {
+                                    println!("Not a possible promotion, try again!\n");
+                                }
+                            }
+                        }
                     }
 
                 }else if san_move.len() >= 4 {
@@ -2859,7 +3525,7 @@ fn main() {
                     desired_position = column + line;
 
                     if is_white(board[desired_position as usize]) {
-                        let captured_piece = board[desired_position as usize];
+                        let captured_piece = board[desired_position as usize]; 
 
                         match san_move[0] {
                             'a' => {
@@ -3147,6 +3813,237 @@ fn main() {
                                 _ => ()
                             }
                         }
+                    
+                        if line == 56 && try_again == false{ // if the pawn moved to the other side of the board successfully
+                            println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
+                            println!("'N'=Knight,'R'=Rook,'B'=Bishop");
+                            let mut promotion_move = String::new();
+                            let mut prom_loop: bool = true;
+
+                            while prom_loop {
+                                io::stdin()
+                                    .read_line(&mut promotion_move)
+                                    .expect("Read error");
+                                
+                                let prom_vec: Vec<char> = promotion_move.trim().chars().collect();
+
+                                if prom_vec.len() > 0 {
+                                    match san_move[0] {
+                                        'a' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_a.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_a.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_a.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'b' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_b.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_b.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_b.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'c' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_c.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_c.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_c.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'd' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_d.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_d.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_d.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'e' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_e.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_e.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_e.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'f' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_f.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_f.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_f.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        'g' => {
+                                            match prom_vec[0] {
+                                                'N' => { // promotion to knight
+                                                    black_column_g.remove(0);
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    black_knights.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'R' => { // promotion to rook
+                                                    black_column_g.remove(0);
+                                                    board[desired_position as usize] = BLACK_ROOK;
+                                                    black_rooks.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                'B' => { // promotion to bishop
+                                                    black_column_g.remove(0);
+                                                    board[desired_position as usize] = BLACK_BISHOP;
+                                                    black_bishops.insert(0, desired_position);
+                                                    prom_loop = false;
+                                                },
+                                                _ => ()
+                                            }
+                                        },
+                                        _ => ()
+                                    };
+                                }else{ // queen promotion (Enter key doesnt add a character to the vector, so it's lenght stays 0)
+                                    match san_move[0] {
+                                        'a' => {
+                                            black_column_a.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'b' => {
+                                            black_column_b.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'c' => {
+                                            black_column_c.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'd' => {
+                                            black_column_d.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'e' => {
+                                            black_column_e.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'f' => {
+                                            black_column_f.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        'g' => {
+                                            black_column_g.remove(0);
+                                            board[desired_position as usize] = BLACK_QUEEN;
+                                            black_queens.insert(0, desired_position);
+                                            prom_loop = false;
+                                        },
+                                        _ => ()
+                                    };
+                                }
+                                if prom_loop == true {
+                                    println!("Not a possible promotion, try again!\n");
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -3216,7 +4113,7 @@ fn upper_right_diagonal(b: i8, i: i8) -> bool {
     // if the index is one of the following,
     // return true
 
-    match b  - i*7 {
+    match b - i*7 {
         // a bishop cannot trace a path after it hits the board's "walls" or corners
         56 |
         48 |
