@@ -19,10 +19,14 @@ fn main() {
     const BLACK_QUEEN: char = 'q';
     const BLACK_KING: char = 'k';
 
-//LAST POSITION OF EACH PIECE AND PAWN:
+// PAWNS:
+    // Columns are made into vectors because of the pawn capture system.
+    // Since pawns capture diagonally, everytime a pawn captures something it changes columns
+    // and since columns may have many pawns in different positions, 
+    // every column was made into a vector, with each element being an i8 
+    // holding the last position of a pawn.
 
     //white pawns
-
     let mut white_column_a = vec![48];
     let mut white_column_b = vec![49];
     let mut white_column_c = vec![50];
@@ -33,7 +37,6 @@ fn main() {
     let mut white_column_h = vec![55];
 
     //black pawns
-    
     let mut black_column_a = vec![8];
     let mut black_column_b = vec![9];
     let mut black_column_c = vec![10];
@@ -43,8 +46,14 @@ fn main() {
     let mut black_column_g = vec![14];
     let mut black_column_h = vec![15];
 
-    //white pieces
+//PIECES:
+    // Once again vectors were used because of the pawn promotion system.
+    // Whenever a pawn reaches the opposite side of the board,
+    // it needs to be transformed from a pawn into a piece
+    // that's why vectors were used: 
+    // to grow in size and hold a promoted pawn.
 
+    //white pieces
     let mut white_rooks: Vec<i8> = vec![56, 63];
     
     let mut white_knights = vec![57, 62];
@@ -53,10 +62,9 @@ fn main() {
     
     let mut white_queens = vec![59];
 
-    let mut white_king: i8 = 60;
+    let mut white_king: i8 = 60; // the only exception are the kings, there may only be one for each side
     
     //black pieces
-
     let mut black_rooks: Vec<i8> = vec![0, 7];
     
     let mut black_knights = vec![1, 6];
@@ -71,35 +79,34 @@ fn main() {
     let mut board = [NOTHING; 64];
 
     // pawns setup
-    // number ranges are half-open (a <= x < b), so we +1 to the last number
     for i in 0..8 {
         board[i+8] = BLACK_PAWN;
         board[i+48] = WHITE_PAWN;
     };
 
-    //rook setup 0 7 56 63
+    //rook setup 0, 7, 56, 63
     board[0] = BLACK_ROOK;
     board[7] = BLACK_ROOK;
     board[56] = WHITE_ROOK;
     board[63] = WHITE_ROOK;
 
-    //knight setup 1 6 57 62
+    //knight setup 1, 6, 57, 62
     board[1] = BLACK_KNIGHT;
     board[6] = BLACK_KNIGHT;
     board[57] = WHITE_KNIGHT;
     board[62] = WHITE_KNIGHT;
 
-    //bishop setup 2 5 58 61
+    //bishop setup 2, 5, 58, 61
     board[2] = BLACK_BISHOP;
     board[5] = BLACK_BISHOP;
     board[58] = WHITE_BISHOP;
     board[61] = WHITE_BISHOP;
 
-    //queen setup 3 59
+    //queen setup 3, 59
     board[3] = BLACK_QUEEN;
     board[59] = WHITE_QUEEN;
 
-    //king setup 4 60
+    //king setup 4, 60
     board[4] = BLACK_KING;
     board[60] = WHITE_KING;
 
@@ -216,26 +223,6 @@ fn main() {
                                     if knight_column + knight_line == *w_knight {
                                         match *w_knight - desired_position {
                                             -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                                    //last position is freed
-                                                    board[*w_knight as usize] = NOTHING;
-
-                                                    //piece is moved to new position
-                                                    board[desired_position as usize] = WHITE_KNIGHT;
-
-                                                    //current position is updated
-                                                    *w_knight = desired_position;
-
-                                                    try_again = false;
-                                                    break;
-                                            },
-                                            _ => ()
-                                        }
-                                    }
-                                }
-                            }else{
-                                for w_knight in white_knights.iter_mut() {
-                                    match *w_knight - desired_position {
-                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
                                                 //last position is freed
                                                 board[*w_knight as usize] = NOTHING;
 
@@ -247,6 +234,26 @@ fn main() {
 
                                                 try_again = false;
                                                 break;
+                                            },
+                                            _ => ()
+                                        }
+                                    }
+                                }
+                            }else{
+                                for w_knight in white_knights.iter_mut() {
+                                    match *w_knight - desired_position {
+                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                            //last position is freed
+                                            board[*w_knight as usize] = NOTHING;
+
+                                            //piece is moved to new position
+                                            board[desired_position as usize] = WHITE_KNIGHT;
+
+                                            //current position is updated
+                                            *w_knight = desired_position;
+
+                                            try_again = false;
+                                            break;
                                         },
                                         _ => ()
                                     }
@@ -266,31 +273,31 @@ fn main() {
                                 san_move = player_move.trim().chars().collect();
                             
                                 let bishop_column: i8 = match san_move[0] {
-                                            'a' => 0,
-                                            'b' => 1,
-                                            'c' => 2,
-                                            'd' => 3,
-                                            'e' => 4,
-                                            'f' => 5,
-                                            'g' => 6,
-                                            'h' => 7,
-                                            _ => 100
-                                        };
+                                    'a' => 0,
+                                    'b' => 1,
+                                    'c' => 2,
+                                    'd' => 3,
+                                    'e' => 4,
+                                    'f' => 5,
+                                    'g' => 6,
+                                    'h' => 7,
+                                    _ => 100
+                                };
                                     
                                 //must be in reverse because we view the board as white
                                 let bishop_line: i8 = match san_move[1] {
-                                            '1' => 56,
-                                            '2' => 48,
-                                            '3' => 40,
-                                            '4' => 32,
-                                            '5' => 24,
-                                            '6' => 16,
-                                            '7' => 8,
-                                            '8' => 0,
-                                            _ => 100
-                                        };
+                                    '1' => 56,
+                                    '2' => 48,
+                                    '3' => 40,
+                                    '4' => 32,
+                                    '5' => 24,
+                                    '6' => 16,
+                                    '7' => 8,
+                                    '8' => 0,
+                                    _ => 100
+                                };
                                 
-                                for w_bishop in white_bishops.iter_mut() {
+                                for w_bishop in white_bishops.iter_mut() { // multiple bishops may reach the square
                                     if bishop_line + bishop_column == *w_bishop {
                                             // if the desired square is "above" the initial position
                                         if *w_bishop > desired_position {
@@ -359,7 +366,7 @@ fn main() {
                                         }
                                     }
                                 };
-                            }else{
+                            }else{ // only one bishop reaches the square
                                 for w_bishop in white_bishops.iter_mut() {
                                         // if the desired square is "above" the initial position
                                     if *w_bishop > desired_position {
@@ -370,7 +377,6 @@ fn main() {
                                                 if *w_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*w_bishop, diagonal) {
                                                     // check if any of the squares in the bishop's diagonal is the desired square,
                                                     // check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
-                                                    // and finally, check if the desired square has no white pieces that may block the movement
                                                     // if all of those checks are true, the bishop may be moved
                                                     board[*w_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_BISHOP;
@@ -1299,6 +1305,7 @@ fn main() {
                             let mut prom_loop: bool = true;
 
                             while prom_loop {
+                                promotion_move.clear();
                                 io::stdin()
                                     .read_line(&mut promotion_move)
                                     .expect("Read error");
@@ -1854,6 +1861,7 @@ fn main() {
                             let mut prom_loop: bool = true;
 
                             while prom_loop {
+                                promotion_move.clear();
                                 io::stdin()
                                     .read_line(&mut promotion_move)
                                     .expect("Read error");
@@ -1861,7 +1869,7 @@ fn main() {
                                 let prom_vec: Vec<char> = promotion_move.trim().chars().collect();
 
                                 if prom_vec.len() > 0 {
-                                    match san_move[0] {
+                                    match san_move[2] {
                                         'a' => {
                                             match prom_vec[0] {
                                                 'N' => { // promotion to knight
@@ -2026,7 +2034,7 @@ fn main() {
                                         _ => ()
                                     };
                                 }else{ // queen promotion (Enter key doesnt add a character to the vector, so it's lenght stays 0)
-                                    match san_move[0] {
+                                    match san_move[2] {
                                         'a' => {
                                             white_column_a.remove(0);
                                             board[desired_position as usize] = WHITE_QUEEN;
@@ -3267,6 +3275,7 @@ fn main() {
                             let mut prom_loop: bool = true;
 
                             while prom_loop {
+                                promotion_move.clear();
                                 io::stdin()
                                     .read_line(&mut promotion_move)
                                     .expect("Read error");
@@ -3821,6 +3830,7 @@ fn main() {
                             let mut prom_loop: bool = true;
 
                             while prom_loop {
+                                promotion_move.clear();
                                 io::stdin()
                                     .read_line(&mut promotion_move)
                                     .expect("Read error");
@@ -3828,7 +3838,7 @@ fn main() {
                                 let prom_vec: Vec<char> = promotion_move.trim().chars().collect();
 
                                 if prom_vec.len() > 0 {
-                                    match san_move[0] {
+                                    match san_move[2] {
                                         'a' => {
                                             match prom_vec[0] {
                                                 'N' => { // promotion to knight
@@ -3993,7 +4003,7 @@ fn main() {
                                         _ => ()
                                     };
                                 }else{ // queen promotion (Enter key doesnt add a character to the vector, so it's lenght stays 0)
-                                    match san_move[0] {
+                                    match san_move[2] {
                                         'a' => {
                                             black_column_a.remove(0);
                                             board[desired_position as usize] = BLACK_QUEEN;
