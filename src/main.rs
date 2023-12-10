@@ -312,7 +312,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop - diagonal*7) as usize]) || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
+                                                    }else if is_white(board[(*w_bishop - diagonal*7) as usize]) 
+                                                    || is_black(board[((*w_bishop - diagonal*7) as usize)]) 
+                                                    || upper_right_diagonal(*w_bishop, diagonal){
                                                         // otherwise, if there are any white/black pieces on the way, the square is unreachable
                                                         break;
                                                     }
@@ -326,7 +328,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop - diagonal*9) as usize]) || is_black(board[((*w_bishop - diagonal*9) as usize)]){
+                                                    }else if is_white(board[(*w_bishop - diagonal*9) as usize]) 
+                                                    || is_black(board[((*w_bishop - diagonal*9) as usize)]) 
+                                                    || upper_left_diagonal(*w_bishop, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -341,7 +345,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) || is_black(board[(*w_bishop + 7*diagonal) as usize]){
+                                                    }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*w_bishop + 7*diagonal) as usize])
+                                                    || inferior_left_diagonal(*w_bishop, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -354,7 +360,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
+                                                    }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                    || inferior_right_diagonal(*w_bishop, diagonal){
                                                         break;
                                                     }
                                                 }
@@ -377,7 +385,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop - diagonal*7) as usize]) || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
+                                                }else if is_white(board[(*w_bishop - diagonal*7) as usize]) 
+                                                || is_black(board[((*w_bishop - diagonal*7) as usize)]) 
+                                                || upper_right_diagonal(*w_bishop, diagonal) {
                                                     // otherwise, if there are any white/black pieces on the way, the square is unreachable
                                                     break;
                                                 }
@@ -391,7 +401,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop - diagonal*9) as usize]) || is_black(board[((*w_bishop - diagonal*9) as usize)]){
+                                                }else if is_white(board[(*w_bishop - diagonal*9) as usize]) 
+                                                || is_black(board[((*w_bishop - diagonal*9) as usize)]) 
+                                                || upper_left_diagonal(*w_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -406,7 +418,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) || is_black(board[(*w_bishop + 7*diagonal) as usize]){
+                                                }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                || is_black(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                || inferior_left_diagonal(*w_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -419,7 +433,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
+                                                }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                || is_black(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                || inferior_right_diagonal(*w_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -483,7 +499,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook - square) as usize]) || is_black(board[(*w_rook - square) as usize]) {
+                                                    }else if is_white(board[(*w_rook - square) as usize]) 
+                                                    || is_black(board[(*w_rook - square) as usize])
+                                                    || rook_left(*w_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -502,7 +520,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook - square*8) as usize]) || is_black(board[(*w_rook - square*8) as usize]) {
+                                                    }else if is_white(board[(*w_rook - square*8) as usize]) 
+                                                    || is_black(board[(*w_rook - square*8) as usize])
+                                                    || rook_up(*w_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -522,7 +542,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook + square) as usize]) || is_black(board[(*w_rook + square) as usize]) {
+                                                    }else if is_white(board[(*w_rook + square) as usize]) 
+                                                    || is_black(board[(*w_rook + square) as usize]) 
+                                                    || rook_right(*w_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -540,7 +562,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook + square*8) as usize]) || is_black(board[(*w_rook + square*8) as usize]) {
+                                                    }else if is_white(board[(*w_rook + square*8) as usize]) 
+                                                    || is_black(board[(*w_rook + square*8) as usize])
+                                                    || rook_down(*w_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -565,7 +589,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_rook - square) as usize]) || is_black(board[(*w_rook - square) as usize]) {
+                                                }else if is_white(board[(*w_rook - square) as usize]) 
+                                                || is_black(board[(*w_rook - square) as usize]) 
+                                                || rook_left(*w_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -583,7 +609,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_rook - square*8) as usize]) || is_black(board[(*w_rook - square*8) as usize]) {
+                                                }else if is_white(board[(*w_rook - square*8) as usize]) 
+                                                || is_black(board[(*w_rook - square*8) as usize]) 
+                                                || rook_up(*w_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -603,7 +631,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_rook + square) as usize]) || is_black(board[(*w_rook + square) as usize]) {
+                                                }else if is_white(board[(*w_rook + square) as usize]) 
+                                                || is_black(board[(*w_rook + square) as usize]) 
+                                                || rook_right(*w_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -621,7 +651,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_rook + square*8) as usize]) || is_black(board[(*w_rook + square*8) as usize]) {
+                                                }else if is_white(board[(*w_rook + square*8) as usize]) 
+                                                || is_black(board[(*w_rook + square*8) as usize]) 
+                                                || rook_down(*w_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -893,7 +925,9 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - diagonal*7) as usize]) || is_black(board[((*w_queen - diagonal*7) as usize)]) {
+                                                }else if is_white(board[(*w_queen - diagonal*7) as usize]) 
+                                                || is_black(board[((*w_queen - diagonal*7) as usize)]) 
+                                                || upper_right_diagonal(*w_queen, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -906,7 +940,9 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - diagonal*9) as usize]) || is_black(board[((*w_queen - diagonal*9) as usize)]){
+                                                }else if is_white(board[(*w_queen - diagonal*9) as usize]) 
+                                                || is_black(board[((*w_queen - diagonal*9) as usize)]) 
+                                                || upper_left_diagonal(*w_queen, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -921,7 +957,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - square) as usize]) || is_black(board[(*w_queen - square) as usize]) {
+                                                }else if is_white(board[(*w_queen - square) as usize]) 
+                                                || is_black(board[(*w_queen - square) as usize])
+                                                || rook_left(*w_queen, square) {
                                                     break;
                                                 }
                                             }
@@ -934,7 +972,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - square*8) as usize]) || is_black(board[(*w_queen - square*8) as usize]) {
+                                                }else if is_white(board[(*w_queen - square*8) as usize]) 
+                                                || is_black(board[(*w_queen - square*8) as usize])
+                                                || rook_up(*w_queen, square) {
                                                     break;
                                                 }
                                             }
@@ -950,7 +990,9 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + 7*diagonal) as usize]) || is_black(board[(*w_queen + 7*diagonal) as usize]){
+                                                }else if is_white(board[(*w_queen + 7*diagonal) as usize]) 
+                                                || is_black(board[(*w_queen + 7*diagonal) as usize]) 
+                                                || inferior_left_diagonal(*w_queen, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -963,7 +1005,9 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + 9*diagonal) as usize]) || is_black(board[(*w_queen + 9*diagonal) as usize]) {
+                                                }else if is_white(board[(*w_queen + 9*diagonal) as usize]) 
+                                                || is_black(board[(*w_queen + 9*diagonal) as usize])
+                                                || inferior_right_diagonal(*w_queen, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -978,7 +1022,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + square) as usize]) || is_black(board[(*w_queen + square) as usize]) {
+                                                }else if is_white(board[(*w_queen + square) as usize]) 
+                                                || is_black(board[(*w_queen + square) as usize])
+                                                || rook_right(*w_queen, square) {
                                                     break;
                                                 }
                                             }
@@ -991,7 +1037,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + square*8) as usize]) || is_black(board[(*w_queen + square*8) as usize]) {
+                                                }else if is_white(board[(*w_queen + square*8) as usize]) 
+                                                || is_black(board[(*w_queen + square*8) as usize])
+                                                || rook_down(*w_queen, square) {
                                                     break;
                                                 }
                                             }
@@ -2356,7 +2404,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop - diagonal*7) as usize]) || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
+                                                    }else if is_white(board[(*b_bishop - diagonal*7) as usize]) 
+                                                    || is_black(board[((*b_bishop - diagonal*7) as usize)])
+                                                    || upper_right_diagonal(*b_bishop, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2369,7 +2419,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop - diagonal*9) as usize]) || is_black(board[((*b_bishop - diagonal*9) as usize)]){
+                                                    }else if is_white(board[(*b_bishop - diagonal*9) as usize]) 
+                                                    || is_black(board[((*b_bishop - diagonal*9) as usize)]) 
+                                                    || upper_left_diagonal(*b_bishop, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2384,7 +2436,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) || is_black(board[(*b_bishop + 7*diagonal) as usize]){
+                                                    }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*b_bishop + 7*diagonal) as usize]) 
+                                                    || inferior_left_diagonal(*b_bishop, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2397,7 +2451,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
+                                                    }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*b_bishop + 9*diagonal) as usize])
+                                                    || inferior_right_diagonal(*b_bishop, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2417,7 +2473,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop - diagonal*7) as usize]) || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
+                                                }else if is_white(board[(*b_bishop - diagonal*7) as usize]) 
+                                                || is_black(board[((*b_bishop - diagonal*7) as usize)])
+                                                || upper_right_diagonal(*b_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -2430,7 +2488,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop - diagonal*9) as usize]) || is_black(board[((*b_bishop - diagonal*9) as usize)]){
+                                                }else if is_white(board[(*b_bishop - diagonal*9) as usize]) 
+                                                || is_black(board[((*b_bishop - diagonal*9) as usize)]) 
+                                                || upper_left_diagonal(*b_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -2445,7 +2505,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) || is_black(board[(*b_bishop + 7*diagonal) as usize]){
+                                                }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) 
+                                                || is_black(board[(*b_bishop + 7*diagonal) as usize]) 
+                                                || inferior_left_diagonal(*b_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -2458,7 +2520,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
+                                                }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) 
+                                                || is_black(board[(*b_bishop + 9*diagonal) as usize])
+                                                || inferior_right_diagonal(*b_bishop, diagonal) {
                                                     break;
                                                 }
                                             }
@@ -2520,7 +2584,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook - square) as usize]) || is_black(board[(*b_rook - square) as usize]) {
+                                                    }else if is_white(board[(*b_rook - square) as usize]) 
+                                                    || is_black(board[(*b_rook - square) as usize])
+                                                    || rook_left(*b_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -2538,7 +2604,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook - square*8) as usize]) || is_black(board[(*b_rook - square*8) as usize]) {
+                                                    }else if is_white(board[(*b_rook - square*8) as usize]) 
+                                                    || is_black(board[(*b_rook - square*8) as usize])
+                                                    || rook_up(*b_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -2558,7 +2626,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook + square) as usize]) || is_black(board[(*b_rook + square) as usize]) {
+                                                    }else if is_white(board[(*b_rook + square) as usize]) 
+                                                    || is_black(board[(*b_rook + square) as usize])
+                                                    || rook_right(*b_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -2576,7 +2646,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook + square*8) as usize]) || is_black(board[(*b_rook + square*8) as usize]) {
+                                                    }else if is_white(board[(*b_rook + square*8) as usize]) 
+                                                    || is_black(board[(*b_rook + square*8) as usize])
+                                                    || rook_down(*b_rook, square) {
                                                         break;
                                                     }
                                                 }
@@ -2601,7 +2673,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_rook - square) as usize]) || is_black(board[(*b_rook - square) as usize]) {
+                                                }else if is_white(board[(*b_rook - square) as usize]) 
+                                                || is_black(board[(*b_rook - square) as usize])
+                                                || rook_left(*b_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -2619,7 +2693,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_rook - square*8) as usize]) || is_black(board[(*b_rook - square*8) as usize]) {
+                                                }else if is_white(board[(*b_rook - square*8) as usize]) 
+                                                || is_black(board[(*b_rook - square*8) as usize])
+                                                || rook_up(*b_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -2639,7 +2715,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_rook + square) as usize]) || is_black(board[(*b_rook + square) as usize]) {
+                                                }else if is_white(board[(*b_rook + square) as usize]) 
+                                                || is_black(board[(*b_rook + square) as usize])
+                                                || rook_right(*b_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -2657,7 +2735,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_rook + square*8) as usize]) || is_black(board[(*b_rook + square*8) as usize]) {
+                                                }else if is_white(board[(*b_rook + square*8) as usize]) 
+                                                || is_black(board[(*b_rook + square*8) as usize])
+                                                || rook_down(*b_rook, square) {
                                                     break;
                                                 }
                                             }
@@ -2808,7 +2888,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - diagonal*7) as usize]) || is_black(board[((*b_queen - diagonal*7) as usize)]) {
+                                                    }else if is_white(board[(*b_queen - diagonal*7) as usize]) 
+                                                    || is_black(board[((*b_queen - diagonal*7) as usize)])
+                                                    || upper_right_diagonal(*b_queen, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2821,7 +2903,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - diagonal*9) as usize]) || is_black(board[((*b_queen - diagonal*9) as usize)]){
+                                                    }else if is_white(board[(*b_queen - diagonal*9) as usize]) 
+                                                    || is_black(board[((*b_queen - diagonal*9) as usize)]) 
+                                                    || upper_left_diagonal(*b_queen, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2836,7 +2920,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - square) as usize]) || is_black(board[(*b_queen - square) as usize]) {
+                                                    }else if is_white(board[(*b_queen - square) as usize]) 
+                                                    || is_black(board[(*b_queen - square) as usize])
+                                                    || rook_left(*b_queen, square) {
                                                         break;
                                                     }
                                                 }
@@ -2849,7 +2935,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - square*8) as usize]) || is_black(board[(*b_queen - square*8) as usize]) {
+                                                    }else if is_white(board[(*b_queen - square*8) as usize]) 
+                                                    || is_black(board[(*b_queen - square*8) as usize])
+                                                    || rook_up(*b_queen, square) {
                                                         break;
                                                     }
                                                 }
@@ -2865,7 +2953,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + 7*diagonal) as usize]) || is_black(board[(*b_queen + 7*diagonal) as usize]){
+                                                    }else if is_white(board[(*b_queen + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*b_queen + 7*diagonal) as usize])
+                                                    || inferior_left_diagonal(*b_queen, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2878,7 +2968,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + 9*diagonal) as usize]) || is_black(board[(*b_queen + 9*diagonal) as usize]) {
+                                                    }else if is_white(board[(*b_queen + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*b_queen + 9*diagonal) as usize])
+                                                    || inferior_right_diagonal(*b_queen, diagonal) {
                                                         break;
                                                     }
                                                 }
@@ -2893,7 +2985,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + square) as usize]) || is_black(board[(*b_queen + square) as usize]) {
+                                                    }else if is_white(board[(*b_queen + square) as usize]) 
+                                                    || is_black(board[(*b_queen + square) as usize])
+                                                    || rook_right(*b_queen, square) {
                                                         break;
                                                     }
                                                 }
@@ -2906,7 +3000,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + square*8) as usize]) || is_black(board[(*b_queen + square*8) as usize]) {
+                                                    }else if is_white(board[(*b_queen + square*8) as usize]) 
+                                                    || is_black(board[(*b_queen + square*8) as usize])
+                                                    || rook_down(*b_queen, square) {
                                                         break;
                                                     }
                                                 }
@@ -4459,3 +4555,9 @@ fn test_multiple_queens(pieces: &mut Vec<i8>, position: i8) -> bool {
 
     return false
 }
+
+// fn get_pieces_checking_the_king(kings_position: i8, board: &[char;64]) -> Vec<i8> {
+//     // check every possible cardinal direction of the king to see if there are pieces checking it
+
+
+// }
