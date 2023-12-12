@@ -1,23 +1,22 @@
 use std::io;
 use std::string::String;
 
+const NOTHING: char = '.';
+
+const WHITE_PAWN: char = 'i';
+const WHITE_ROOK: char = 'R';
+const WHITE_KNIGHT: char = 'N';
+const WHITE_BISHOP: char = 'B';
+const WHITE_QUEEN: char = 'Q';
+const WHITE_KING: char = 'K';
+
+const BLACK_PAWN: char = 'j';
+const BLACK_ROOK: char = 'r';
+const BLACK_KNIGHT: char = 'n';
+const BLACK_BISHOP: char = 'b';
+const BLACK_QUEEN: char = 'q';
+const BLACK_KING: char = 'k';
 fn main() {
-    
-    const NOTHING: char = '.';
-
-    const WHITE_PAWN: char = 'i';
-    const WHITE_ROOK: char = 'R';
-    const WHITE_KNIGHT: char = 'N';
-    const WHITE_BISHOP: char = 'B';
-    const WHITE_QUEEN: char = 'Q';
-    const WHITE_KING: char = 'K';
-
-    const BLACK_PAWN: char = 'j';
-    const BLACK_ROOK: char = 'r';
-    const BLACK_KNIGHT: char = 'n';
-    const BLACK_BISHOP: char = 'b';
-    const BLACK_QUEEN: char = 'q';
-    const BLACK_KING: char = 'k';
 
 // PAWNS:
     /* Columns are made into vectors because of the pawn capture system.
@@ -126,6 +125,8 @@ fn main() {
         try_again = true;
         show_board(board); //print the board
 
+        let wking_checks = get_pieces_checking_the_white_king(white_king, &board); // will never have more than 2 elements
+
         while try_again { // white's turn
             
             player_move.clear(); //has to be cleared, otherwise read_line would just append the string to the last move registered in player_move
@@ -143,7 +144,7 @@ fn main() {
                 println!("To move, input atleast a letter from 'a' to 'h' and a number from 1 to 8 (i.e. 'e4')");
                 continue
             }
-
+  
             if is_piece(san_move[0]) == true {
                 column = match san_move[1] {
                     'a' => 0,
@@ -176,6 +177,32 @@ fn main() {
                 }
 
                 desired_position = column + line;
+
+                if wking_checks.len() == 1 { // king is being checked by a single piece/pawn
+                    if san_move[0] == 'K' {
+                        if match desired_position - white_king { // check if it's a possible king move (otherwise just ignore the following)
+                            -9|-8|-7|-1|1|7|8|9 => true,
+                            _ => false
+                        } {
+                            if get_pieces_checking_the_white_king(desired_position, &board).len() > 0 {
+                                println!("Your king is in check and that position would still keep it in check!\n");
+                                continue;
+                            }
+                        }else{ // not even a possible king move
+                            println!("Not a possible move, try again!\n");
+                            continue;
+                        }
+                    }else if (wking_checks[0] > white_king && desired_position < white_king) // if the checking piece has a higher index than the king, the blocking piece must also be higher
+                        || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking piece must also be lower
+                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the piece is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the piece is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the piece is not blocking the file
+
+                        // the piece to be moved does not block the check
+                        println!("That move did not block the check completely!\n");
+                        continue;
+                    }
+                }
 
                 //pieces' movement checks
                 if !is_white(board[desired_position as usize]) {
@@ -303,9 +330,9 @@ fn main() {
                                                     // count each possible diagonal (until the maximum of 7 diagonals)
                                                     if *w_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*w_bishop, diagonal) {
                                                         /* check if any of the squares in the bishop's diagonal is the desired square,
-                                                           check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
-                                                           and finally, check if the desired square has no white pieces that may block the movement
-                                                           if all of those checks are true, the bishop may be moved */
+                                                        check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
+                                                        and finally, check if the desired square has no white pieces that may block the movement
+                                                        if all of those checks are true, the bishop may be moved */
                                                         board[*w_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_BISHOP;
                                                         *w_bishop = desired_position;
@@ -671,7 +698,8 @@ fn main() {
                                         white_king = desired_position;
                                         try_again = false;
 
-                                        // the rooks may have not actually moved, but a king move invalidates both castling maneuvers
+                                        // the rooks might have not actually moved,
+                                        // but a king move invalidates both castling maneuvers
                                         has_white_rook1_moved = true;
                                         has_white_rook2_moved = true;
                                         }
@@ -1161,39 +1189,46 @@ fn main() {
             }else if player_move.trim() == "O-O" || player_move.trim() == "0-0" { // kingside castling
                 if has_white_rook2_moved == false {
                     if board[62] == NOTHING && board[61] == NOTHING { // squares between the rook and king must be empty
-                        board[white_king as usize] = NOTHING;
-                        board[63] = NOTHING; // kingside rook
+                        if get_pieces_checking_the_white_king(62, &board).len() == 0
+                        && get_pieces_checking_the_white_king(61, &board).len() == 0 { // any black piece attacking the square makes it impossible to castle
+                            board[white_king as usize] = NOTHING;
+                            board[63] = NOTHING; // kingside rook
 
-                        white_king = 62;
-                        board[white_king as usize] = WHITE_KING;
-                        for w_rook in white_rooks.iter_mut() {
-                            if *w_rook == 63 {
-                                *w_rook = 61;
-                                board[*w_rook as usize] = WHITE_ROOK;
-                                break;
+                            white_king = 62;
+                            board[white_king as usize] = WHITE_KING;
+                            for w_rook in white_rooks.iter_mut() {
+                                if *w_rook == 63 {
+                                    *w_rook = 61;
+                                    board[*w_rook as usize] = WHITE_ROOK;
+                                    break;
+                                }
                             }
-                        }
 
-                        try_again = false;
+                            try_again = false;
+                        }
                     }
                 }
             }else if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" { // queenside castling
                 if has_white_rook1_moved == false {
                     if board[59] == NOTHING && board[58] == NOTHING && board[57] == NOTHING { // squares between the rook and king must be empty
-                        board[white_king as usize] = NOTHING;
-                        board[56] = NOTHING; // kingside rook
+                        if get_pieces_checking_the_white_king(59, &board).len() == 0 
+                        && get_pieces_checking_the_white_king(58, &board).len() == 0
+                        && get_pieces_checking_the_white_king(57, &board).len() == 0 {
+                            board[white_king as usize] = NOTHING;
+                            board[56] = NOTHING; // kingside rook
 
-                        white_king = 58;
-                        board[white_king as usize] = WHITE_KING;
-                        for w_rook in white_rooks.iter_mut() {
-                            if *w_rook == 56 {
-                                *w_rook = 59;
-                                board[*w_rook as usize] = WHITE_ROOK;
-                                break;
+                            white_king = 58;
+                            board[white_king as usize] = WHITE_KING;
+                            for w_rook in white_rooks.iter_mut() {
+                                if *w_rook == 56 {
+                                    *w_rook = 59;
+                                    board[*w_rook as usize] = WHITE_ROOK;
+                                    break;
+                                }
                             }
-                        }
 
-                        try_again = false;
+                            try_again = false;
+                        }
                     }
                 }
             }else{ // pawn movement
@@ -1229,6 +1264,19 @@ fn main() {
                     }
 
                     desired_position = column + line;
+
+                    if wking_checks.len() == 1 {
+                        if (wking_checks[0] > white_king && desired_position < white_king) // if the checking piece has a higher index than the king, the blocking pawn must also be higher
+                        || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
+                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the pawn is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the pawn is not blocking the file
+
+                            // the piece to be moved does not block the check
+                            println!("That move did not block the check completely!\n");
+                            continue;
+                        }
+                    }
 
                     if board[desired_position as usize] == NOTHING {
                         match san_move[0] {
@@ -1699,6 +1747,19 @@ fn main() {
                     }
 
                     desired_position = column + line;
+
+                    if wking_checks.len() == 1 {
+                        if (wking_checks[0] > white_king && desired_position < white_king) // if the checking piece has a higher index than the king, the blocking pawn must also be higher
+                        || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
+                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the pawn is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the pawn is not blocking the file
+
+                            // the piece to be moved does not block the check
+                            println!("That move did not block the check completely!\n");
+                            continue;
+                        }
+                    }
 
                     if is_black(board[desired_position as usize]) {
                         let captured_piece = board[desired_position as usize];
@@ -2236,6 +2297,8 @@ fn main() {
         try_again = true;
         show_board(board); //print the board
 
+        let bking_checks = get_pieces_checking_the_black_king(black_king, &board);
+
         while try_again{ // black's turn
             player_move.clear();
 
@@ -2284,6 +2347,32 @@ fn main() {
                 }
 
                 desired_position = column + line;
+
+                if bking_checks.len() == 1 { // king is being checked by a single piece/pawn
+                    if san_move[0] == 'K' {
+                        if match desired_position - black_king { // check if it's a possible king move (otherwise just ignore the following)
+                            -9|-8|-7|-1|1|7|8|9 => true,
+                            _ => false
+                        } {
+                            if get_pieces_checking_the_black_king(desired_position, &board).len() > 0 {
+                                println!("Your king is in check and that position would still keep it in check!\n");
+                                continue;
+                            }
+                        }else{ // not even a possible king move
+                            println!("Not a possible move, try again!\n");
+                            continue;
+                        }
+                    }else if (bking_checks[0] > black_king && desired_position < black_king) // if the checking piece has a higher index than the king, the blocking piece must also be higher
+                        || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking piece must also be lower
+                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the piece is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the piece is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the piece is not blocking the file
+
+                        // the piece to be moved does not block the check
+                        println!("That move did not block the check completely!\n");
+                        continue;
+                    }
+                }
 
                 if !is_black(board[desired_position as usize]) {
                     let captured_piece = board[desired_position as usize];
@@ -3243,39 +3332,46 @@ fn main() {
             }else if player_move.trim() == "O-O" || player_move.trim() == "0-0" { // kingside castling
                 if has_black_rook2_moved == false {
                     if board[6] == NOTHING && board[5] == NOTHING { // squares between the rook and king must be empty
-                        board[black_king as usize] = NOTHING;
-                        board[7] = NOTHING; // kingside rook
+                        if get_pieces_checking_the_black_king(6, &board).len() == 0
+                        && get_pieces_checking_the_black_king(5, &board).len() == 0 {
+                            board[black_king as usize] = NOTHING;
+                            board[7] = NOTHING; // kingside rook
 
-                        black_king = 6;
-                        board[black_king as usize] = BLACK_KING;
-                        for b_rook in black_rooks.iter_mut() {
-                            if *b_rook == 7 {
-                                *b_rook = 5;
-                                board[*b_rook as usize] = BLACK_ROOK;
-                                break;
+                            black_king = 6;
+                            board[black_king as usize] = BLACK_KING;
+                            for b_rook in black_rooks.iter_mut() {
+                                if *b_rook == 7 {
+                                    *b_rook = 5;
+                                    board[*b_rook as usize] = BLACK_ROOK;
+                                    break;
+                                }
                             }
-                        }
 
-                        try_again = false;
+                            try_again = false;
+                        }
                     }
                 }
             }else if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" { // queenside castling
                 if has_black_rook1_moved == false {
                     if board[3] == NOTHING && board[2] == NOTHING && board[1] == NOTHING { // squares between the rook and king must be empty
-                        board[black_king as usize] = NOTHING;
-                        board[0] = NOTHING; // kingside rook
+                        if get_pieces_checking_the_black_king(3, &board).len() == 0
+                        && get_pieces_checking_the_black_king(2, &board).len() == 0
+                        && get_pieces_checking_the_black_king(1, &board).len() == 0 {
+                            board[black_king as usize] = NOTHING;
+                            board[0] = NOTHING; // kingside rook
 
-                        black_king = 2;
-                        board[black_king as usize] = BLACK_KING;
-                        for b_rook in black_rooks.iter_mut() {
-                            if *b_rook == 0 {
-                                *b_rook = 3;
-                                board[*b_rook as usize] = BLACK_ROOK;
-                                break;
+                            black_king = 2;
+                            board[black_king as usize] = BLACK_KING;
+                            for b_rook in black_rooks.iter_mut() {
+                                if *b_rook == 0 {
+                                    *b_rook = 3;
+                                    board[*b_rook as usize] = BLACK_ROOK;
+                                    break;
+                                }
                             }
-                        }
 
-                        try_again = false;
+                            try_again = false;
+                        }
                     }
                 }
             }else{ // pawn movement
@@ -3311,6 +3407,19 @@ fn main() {
                     }
 
                     desired_position = column + line;
+
+                    if bking_checks.len() == 1 { // king is being checked by a single piece
+                        if (bking_checks[0] > black_king && desired_position < black_king) // if the checking piece has a higher index than the king, the blocking pawn must also be higher
+                        || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
+                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the pawn is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the pawn is not blocking the file
+
+                            // the piece to be moved does not block the check
+                            println!("That move did not block the check completely!\n");
+                            continue;
+                        }
+                    }
 
                     if board[desired_position as usize] == NOTHING {
                         match san_move[0] {
@@ -3781,6 +3890,19 @@ fn main() {
                     }
 
                     desired_position = column + line;
+
+                    if bking_checks.len() == 1 { // king is being checked by a single piece
+                        if (bking_checks[0] > black_king && desired_position < black_king) // if the checking piece has a higher index than the king, the blocking pawn must also be higher
+                        || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
+                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the pawn is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the pawn is not blocking the file
+
+                            // the piece to be moved does not block the check
+                            println!("That move did not block the check completely!\n");
+                            continue;
+                        }
+                    }
 
                     if is_white(board[desired_position as usize]) {
                         let captured_piece = board[desired_position as usize]; 
@@ -4304,8 +4426,7 @@ fn main() {
             }
         }
     } // loop end
-
-}
+} 
 
 fn show_board(board: [char; 64]) { //print the board
     for i in 0..board.len() { //print the board
@@ -4556,8 +4677,302 @@ fn test_multiple_queens(pieces: &mut Vec<i8>, position: i8) -> bool {
     return false
 }
 
-// fn get_pieces_checking_the_king(kings_position: i8, board: &[char;64]) -> Vec<i8> {
-//     // check every possible cardinal direction of the king to see if there are pieces checking it
+fn get_pieces_checking_the_white_king(kings_position: i8, board: &[char;64]) -> Vec<i8> {
+    // check every possible cardinal direction of the king to see if there are pieces checking it
+    let mut pieces_checking_the_king: Vec<i8> = vec![];
 
+    //left side of the king
+    for left_square in 1..8 {
+        if !rook_left(kings_position, left_square) 
+        && is_black(board[(kings_position-left_square) as usize]) {
+            if board[(kings_position-left_square) as usize] == BLACK_ROOK 
+            || board[(kings_position-left_square) as usize] == BLACK_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position-left_square);
+                break;
+            }
+        }else if rook_left(kings_position, left_square)
+        || is_white(board[(kings_position-left_square) as usize]) 
+        || is_black(board[(kings_position-left_square) as usize]) {
+            // if it is black but not a rook or a queen, 
+            // its not aiming directly at the king
+            break;
+        }
+    }
 
-// }
+    //right side of the king
+    for right_square in 1..8 {
+        if !rook_right(kings_position, right_square)
+        && is_black(board[(kings_position-right_square) as usize]) {
+            if board[(kings_position-right_square) as usize] == BLACK_ROOK 
+            || board[(kings_position-right_square) as usize] == BLACK_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position-right_square);
+                break;
+            }
+        }else if rook_right(kings_position, right_square)
+        || is_white(board[(kings_position-right_square) as usize]) 
+        || is_black(board[(kings_position-right_square) as usize]) {
+            break;
+        }
+    }
+
+    //upper left diagonal
+    for diagonal in 1..8 {
+        if !upper_left_diagonal(kings_position, diagonal)
+        && is_black(board[(kings_position-diagonal*9) as usize]) {
+            if board[(kings_position-diagonal*9) as usize] == BLACK_BISHOP 
+            || board[(kings_position-diagonal*9) as usize] == BLACK_QUEEN 
+            || board[(kings_position-9) as usize] == BLACK_PAWN {
+                pieces_checking_the_king.insert(0, kings_position-diagonal*9);
+                break;
+            }
+        }else if upper_left_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position-diagonal*9) as usize]) 
+        || is_black(board[(kings_position-diagonal*9) as usize]) {
+            break;
+        }
+    }
+    
+
+    for diagonal in 1..8 {
+        if !upper_right_diagonal(kings_position, diagonal)
+        && is_black(board[(kings_position-diagonal*7) as usize]) {
+            if board[(kings_position-diagonal*7) as usize] == BLACK_BISHOP 
+            || board[(kings_position-diagonal*7) as usize] == BLACK_QUEEN
+            || board[(kings_position-7) as usize] == BLACK_PAWN {
+                pieces_checking_the_king.insert(0, kings_position-diagonal*7);
+                break;
+            }
+        }else if upper_right_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position-diagonal*7) as usize]) 
+        || is_black(board[(kings_position-diagonal*7) as usize]) {
+            break;
+        }
+    }
+    
+
+    for diagonal in 1..8 {
+        if !inferior_left_diagonal(kings_position, diagonal)
+        && is_black(board[(kings_position+diagonal*7) as usize]) {
+            if board[(kings_position+diagonal*7) as usize] == BLACK_BISHOP 
+            || board[(kings_position+diagonal*7) as usize] == BLACK_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position+diagonal*7);
+                break;
+            }
+        }else if inferior_left_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position+diagonal*7) as usize]) 
+        || is_black(board[(kings_position+diagonal*7) as usize]) {
+            break;
+        }
+    }
+    
+
+    for diagonal in 1..8 {
+        if !inferior_right_diagonal(kings_position, diagonal)
+        && is_black(board[(kings_position+diagonal*9) as usize]) {
+            if board[(kings_position+diagonal*9) as usize] == BLACK_BISHOP 
+            || board[(kings_position+diagonal*9) as usize] == BLACK_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position+diagonal*9);
+                break;
+            }
+        }else if inferior_right_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position+diagonal*9) as usize]) 
+        || is_black(board[(kings_position+diagonal*9) as usize]) {
+            break;
+        }
+    }
+    
+
+    if (kings_position + 17) <= 63 {
+        if board[(kings_position+17) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+17);
+        }
+    }
+    if (kings_position + 15) <= 63 {
+        if board[(kings_position+15) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+15);
+        }
+    }
+    if (kings_position + 10) <= 63 {
+        if board[(kings_position+10) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+10);
+        }
+    }
+    if (kings_position + 6) <= 63 {
+        if board[(kings_position+6) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+6);
+        }
+    }
+    if (kings_position - 6) >= 0 {
+        if board[(kings_position-6) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-6);
+        }
+    }
+    if (kings_position - 10) >= 0 {
+        if board[(kings_position-10) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-10);
+        }
+    }
+    if (kings_position - 15) >= 0 {
+        if board[(kings_position-15) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-15);
+        }
+    }
+    if (kings_position - 17) >= 0 {
+        if board[(kings_position-17) as usize] == BLACK_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-17);
+        }
+    }
+
+    return pieces_checking_the_king
+
+}
+
+fn get_pieces_checking_the_black_king(kings_position: i8, board: &[char;64]) -> Vec<i8> {
+    // check every possible cardinal direction of the king to see if there are pieces checking it
+    let mut pieces_checking_the_king: Vec<i8> = vec![];
+
+    //left side of the king
+    for left_square in 1..8 {
+        if !rook_left(kings_position, left_square) 
+        && is_white(board[(kings_position-left_square) as usize]) {
+            if board[(kings_position-left_square) as usize] == WHITE_ROOK 
+            || board[(kings_position-left_square) as usize] == WHITE_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position-left_square);
+                break;
+            }
+        }else if rook_left(kings_position, left_square)
+        || is_white(board[(kings_position-left_square) as usize]) 
+        || is_black(board[(kings_position-left_square) as usize]) {
+            // if it is black but not a rook or a queen, 
+            // its not aiming directly at the king
+            break;
+        }
+    }
+
+    //right side of the king
+    for right_square in 1..8 {
+        if !rook_right(kings_position, right_square)
+        && is_white(board[(kings_position-right_square) as usize]) {
+            if board[(kings_position-right_square) as usize] == WHITE_ROOK 
+            || board[(kings_position-right_square) as usize] == WHITE_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position-right_square);
+                break;
+            }
+        }else if rook_right(kings_position, right_square)
+        || is_white(board[(kings_position-right_square) as usize]) 
+        || is_black(board[(kings_position-right_square) as usize]) {
+            break;
+        }
+    }
+
+    //upper left diagonal
+    for diagonal in 1..8 {
+        if !upper_left_diagonal(kings_position, diagonal)
+        && is_white(board[(kings_position-diagonal*9) as usize]) {
+            if board[(kings_position-diagonal*9) as usize] == WHITE_BISHOP 
+            || board[(kings_position-diagonal*9) as usize] == WHITE_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position-diagonal*9);
+                break;
+            }
+        }else if upper_left_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position-diagonal*9) as usize]) 
+        || is_black(board[(kings_position-diagonal*9) as usize]) {
+            break;
+        }
+    }
+    
+
+    for diagonal in 1..8 {
+        if !upper_right_diagonal(kings_position, diagonal)
+        && is_white(board[(kings_position-diagonal*7) as usize]) {
+            if board[(kings_position-diagonal*7) as usize] == WHITE_BISHOP 
+            || board[(kings_position-diagonal*7) as usize] == WHITE_QUEEN {
+                pieces_checking_the_king.insert(0, kings_position-diagonal*7);
+                break;
+            }
+        }else if upper_right_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position-diagonal*7) as usize]) 
+        || is_black(board[(kings_position-diagonal*7) as usize]) {
+            break;
+        }
+    }
+    
+
+    for diagonal in 1..8 {
+        if !inferior_left_diagonal(kings_position, diagonal)
+        && is_white(board[(kings_position+diagonal*7) as usize]) {
+            if board[(kings_position+diagonal*7) as usize] == WHITE_BISHOP 
+            || board[(kings_position+diagonal*7) as usize] == WHITE_QUEEN 
+            || board[(kings_position+7) as usize] == WHITE_PAWN {
+                pieces_checking_the_king.insert(0, kings_position+diagonal*7);
+                break;
+            }
+        }else if inferior_left_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position+diagonal*7) as usize]) 
+        || is_black(board[(kings_position+diagonal*7) as usize]) {
+            break;
+        }
+    }
+    
+
+    for diagonal in 1..8 {
+        if !inferior_right_diagonal(kings_position, diagonal)
+        && is_white(board[(kings_position+diagonal*9) as usize]) {
+            if board[(kings_position+diagonal*9) as usize] == WHITE_BISHOP 
+            || board[(kings_position+diagonal*9) as usize] == WHITE_QUEEN 
+            || board[(kings_position+9) as usize] == WHITE_PAWN {
+                pieces_checking_the_king.insert(0, kings_position+diagonal*9);
+                break;
+            }
+        }else if inferior_right_diagonal(kings_position, diagonal)
+        || is_white(board[(kings_position+diagonal*9) as usize]) 
+        || is_black(board[(kings_position+diagonal*9) as usize]) {
+            break;
+        }
+    }
+    
+
+    if (kings_position + 17) <= 63 {
+        if board[(kings_position+17) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+17);
+        }
+    }
+    if (kings_position + 15) <= 63 {
+        if board[(kings_position+15) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+15);
+        }
+    }
+    if (kings_position + 10) <= 63 {
+        if board[(kings_position+10) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+10);
+        }
+    }
+    if (kings_position + 6) <= 63 {
+        if board[(kings_position+6) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position+6);
+        }
+    }
+    if (kings_position - 6) >= 0 {
+        if board[(kings_position-6) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-6);
+        }
+    }
+    if (kings_position - 10) >= 0 {
+        if board[(kings_position-10) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-10);
+        }
+    }
+    if (kings_position - 15) >= 0 {
+        if board[(kings_position-15) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-15);
+        }
+    }
+    if (kings_position - 17) >= 0 {
+        if board[(kings_position-17) as usize] == WHITE_KNIGHT {
+            pieces_checking_the_king.insert(0, kings_position-17);
+        }
+    }
+
+    return pieces_checking_the_king
+
+}
