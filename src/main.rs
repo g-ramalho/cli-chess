@@ -146,10 +146,13 @@ fn main() {
 
         // WHITE'S TURN:
         let wking_checks = get_pieces_checking_the_white_king(white_king, &board); // will never have more than 2 elements
-        try_again = true;
-        show_board(board); //print the board
+        let wpinned: Vec<i8> = get_pinned_white_pieces(white_king, &board);
+        //let wking_safe_squares: Vec<i8> = get_safe_squares_for_king(white_king, &board);
 
-        while try_again { // white's turn
+        try_again = true;
+        show_board(&board); //print the board
+
+        'white: while try_again { // white's turn
 
             player_move.clear(); //has to be cleared, otherwise read_line would just append the string to the last move registered in player_move
 
@@ -164,10 +167,10 @@ fn main() {
 
             if san_move.len() <= 1 {
                 println!("To move, input atleast a letter from 'a' to 'h' and a number from 1 to 8 (i.e. 'e4')");
-                continue
+                continue;
             }
 
-            if is_piece(san_move[0]) == true {
+            if is_piece(san_move[0]) == true { // piece movement
                 column = match san_move[1] {
                     'a' => 0,
                     'b' => 1,
@@ -224,7 +227,7 @@ fn main() {
                         println!("That move did not block the check completely!\n");
                         continue;
                     }
-                }else if wking_checks.len() > 1 {
+                }else if wking_checks.len() > 1 { // double check
                     // incase of a double check, the king MUST move
                     if san_move[0] == 'K' {
                         if match desired_position - white_king { // check if it's a possible king move (otherwise just ignore the following)
@@ -292,6 +295,13 @@ fn main() {
                                     if knight_column + knight_line == *w_knight {
                                         match *w_knight - desired_position {
                                             -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                                for piece in wpinned.iter() {
+                                                    if knight_column + knight_line == *piece {
+                                                        // knights cant move out of absolute pins
+                                                        println!("That knight is pinned and may not move right now!\n");
+                                                        continue 'white;
+                                                    }
+                                                }
                                                 //last position is freed
                                                 board[*w_knight as usize] = NOTHING;
 
@@ -312,6 +322,13 @@ fn main() {
                                 for w_knight in white_knights.iter_mut() {
                                     match *w_knight - desired_position {
                                         -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                            for piece in wpinned.iter() {
+                                                if *w_knight == *piece {
+                                                // knights cant move out of absolute pins
+                                                println!("That knight is pinned and may not move right now!\n");
+                                                continue 'white;
+                                                }
+                                            }
                                             board[*w_knight as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_KNIGHT;
                                             *w_knight = desired_position;
@@ -360,9 +377,11 @@ fn main() {
                                     '8' => 0,
                                     _ => 100
                                 };
-                                
+
+                                let bishop_position = bishop_line + bishop_column;
+
                                 for w_bishop in white_bishops.iter_mut() { // multiple bishops may reach the square
-                                    if bishop_line + bishop_column == *w_bishop {
+                                    if bishop_position == *w_bishop {
                                             // if the desired square is "above" the initial position
                                         if *w_bishop > desired_position {
                                             // and if the distance is divisible by 7
@@ -374,6 +393,11 @@ fn main() {
                                                         check if any of the calculated diagonals are forbidden (done using the 'upper_right_diagonal' function),
                                                         and finally, check if the desired square has no white pieces that may block the movement
                                                         if all of those checks are true, the bishop may be moved */
+                                                        if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
+
                                                         board[*w_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_BISHOP;
                                                         *w_bishop = desired_position;
@@ -390,6 +414,10 @@ fn main() {
                                             }else if (*w_bishop - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*w_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_BISHOP;
                                                         *w_bishop = desired_position;
@@ -407,6 +435,10 @@ fn main() {
                                             if (*w_bishop - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*w_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_BISHOP;
                                                         *w_bishop = desired_position;
@@ -422,6 +454,10 @@ fn main() {
                                             }else if (*w_bishop - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*w_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_BISHOP;
                                                         *w_bishop = desired_position;
@@ -447,6 +483,10 @@ fn main() {
                                             for diagonal in 1..8 {
                                                 // count each possible diagonal (until the maximum of 7 diagonals)
                                                 if *w_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*w_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_BISHOP;
                                                     *w_bishop = desired_position;
@@ -463,6 +503,10 @@ fn main() {
                                         }else if (*w_bishop - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*w_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_BISHOP;
                                                     *w_bishop = desired_position;
@@ -480,6 +524,10 @@ fn main() {
                                         if (*w_bishop - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*w_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_BISHOP;
                                                     *w_bishop = desired_position;
@@ -495,6 +543,10 @@ fn main() {
                                         }else if (*w_bishop - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*w_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_bishop, white_king, desired_position, &wpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_BISHOP;
                                                     *w_bishop = desired_position;
@@ -556,6 +608,10 @@ fn main() {
                                             if get_line(*w_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_rook - square == desired_position && !rook_left(*w_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_ROOK;
                                                         match *w_rook { // check if the moved rook was in its initial position
@@ -577,6 +633,10 @@ fn main() {
                                                 // otherwise, test if it is on the same file
                                                 for square in 1..8 {
                                                     if *w_rook - square*8 == desired_position && !rook_up(*w_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_ROOK;
                                                         match *w_rook {
@@ -599,6 +659,10 @@ fn main() {
                                             if get_line(*w_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_rook + square == desired_position && !rook_right(*w_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_ROOK;
                                                         match *w_rook {
@@ -619,6 +683,10 @@ fn main() {
                                             }else if (desired_position - *w_rook)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *w_rook + square*8 == desired_position && !rook_down(*w_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_ROOK;
                                                         match *w_rook {
@@ -646,6 +714,10 @@ fn main() {
                                         if get_line(*w_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_rook - square == desired_position && !rook_left(*w_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_ROOK;
                                                     match *w_rook {
@@ -666,6 +738,10 @@ fn main() {
                                         }else if (*w_rook - desired_position)%8 == 0 {
                                             for square in 1..8 {
                                                 if *w_rook - square*8 == desired_position && !rook_up(*w_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_ROOK;
                                                     match *w_rook {
@@ -688,6 +764,10 @@ fn main() {
                                         if get_line(*w_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_rook + square == desired_position && !rook_right(*w_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_ROOK;
                                                     match *w_rook {
@@ -708,6 +788,10 @@ fn main() {
                                         }else if (desired_position - *w_rook)%8 == 0 {
                                             for square in 1..8 {
                                                 if *w_rook + square*8 == desired_position && !rook_down(*w_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_ROOK;
                                                     match *w_rook {
@@ -869,6 +953,10 @@ fn main() {
                                             if (*w_queen - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_queen - diagonal*7 == desired_position && !upper_right_diagonal(*w_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -882,6 +970,10 @@ fn main() {
                                             }else if (*w_queen - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_queen - diagonal*9 == desired_position && !upper_left_diagonal(*w_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -897,6 +989,10 @@ fn main() {
                                             if get_line(*w_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -910,6 +1006,10 @@ fn main() {
                                             }else if (*w_queen - desired_position)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -926,6 +1026,10 @@ fn main() {
                                             if (*w_queen - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*w_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -939,6 +1043,10 @@ fn main() {
                                             }else if (*w_queen - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *w_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*w_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -954,6 +1062,10 @@ fn main() {
                                             if get_line(*w_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -967,6 +1079,10 @@ fn main() {
                                             }else if (desired_position - *w_queen)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'white;
+                                                        }
                                                         board[*w_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = WHITE_QUEEN;
                                                         *w_queen = desired_position;
@@ -988,6 +1104,10 @@ fn main() {
                                         if (*w_queen - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_queen - diagonal*7 == desired_position && !upper_right_diagonal(*w_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1003,6 +1123,10 @@ fn main() {
                                         }else if (*w_queen - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_queen - diagonal*9 == desired_position && !upper_left_diagonal(*w_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1020,6 +1144,10 @@ fn main() {
                                         if get_line(*w_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1035,6 +1163,10 @@ fn main() {
                                         }else if (*w_queen - desired_position)%8 == 0 {
                                             for square in 1..8 {
                                                 if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1053,6 +1185,10 @@ fn main() {
                                         if (*w_queen - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*w_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1068,6 +1204,10 @@ fn main() {
                                         }else if (*w_queen - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *w_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*w_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1085,6 +1225,10 @@ fn main() {
                                         if get_line(*w_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1100,6 +1244,10 @@ fn main() {
                                         }else if (desired_position - *w_queen)%8 == 0 {
                                             for square in 1..8 {
                                                 if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'white;
+                                                    }
                                                     board[*w_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = WHITE_QUEEN;
                                                     *w_queen = desired_position;
@@ -1230,50 +1378,78 @@ fn main() {
             }else if player_move.trim() == "O-O" || player_move.trim() == "0-0" { // kingside castling
                 if has_white_rook2_moved == false {
                     if board[62] == NOTHING && board[61] == NOTHING { // squares between the rook and king must be empty
-                        if get_pieces_checking_the_white_king(62, &board).len() == 0
-                        && get_pieces_checking_the_white_king(61, &board).len() == 0 { // any black piece attacking the square makes it impossible to castle
-                            board[white_king as usize] = NOTHING;
-                            board[63] = NOTHING; // kingside rook
+                        if wking_checks.len() < 1 {
+                            if get_pieces_checking_the_white_king(62, &board).len() == 0
+                            && get_pieces_checking_the_white_king(61, &board).len() == 0 { // any black piece attacking the square makes it impossible to castle
+                                board[white_king as usize] = NOTHING;
+                                board[63] = NOTHING; // kingside rook
 
-                            white_king = 62;
-                            board[white_king as usize] = WHITE_KING;
-                            for w_rook in white_rooks.iter_mut() {
-                                if *w_rook == 63 {
-                                    *w_rook = 61;
-                                    board[*w_rook as usize] = WHITE_ROOK;
-                                    break;
+                                white_king = 62;
+                                board[white_king as usize] = WHITE_KING;
+                                for w_rook in white_rooks.iter_mut() {
+                                    if *w_rook == 63 {
+                                        *w_rook = 61;
+                                        board[*w_rook as usize] = WHITE_ROOK;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            try_again = false;
+                                try_again = false;
+                            }else{
+                                println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
+                                continue;
+                            }
+                        }else{
+                            println!("You may not castle while in check!\n");
+                            continue;
                         }
+                    }else{
+                        println!("The path between your king and rook must be free to castle!\n");
+                        continue;
                     }
+                }else{
+                    println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
+                    continue;
                 }
             }else if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" { // queenside castling
                 if has_white_rook1_moved == false {
                     if board[59] == NOTHING && board[58] == NOTHING && board[57] == NOTHING { // squares between the rook and king must be empty
-                        if get_pieces_checking_the_white_king(59, &board).len() == 0 
-                        && get_pieces_checking_the_white_king(58, &board).len() == 0
-                        && get_pieces_checking_the_white_king(57, &board).len() == 0 {
-                            board[white_king as usize] = NOTHING;
-                            board[56] = NOTHING; // kingside rook
+                        if wking_checks.len() < 1 {
+                            if get_pieces_checking_the_white_king(59, &board).len() == 0 
+                            && get_pieces_checking_the_white_king(58, &board).len() == 0
+                            && get_pieces_checking_the_white_king(57, &board).len() == 0 {
+                                board[white_king as usize] = NOTHING;
+                                board[56] = NOTHING; // kingside rook
 
-                            white_king = 58;
-                            board[white_king as usize] = WHITE_KING;
-                            for w_rook in white_rooks.iter_mut() {
-                                if *w_rook == 56 {
-                                    *w_rook = 59;
-                                    board[*w_rook as usize] = WHITE_ROOK;
-                                    break;
+                                white_king = 58;
+                                board[white_king as usize] = WHITE_KING;
+                                for w_rook in white_rooks.iter_mut() {
+                                    if *w_rook == 56 {
+                                        *w_rook = 59;
+                                        board[*w_rook as usize] = WHITE_ROOK;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            try_again = false;
+                                try_again = false;
+                            }else{
+                                println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
+                                continue;
+                            }
+                        }else{
+                            println!("You may not castle while in check!\n");
+                            continue;
                         }
+                    }else{
+                        println!("The path between your king and rook must be free to castle!\n");
+                        continue;
                     }
+                }else{
+                    println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
+                    continue;
                 }
             }else{ // pawn movement
-                if san_move[1] != 'x' {
+                if san_move[1] != 'x' { // not a pawn capture
                     column = match san_move[0] {
                         'a' => 0,
                         'b' => 1,
@@ -1889,7 +2065,8 @@ fn main() {
                     }
 
                     if is_black(board[desired_position as usize])
-                    || (get_line(desired_position) == 6 && board[(desired_position+8) as usize] == BLACK_PAWN && match san_move[2] { // checks if the desired square's column can be a victim of en passant
+                    || (get_line(desired_position) == 6 && board[(desired_position+8) as usize] == BLACK_PAWN && match san_move[2] {
+                        // checks if the desired square's column can be a victim of en passant
                         'a' => {
                             if black_column_a_enpassant == true {
                                 true
@@ -2589,8 +2766,9 @@ fn main() {
 
         // BLACK'S TURN:
         let bking_checks = get_pieces_checking_the_black_king(black_king, &board);
+        let bpinned: Vec<i8> = get_pinned_black_pieces(black_king, &board);
         try_again = true;
-        show_board(board); //print the board
+        show_board(&board); //print the board
 
         black_column_a_enpassant = false;
         black_column_b_enpassant = false;
@@ -2601,7 +2779,7 @@ fn main() {
         black_column_g_enpassant = false;
         black_column_h_enpassant = false;
 
-        while try_again{ // black's turn
+        'black: while try_again{ // black's turn
             player_move.clear();
 
             println!("Black moves");
@@ -2739,12 +2917,19 @@ fn main() {
                                     if knight_column + knight_line == *b_knight {
                                         match *b_knight - desired_position {
                                             -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                                    board[*b_knight as usize] = NOTHING;
-                                                    board[desired_position as usize] = BLACK_KNIGHT;
-                                                    *b_knight = desired_position;
+                                                for piece in bpinned.iter() {
+                                                    if knight_column + knight_line == *piece {
+                                                        // knights cant move out of absolute pins
+                                                        println!("That knight is pinned and may not move right now!\n");
+                                                        continue 'black;
+                                                    }
+                                                }
+                                                board[*b_knight as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KNIGHT;
+                                                *b_knight = desired_position;
 
-                                                    try_again = false;
-                                                    break;
+                                                try_again = false;
+                                                break;
                                             },
                                             _ => ()
                                         }
@@ -2754,12 +2939,19 @@ fn main() {
                                 for b_knight in black_knights.iter_mut() {
                                     match *b_knight - desired_position {
                                         -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                                board[*b_knight as usize] = NOTHING;
-                                                board[desired_position as usize] = BLACK_KNIGHT;
-                                                *b_knight = desired_position;
+                                            for piece in wpinned.iter() {
+                                                if *b_knight == *piece {
+                                                // knights cant move out of absolute pins
+                                                println!("That knight is pinned and may not move right now!\n");
+                                                continue 'black;
+                                                }
+                                            }
+                                            board[*b_knight as usize] = NOTHING;
+                                            board[desired_position as usize] = BLACK_KNIGHT;
+                                            *b_knight = desired_position;
 
-                                                try_again = false;
-                                                break;
+                                            try_again = false;
+                                            break;
                                         },
                                         _ => ()
                                     }
@@ -2801,13 +2993,19 @@ fn main() {
                                             '8' => 0,
                                             _ => 100
                                         };
+
+                                let bishop_position = bishop_line + bishop_column;
                                 
                                 for b_bishop in black_bishops.iter_mut() {
-                                    if bishop_line + bishop_column == *b_bishop {
+                                    if bishop_position == *b_bishop {
                                         if *b_bishop > desired_position {
                                             if (*b_bishop - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*b_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_BISHOP;
                                                         *b_bishop = desired_position;
@@ -2823,6 +3021,10 @@ fn main() {
                                             }else if (*b_bishop - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*b_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_BISHOP;
                                                         *b_bishop = desired_position;
@@ -2840,6 +3042,10 @@ fn main() {
                                             if (*b_bishop - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*b_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_BISHOP;
                                                         *b_bishop = desired_position;
@@ -2855,6 +3061,10 @@ fn main() {
                                             }else if (*b_bishop - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*b_bishop, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                            println!("That bishop is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_bishop as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_BISHOP;
                                                         *b_bishop = desired_position;
@@ -2877,6 +3087,10 @@ fn main() {
                                         if (*b_bishop - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_bishop - diagonal*7 == desired_position && !upper_right_diagonal(*b_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_BISHOP;
                                                     *b_bishop = desired_position;
@@ -2892,6 +3106,10 @@ fn main() {
                                         }else if (*b_bishop - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_bishop - diagonal*9 == desired_position && !upper_left_diagonal(*b_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_BISHOP;
                                                     *b_bishop = desired_position;
@@ -2909,6 +3127,10 @@ fn main() {
                                         if (*b_bishop - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_bishop + diagonal*7 == desired_position && !inferior_left_diagonal(*b_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_BISHOP;
                                                     *b_bishop = desired_position;
@@ -2924,6 +3146,10 @@ fn main() {
                                         }else if (*b_bishop - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_bishop + diagonal*9 == desired_position && !inferior_right_diagonal(*b_bishop, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_bishop, black_king, desired_position, &bpinned) == false {
+                                                        println!("That bishop is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_bishop as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_BISHOP;
                                                     *b_bishop = desired_position;
@@ -2983,6 +3209,10 @@ fn main() {
                                             if get_line(*b_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_rook - square == desired_position && !rook_left(*b_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_ROOK;
                                                         match *b_rook {
@@ -3003,6 +3233,10 @@ fn main() {
                                             }else if (*b_rook - desired_position)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *b_rook - square*8 == desired_position && !rook_up(*b_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_ROOK;
                                                         match *b_rook {
@@ -3025,6 +3259,10 @@ fn main() {
                                             if get_line(*b_rook) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_rook + square == desired_position && !rook_right(*b_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_ROOK;
                                                         match *b_rook {
@@ -3045,6 +3283,10 @@ fn main() {
                                             }else if (desired_position - *b_rook)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *b_rook + square*8 == desired_position && !rook_down(*b_rook, square) {
+                                                        if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                            println!("That rook is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_rook as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_ROOK;
                                                         match *b_rook {
@@ -3072,6 +3314,10 @@ fn main() {
                                         if get_line(*b_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_rook - square == desired_position && !rook_left(*b_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_ROOK;
                                                     match *b_rook {
@@ -3092,6 +3338,10 @@ fn main() {
                                         }else if (*b_rook - desired_position)%8 == 0 {
                                             for square in 1..8 {
                                                 if *b_rook - square*8 == desired_position && !rook_up(*b_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_ROOK;
                                                     match *b_rook {
@@ -3114,6 +3364,10 @@ fn main() {
                                         if get_line(*b_rook) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_rook + square == desired_position && !rook_right(*b_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_ROOK;
                                                     match *b_rook {
@@ -3134,6 +3388,10 @@ fn main() {
                                         }else if (desired_position - *b_rook)%8 == 0 {
                                             for square in 1..8 {
                                                 if *b_rook + square*8 == desired_position && !rook_down(*b_rook, square) {
+                                                    if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
+                                                        println!("That rook is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_rook as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_ROOK;
                                                     match *b_rook {
@@ -3292,6 +3550,10 @@ fn main() {
                                             if (*b_queen - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_queen - diagonal*7 == desired_position && !upper_right_diagonal(*b_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3307,6 +3569,10 @@ fn main() {
                                             }else if (*b_queen - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_queen - diagonal*9 == desired_position && !upper_left_diagonal(*b_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3324,6 +3590,10 @@ fn main() {
                                             if get_line(*b_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3339,6 +3609,10 @@ fn main() {
                                             }else if (*b_queen - desired_position)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3357,6 +3631,10 @@ fn main() {
                                             if (*b_queen - desired_position)%7 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*b_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3372,6 +3650,10 @@ fn main() {
                                             }else if (*b_queen - desired_position)%9 == 0 {
                                                 for diagonal in 1..8 {
                                                     if *b_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*b_queen, diagonal) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3389,6 +3671,10 @@ fn main() {
                                             if get_line(*b_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3404,6 +3690,10 @@ fn main() {
                                             }else if (desired_position - *b_queen)%8 == 0 {
                                                 for square in 1..8 {
                                                     if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                        if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                            println!("That queen is pinned and may not move to that square!\n");
+                                                            continue 'black;
+                                                        }
                                                         board[*b_queen as usize] = NOTHING;
                                                         board[desired_position as usize] = BLACK_QUEEN;
                                                         *b_queen = desired_position;
@@ -3427,6 +3717,10 @@ fn main() {
                                         if (*b_queen - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_queen - diagonal*7 == desired_position && !upper_right_diagonal(*b_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3440,6 +3734,10 @@ fn main() {
                                         }else if (*b_queen - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_queen - diagonal*9 == desired_position && !upper_left_diagonal(*b_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3455,6 +3753,10 @@ fn main() {
                                         if get_line(*b_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3468,6 +3770,10 @@ fn main() {
                                         }else if (*b_queen - desired_position)%8 == 0 {
                                             for square in 1..8 {
                                                 if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3484,6 +3790,10 @@ fn main() {
                                         if (*b_queen - desired_position)%7 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_queen + diagonal*7 == desired_position && !inferior_left_diagonal(*b_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3497,6 +3807,10 @@ fn main() {
                                         }else if (*b_queen - desired_position)%9 == 0 {
                                             for diagonal in 1..8 {
                                                 if *b_queen + diagonal*9 == desired_position && !inferior_right_diagonal(*b_queen, diagonal) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3512,6 +3826,10 @@ fn main() {
                                         if get_line(*b_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3525,6 +3843,10 @@ fn main() {
                                         }else if (desired_position - *b_queen)%8 == 0 {
                                             for square in 1..8 {
                                                 if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                    if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
+                                                        println!("That queen is pinned and may not move to that square!\n");
+                                                        continue 'black;
+                                                    }
                                                     board[*b_queen as usize] = NOTHING;
                                                     board[desired_position as usize] = BLACK_QUEEN;
                                                     *b_queen = desired_position;
@@ -3653,47 +3975,75 @@ fn main() {
             }else if player_move.trim() == "O-O" || player_move.trim() == "0-0" { // kingside castling
                 if has_black_rook2_moved == false {
                     if board[6] == NOTHING && board[5] == NOTHING { // squares between the rook and king must be empty
-                        if get_pieces_checking_the_black_king(6, &board).len() == 0
-                        && get_pieces_checking_the_black_king(5, &board).len() == 0 {
-                            board[black_king as usize] = NOTHING;
-                            board[7] = NOTHING; // kingside rook
+                        if bking_checks.len() < 1 {
+                            if get_pieces_checking_the_black_king(6, &board).len() == 0
+                            && get_pieces_checking_the_black_king(5, &board).len() == 0 {
+                                board[black_king as usize] = NOTHING;
+                                board[7] = NOTHING; // kingside rook
 
-                            black_king = 6;
-                            board[black_king as usize] = BLACK_KING;
-                            for b_rook in black_rooks.iter_mut() {
-                                if *b_rook == 7 {
-                                    *b_rook = 5;
-                                    board[*b_rook as usize] = BLACK_ROOK;
-                                    break;
+                                black_king = 6;
+                                board[black_king as usize] = BLACK_KING;
+                                for b_rook in black_rooks.iter_mut() {
+                                    if *b_rook == 7 {
+                                        *b_rook = 5;
+                                        board[*b_rook as usize] = BLACK_ROOK;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            try_again = false;
+                                try_again = false;
+                            }else{
+                                println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
+                                continue;
+                            }
+                        }else{
+                            println!("You may not castle while in check!\n");
+                            continue;
                         }
+                    }else{
+                        println!("The path between your king and rook must be free to castle!\n");
+                        continue;
                     }
+                }else{
+                    println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
+                    continue;
                 }
             }else if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" { // queenside castling
                 if has_black_rook1_moved == false {
                     if board[3] == NOTHING && board[2] == NOTHING && board[1] == NOTHING { // squares between the rook and king must be empty
-                        if get_pieces_checking_the_black_king(3, &board).len() == 0
-                        && get_pieces_checking_the_black_king(2, &board).len() == 0
-                        && get_pieces_checking_the_black_king(1, &board).len() == 0 {
-                            board[black_king as usize] = NOTHING;
-                            board[0] = NOTHING; // kingside rook
+                        if bking_checks.len() < 1 {
+                            if get_pieces_checking_the_black_king(3, &board).len() == 0
+                            && get_pieces_checking_the_black_king(2, &board).len() == 0
+                            && get_pieces_checking_the_black_king(1, &board).len() == 0 {
+                                board[black_king as usize] = NOTHING;
+                                board[0] = NOTHING; // kingside rook
 
-                            black_king = 2;
-                            board[black_king as usize] = BLACK_KING;
-                            for b_rook in black_rooks.iter_mut() {
-                                if *b_rook == 0 {
-                                    *b_rook = 3;
-                                    board[*b_rook as usize] = BLACK_ROOK;
-                                    break;
+                                black_king = 2;
+                                board[black_king as usize] = BLACK_KING;
+                                for b_rook in black_rooks.iter_mut() {
+                                    if *b_rook == 0 {
+                                        *b_rook = 3;
+                                        board[*b_rook as usize] = BLACK_ROOK;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            try_again = false;
+                                try_again = false;
+                            }else{
+                                println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
+                                continue;
+                            }
+                        }else{
+                            println!("You may not castle while in check!\n");
+                            continue;
                         }
+                    }else{
+                        println!("The path between your king and rook must be free to castle!\n");
+                        continue;
                     }
+                }else{
+                    println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
+                    continue;
                 }
             }else{ // pawn movement
                 if san_move[1] != 'x' {
@@ -5011,7 +5361,7 @@ fn main() {
     } // loop end
 } 
 
-fn show_board(board: [char; 64]) { //print the board
+fn show_board(board: &[char; 64]) { //print the board
     for i in 0..board.len() { //print the board
         //for every element in the board until 0, print the current element
 
@@ -5090,7 +5440,7 @@ fn upper_left_diagonal(b: i8, i: i8) -> bool {
 fn inferior_right_diagonal(b: i8, i: i8) -> bool {
     match b + i*9 {
         // a bishop cannot trace a path after it hits the board's "walls" or corners
-        16 | 24 | 32 | 40 | 48 | 50 | 51 | 52 | 56 |
+        16 | 24 | 32 | 40 | 48 | 50 | 56 |
         // positions where adding to the index would exceed the array:
         64..=72  => true,
         _ => false
@@ -5100,7 +5450,7 @@ fn inferior_right_diagonal(b: i8, i: i8) -> bool {
 fn inferior_left_diagonal(b: i8, i: i8) -> bool {
     match b + i*7 {
         // a bishop cannot trace a path after it hits the board's "walls" or corners
-        7 | 15 | 23 | 31 | 39 | 47 | 55 |
+        7 | 15 | 23 | 31 | 39 | 47 | 55 | 63 |
         // positions where adding to the index would exceed the array:
         64..=70 => true,
         _ => false
@@ -5578,5 +5928,618 @@ fn get_pieces_checking_the_black_king(kings_position: i8, board: &[char;64]) -> 
     }
 
     return pieces_checking_the_king
+
+}
+
+fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
+    let mut pinned_pieces: Vec<i8> = vec![];
+    let mut pinning_pieces: Vec<i8> = vec![];
+    let mut pinned_pieces_index: usize = 0;
+
+    for left_square in 1..8 {
+        if !rook_left(kings_position, left_square) 
+        && (board[(kings_position-left_square) as usize] == BLACK_ROOK 
+        || board[(kings_position-left_square) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position-left_square);
+            break;
+        }else if rook_left(kings_position, left_square) 
+        || is_black(board[(kings_position-left_square) as usize]) {
+            // if it is black but not a rook or a queen, 
+            // its not aiming directly at the king
+            break;
+        }else if is_white(board[(kings_position-left_square) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-left_square)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        // if there is a "pinning piece" but no "pinned piece", 
+        // either the king is in check or there are multiple white pieces on the way
+        // (in which case they are all free to move)
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        // if there is a "pinned piece" but no "pinning piece",
+        // the pinned piece is not actually being pinned by anything
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for right_square in 1..8 {
+        if !rook_right(kings_position, right_square)
+        && (board[(kings_position+right_square) as usize] == BLACK_ROOK 
+        || board[(kings_position+right_square) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position+right_square);
+            break;
+        }else if rook_right(kings_position, right_square)
+        || is_black(board[(kings_position+right_square) as usize]) {
+            break;
+        }else if is_white(board[(kings_position+right_square) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+right_square)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for down_square in 1..8 {
+        if !rook_down(kings_position, down_square)
+        && (board[(kings_position+down_square*8) as usize] == BLACK_ROOK 
+        || board[(kings_position+down_square*8) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position+down_square*8);
+            break;
+        }else if rook_down(kings_position, down_square)
+        || is_black(board[(kings_position+down_square*8) as usize]) {
+            break;
+        }else if is_white(board[(kings_position+down_square*8) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+down_square*8)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for up_square in 1..8 {
+        if !rook_up(kings_position, up_square)
+        && (board[(kings_position-up_square*8) as usize] == BLACK_ROOK 
+        || board[(kings_position-up_square*8) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position-up_square*8);
+            break;
+        }else if rook_up(kings_position, up_square)
+        || is_black(board[(kings_position-up_square*8) as usize]) {
+            break;
+        }else if is_white(board[(kings_position-up_square*8) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-up_square*8)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for diagonal in 1..8 {
+        if !upper_left_diagonal(kings_position, diagonal)
+        && (board[(kings_position-diagonal*9) as usize] == BLACK_BISHOP 
+        || board[(kings_position-diagonal*9) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position-diagonal*9);
+            break;
+        }else if upper_left_diagonal(kings_position, diagonal) 
+        || is_black(board[(kings_position-diagonal*9) as usize]) {
+            break;
+        }else if is_white(board[(kings_position-diagonal*9) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*9)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+    
+    for diagonal in 1..8 {
+        if !upper_right_diagonal(kings_position, diagonal)
+        && (board[(kings_position-diagonal*7) as usize] == BLACK_BISHOP 
+        || board[(kings_position-diagonal*7) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position-diagonal*7);
+            break;
+        }else if upper_right_diagonal(kings_position, diagonal) 
+        || is_black(board[(kings_position-diagonal*7) as usize]) {
+            break;
+        }else if is_white(board[(kings_position-diagonal*7) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*7)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for diagonal in 1..8 {
+        if !inferior_left_diagonal(kings_position, diagonal)
+        && (board[(kings_position+diagonal*7) as usize] == BLACK_BISHOP 
+        || board[(kings_position+diagonal*7) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position+diagonal*7);
+            break;
+        }else if inferior_left_diagonal(kings_position, diagonal) 
+        || is_black(board[(kings_position+diagonal*7) as usize]) {
+            break;
+        }else if is_white(board[(kings_position+diagonal*7) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*7)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+    
+    for diagonal in 1..8 {
+        if !inferior_right_diagonal(kings_position, diagonal)
+        && (board[(kings_position+diagonal*9) as usize] == BLACK_BISHOP 
+        || board[(kings_position+diagonal*9) as usize] == BLACK_QUEEN) {
+            pinning_pieces.insert(0, kings_position+diagonal*9);
+            break;
+        }else if inferior_right_diagonal(kings_position, diagonal) 
+        || is_black(board[(kings_position+diagonal*9) as usize]) {
+            break;
+        }else if is_white(board[(kings_position+diagonal*9) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*9)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    return pinned_pieces
+
+}
+
+fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
+    let mut pinned_pieces: Vec<i8> = vec![];
+    let mut pinning_pieces: Vec<i8> = vec![];
+    let mut pinned_pieces_index: usize = 0;
+
+    for left_square in 1..8 {
+        if !rook_left(kings_position, left_square) 
+        && (board[(kings_position-left_square) as usize] == WHITE_ROOK 
+        || board[(kings_position-left_square) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position-left_square);
+            break;
+        }else if rook_left(kings_position, left_square) 
+        || is_white(board[(kings_position-left_square) as usize]) {
+            // if it is black but not a rook or a queen, 
+            // its not aiming directly at the king
+            break;
+        }else if is_black(board[(kings_position-left_square) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-left_square)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for right_square in 1..8 {
+        if !rook_right(kings_position, right_square)
+        && (board[(kings_position+right_square) as usize] == WHITE_ROOK 
+        || board[(kings_position+right_square) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position+right_square);
+            break;
+        }else if rook_right(kings_position, right_square)
+        || is_white(board[(kings_position+right_square) as usize]) {
+            break;
+        }else if is_black(board[(kings_position+right_square) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+right_square)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for down_square in 1..8 {
+        if !rook_down(kings_position, down_square)
+        && (board[(kings_position+down_square*8) as usize] == WHITE_ROOK 
+        || board[(kings_position+down_square*8) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position+down_square*8);
+            break;
+        }else if rook_down(kings_position, down_square)
+        || is_white(board[(kings_position+down_square*8) as usize]) {
+            break;
+        }else if is_black(board[(kings_position+down_square*8) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+down_square*8)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for up_square in 1..8 {
+        if !rook_up(kings_position, up_square)
+        && (board[(kings_position-up_square*8) as usize] == WHITE_ROOK 
+        || board[(kings_position-up_square*8) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position-up_square*8);
+            break;
+        }else if rook_up(kings_position, up_square)
+        || is_white(board[(kings_position-up_square*8) as usize]) {
+            break;
+        }else if is_black(board[(kings_position-up_square*8) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-up_square*8)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for diagonal in 1..8 {
+        if !upper_left_diagonal(kings_position, diagonal)
+        && (board[(kings_position-diagonal*9) as usize] == WHITE_BISHOP 
+        || board[(kings_position-diagonal*9) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position-diagonal*9);
+            break;
+        }else if upper_left_diagonal(kings_position, diagonal) 
+        || is_white(board[(kings_position-diagonal*9) as usize]) {
+            break;
+        }else if is_black(board[(kings_position-diagonal*9) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*9)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+    
+    for diagonal in 1..8 {
+        if !upper_right_diagonal(kings_position, diagonal)
+        && (board[(kings_position-diagonal*7) as usize] == WHITE_BISHOP 
+        || board[(kings_position-diagonal*7) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position-diagonal*7);
+            break;
+        }else if upper_right_diagonal(kings_position, diagonal) 
+        || is_white(board[(kings_position-diagonal*7) as usize]) {
+            break;
+        }else if is_black(board[(kings_position-diagonal*7) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*7)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+
+    for diagonal in 1..8 {
+        if !inferior_left_diagonal(kings_position, diagonal)
+        && (board[(kings_position+diagonal*7) as usize] == WHITE_BISHOP 
+        || board[(kings_position+diagonal*7) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position+diagonal*7);
+            break;
+        }else if inferior_left_diagonal(kings_position, diagonal) 
+        || is_white(board[(kings_position+diagonal*7) as usize]) {
+            break;
+        }else if is_black(board[(kings_position+diagonal*7) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*7)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    if pinned_pieces.len() == pinned_pieces_index+1 {
+        pinned_pieces_index += 1;
+    }
+    
+    for diagonal in 1..8 {
+        if !inferior_right_diagonal(kings_position, diagonal)
+        && (board[(kings_position+diagonal*9) as usize] == WHITE_BISHOP 
+        || board[(kings_position+diagonal*9) as usize] == WHITE_QUEEN) {
+            pinning_pieces.insert(0, kings_position+diagonal*9);
+            break;
+        }else if inferior_right_diagonal(kings_position, diagonal) 
+        || is_white(board[(kings_position+diagonal*9) as usize]) {
+            break;
+        }else if is_black(board[(kings_position+diagonal*9) as usize]) {
+            if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
+                pinned_pieces.swap_remove(pinned_pieces_index);
+                break;
+            }else{
+                pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*9)
+            }
+        }
+    }
+
+    if pinning_pieces.len() > pinned_pieces.len() { 
+        pinning_pieces.swap_remove(pinned_pieces_index);
+    }else if pinning_pieces.len() < pinned_pieces.len() {
+        pinned_pieces.swap_remove(pinned_pieces_index);
+    }
+
+    return pinned_pieces
+
+}
+
+fn check_if_pinned_piece_can_move(piece_position: i8, kings_position: i8, desired_position: i8, xpinned: &Vec<i8>) -> bool {
+    for piece in xpinned.iter() {
+        if piece_position == *piece {//the piece to be moved is pinned
+            if (piece_position-kings_position)%7 == 0 {//diagonally pinned
+                if (piece_position-desired_position)%7 != 0 {//but the desired position is not in the diagonal
+                    return false
+                }
+            }else if (piece_position-kings_position)%9 == 0 {//diagonally pinned
+                if (piece_position-desired_position)%9 != 0 {//but the desired position is not in the diagonal
+                    return false
+                }
+            }else if (piece_position-kings_position)%8 == 0 {//pinned by a rook or queen
+                if (piece_position-desired_position)%8 != 0 {//but the desired position is not in the column
+                    return false
+                }
+            }
+        }
+    }
+
+    return true
+
+}
+
+fn get_safe_squares_for_king(kings_position: i8, board: &[char;64]) -> Vec<i8> {
+    let mut safe_squares: Vec<i8> = vec![];
+
+    if board[kings_position as usize] == WHITE_KING {
+        if kings_position - 9 >= 0 
+        && !is_white(board[(kings_position-9) as usize])
+        && !upper_left_diagonal(kings_position, 1) 
+        && get_pieces_checking_the_white_king(kings_position-9, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-9);
+        }
+        if kings_position - 8 >= 0 
+        && !is_white(board[(kings_position-8) as usize])
+        && !rook_up(kings_position, 1) 
+        && get_pieces_checking_the_white_king(kings_position-8, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-8);
+        }
+        if kings_position - 7 >= 0 
+        && !is_white(board[(kings_position-7) as usize])
+        && !upper_right_diagonal(kings_position, 1) 
+        && get_pieces_checking_the_white_king(kings_position-7, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-7);
+        }
+        if kings_position - 1 >= 0 
+        && !is_white(board[(kings_position-1) as usize])
+        && !rook_left(kings_position, 1)
+        && get_pieces_checking_the_white_king(kings_position-1, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-1);
+        }
+        if kings_position + 1 <= 63 
+        && !is_white(board[(kings_position+1) as usize])
+        && !rook_right(kings_position, 1)
+        && get_pieces_checking_the_white_king(kings_position+1, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+1);
+        }
+        if kings_position + 7 <= 63 
+        && !is_white(board[(kings_position+7) as usize])
+        && !inferior_left_diagonal(kings_position, 1)
+        && get_pieces_checking_the_white_king(kings_position+7, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+7);
+        }
+        if kings_position + 8 <= 63 
+        && !is_white(board[(kings_position+8) as usize])
+        && !rook_down(kings_position, 1)
+        && get_pieces_checking_the_white_king(kings_position+8, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+8);
+        }
+        if kings_position + 9 <= 63 
+        && !is_white(board[(kings_position+9) as usize])
+        && !inferior_right_diagonal(kings_position, 1)
+        && get_pieces_checking_the_white_king(kings_position+9, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+9);
+        }
+    }else if board[kings_position as usize] == BLACK_KING {
+        if kings_position - 9 >= 0 
+        && !is_black(board[(kings_position-9) as usize])
+        && !upper_left_diagonal(kings_position, 1) 
+        && get_pieces_checking_the_black_king(kings_position-9, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-9);
+        }
+        if kings_position - 8 >= 0 
+        && !is_black(board[(kings_position-8) as usize])
+        && !rook_up(kings_position, 1) 
+        && get_pieces_checking_the_black_king(kings_position-8, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-8);
+        }
+        if kings_position - 7 >= 0 
+        && !is_black(board[(kings_position-7) as usize])
+        && !upper_right_diagonal(kings_position, 1) 
+        && get_pieces_checking_the_black_king(kings_position-7, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-7);
+        }
+        if kings_position - 1 >= 0 
+        && !is_black(board[(kings_position-1) as usize])
+        && !rook_left(kings_position, 1)
+        && get_pieces_checking_the_black_king(kings_position-1, &board).len() == 0 {
+            safe_squares.insert(0, kings_position-1);
+        }
+        if kings_position + 1 <= 63 
+        && !is_black(board[(kings_position+1) as usize])
+        && !rook_right(kings_position, 1)
+        && get_pieces_checking_the_black_king(kings_position+1, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+1);
+        }
+        if kings_position + 7 <= 63 
+        && !is_black(board[(kings_position+7) as usize])
+        && !inferior_left_diagonal(kings_position, 1)
+        && get_pieces_checking_the_black_king(kings_position+7, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+7);
+        }
+        if kings_position + 8 <= 63 
+        && !is_black(board[(kings_position+8) as usize])
+        && !rook_down(kings_position, 1)
+        && get_pieces_checking_the_black_king(kings_position+8, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+8);
+        }
+        if kings_position + 9 <= 63 
+        && !is_black(board[(kings_position+9) as usize])
+        && !inferior_right_diagonal(kings_position, 1)
+        && get_pieces_checking_the_black_king(kings_position+9, &board).len() == 0 {
+            safe_squares.insert(0, kings_position+9);
+        }
+    }
+
+    return safe_squares
 
 }

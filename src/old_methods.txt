@@ -1,3 +1,26 @@
+if wking_safe_squares.len() == 0 { // if the white king has nowhere to go
+            if wking_checks.len() == 0 { // but is not in check
+                if wpinned.len() == 0 { // and there are no pinned pieces
+                    if white_bishops.len() == 0
+                    && white_knights.len() == 0
+                    && white_rooks.len() == 0
+                    && white_queens.len() == 0 { // if there are no more white pieces to move
+                        if white_column_a.len() == 0
+                        && white_column_b.len() == 0
+                        && white_column_c.len() == 0
+                        && white_column_d.len() == 0 
+                        && white_column_e.len() == 0 
+                        && white_column_f.len() == 0 
+                        && white_column_g.len() == 0 
+                        && white_column_h.len() == 0 { // and also no white pawns left to move
+                            println!("\nIt is a STALEMATE! The game ended in a draw!\n");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
 -------------------------
 white pawns movement:
 
