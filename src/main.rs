@@ -1501,12 +1501,14 @@ fn main() {
                     if board[desired_position as usize] == NOTHING {
                         match san_move[0] {
                             'a' => {
-                                // for every pawn in the column
-                                for pawn in &mut white_column_a.iter_mut() {
-                                    // if the pawn is in it's starting position
-                                    if *pawn >= 48 {
+                                for pawn in &mut white_column_a.iter_mut() { // for every pawn in the column
+                                    if *pawn >= 48 { // if the pawn is in it's starting position
                                         if desired_position - *pawn == -16 
-                                        && board[(*pawn-8) as usize] == NOTHING {
+                                        && board[(*pawn-8) as usize] == NOTHING { // pawn moving two squares up
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1515,7 +1517,11 @@ fn main() {
                                             white_column_a_enpassant = true;
 
                                             break;
-                                        }else if desired_position - *pawn == -8 {
+                                        }else if desired_position - *pawn == -8 { // one square up
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1523,8 +1529,12 @@ fn main() {
                                             try_again = false;
                                             break;
                                         }
-                                    }else{
+                                    }else{ // not in the starting position
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1542,6 +1552,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1551,6 +1565,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1560,6 +1578,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1577,6 +1599,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1586,6 +1612,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1595,6 +1625,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1612,6 +1646,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1621,6 +1659,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1630,6 +1672,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1647,6 +1693,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1656,6 +1706,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1665,6 +1719,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1682,6 +1740,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1691,6 +1753,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1700,6 +1766,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1717,6 +1787,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1726,6 +1800,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1735,6 +1813,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1752,6 +1834,10 @@ fn main() {
                                     if *pawn >= 48 {
                                         if desired_position - *pawn == -16 
                                         && board[(*pawn-8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1761,6 +1847,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -1770,6 +1860,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == -8 {
+                                            if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'white;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = WHITE_PAWN;
                                             *pawn = desired_position;
@@ -2138,6 +2232,10 @@ fn main() {
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_a.iter_mut() {
                                     if desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2163,6 +2261,10 @@ fn main() {
                                 for pawn in &mut white_column_b.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) 
                                     || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2190,6 +2292,10 @@ fn main() {
                                 for pawn in &mut white_column_c.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) 
                                     || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2217,6 +2323,10 @@ fn main() {
                                 for pawn in &mut white_column_d.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2244,6 +2354,10 @@ fn main() {
                                 for pawn in &mut white_column_e.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2271,6 +2385,10 @@ fn main() {
                                 for pawn in &mut white_column_f.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) 
                                     || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2298,6 +2416,10 @@ fn main() {
                                 for pawn in &mut white_column_g.iter_mut() {
                                     if (desired_position - *pawn == -7 && !upper_right_diagonal(*pawn, 1)) 
                                     || (desired_position  - *pawn == -9 && !upper_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -2324,6 +2446,10 @@ fn main() {
                                 // for every *pawn in the column
                                 for pawn in &mut white_column_h.iter_mut() {
                                     if desired_position - *pawn == -9 && !upper_left_diagonal(*pawn, 1) {
+                                        if check_if_pinned_piece_can_move(*pawn, white_king, desired_position, &wpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'white;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING { // en passant
                                             board[(desired_position+8) as usize] = NOTHING;
@@ -4104,6 +4230,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4113,6 +4243,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4122,6 +4256,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4139,6 +4277,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4148,6 +4290,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4157,6 +4303,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4174,6 +4324,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4183,6 +4337,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4192,6 +4350,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4209,6 +4371,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4218,6 +4384,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4227,6 +4397,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4244,6 +4418,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4253,6 +4431,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4262,6 +4444,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4279,6 +4465,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4288,6 +4478,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4297,6 +4491,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4314,6 +4512,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4323,6 +4525,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4332,6 +4538,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4349,6 +4559,10 @@ fn main() {
                                     if *pawn <= 15 {
                                         if desired_position - *pawn == 16 
                                         && board[(*pawn+8) as usize] == NOTHING {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4358,6 +4572,10 @@ fn main() {
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4367,6 +4585,10 @@ fn main() {
                                         }
                                     }else{
                                         if desired_position - *pawn == 8 {
+                                            if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                                println!("That pawn is pinned and may not move to that square!\n");
+                                                continue 'black;
+                                            }
                                             board[*pawn as usize] = NOTHING;
                                             board[desired_position as usize] = BLACK_PAWN;
                                             *pawn = desired_position;
@@ -4733,6 +4955,10 @@ fn main() {
                                 let mut pawn_index: usize = 0;
                                 for pawn in &mut black_column_a.iter_mut() {
                                     if desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4755,6 +4981,10 @@ fn main() {
                                 for pawn in &mut black_column_b.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4781,6 +5011,10 @@ fn main() {
                                 for pawn in &mut black_column_c.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4807,6 +5041,10 @@ fn main() {
                                 for pawn in &mut black_column_d.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4833,6 +5071,10 @@ fn main() {
                                 for pawn in &mut black_column_e.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4859,6 +5101,10 @@ fn main() {
                                 for pawn in &mut black_column_f.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4885,6 +5131,10 @@ fn main() {
                                 for pawn in &mut black_column_g.iter_mut() {
                                     if (desired_position - *pawn == 9 && !inferior_right_diagonal(*pawn, 1)) 
                                     || (desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1)) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
@@ -4910,6 +5160,10 @@ fn main() {
                                 let mut pawn_index: usize = 0;
                                 for pawn in &mut black_column_h.iter_mut() {
                                     if desired_position - *pawn == 7 && !inferior_left_diagonal(*pawn, 1) {
+                                        if check_if_pinned_piece_can_move(*pawn, black_king, desired_position, &bpinned) == false {
+                                            println!("That pawn is pinned and may not move to that square!\n");
+                                            continue 'black;
+                                        }
                                         board[*pawn as usize] = NOTHING;
                                         if board[desired_position as usize] == NOTHING {
                                             board[(desired_position-8) as usize] = NOTHING;
