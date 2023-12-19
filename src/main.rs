@@ -35,14 +35,12 @@ fn main() {
     let mut white_column_f = vec![53];
     let mut white_column_g = vec![54];
     let mut white_column_h = vec![55];
-    let mut white_column_a_enpassant: bool = false;
-    let mut white_column_b_enpassant: bool = false;
-    let mut white_column_c_enpassant: bool = false;
-    let mut white_column_d_enpassant: bool = false;
-    let mut white_column_e_enpassant: bool = false;
-    let mut white_column_f_enpassant: bool = false;
-    let mut white_column_g_enpassant: bool = false;
-    let mut white_column_h_enpassant: bool = false;
+    /* Since there was also a need to keep track of every pawn in every column
+       that jumped two squares in their first move (for en passant), 
+       bitmasking was used for memory efficiency. 
+       From left to right, every bit represents a column from 'a' to 'h'.
+    */
+    let mut white_columns_enpassant = 0b00000000;
 
     //BLACK PAWNS:
     let mut black_column_a = vec![8];
@@ -53,14 +51,7 @@ fn main() {
     let mut black_column_f = vec![13];
     let mut black_column_g = vec![14];
     let mut black_column_h = vec![15];
-    let mut black_column_a_enpassant: bool = false;
-    let mut black_column_b_enpassant: bool = false;
-    let mut black_column_c_enpassant: bool = false;
-    let mut black_column_d_enpassant: bool = false;
-    let mut black_column_e_enpassant: bool = false;
-    let mut black_column_f_enpassant: bool = false;
-    let mut black_column_g_enpassant: bool = false;
-    let mut black_column_h_enpassant: bool = false;
+    let mut black_columns_enpassant = 0b00000000;
 
 //PIECES:
     /* Once again vectors were used because of the pawn promotion system.
@@ -79,7 +70,7 @@ fn main() {
        position isn't enough because they can simply come back 
        to their initial position, but that still invalidates castling). 
        So, whenever a rook moves, their variable
-       recieve the "true" value (both do when the king has moved).
+       recieves the "true" value (both rooks do when the king has moved).
     */
     let mut has_white_rook1_moved = false;
     let mut has_white_rook2_moved = false;
@@ -134,7 +125,7 @@ fn main() {
     board[4] = BLACK_KING;
     board[60] = WHITE_KING;
 
-    loop {
+    'game: loop {
     
         let mut player_move = String::new();
 
@@ -147,14 +138,118 @@ fn main() {
         // WHITE'S TURN:
         let wking_checks = get_pieces_checking_the_white_king(white_king, &board); // will never have more than 2 elements
         let wpinned: Vec<i8> = get_pinned_white_pieces(white_king, &board);
-        //let wking_safe_squares: Vec<i8> = get_safe_squares_for_king(white_king, &board);
+        let wking_safe_squares: Vec<i8> = get_safe_squares_for_king(white_king, &board);
 
+        show_board(&board); // print the board
+        // checkmate test:
+        if wking_checks.len() == 2 { // king double-checked
+            if wking_safe_squares.len() == 0 { // and has no safe squares to go to
+                println!("\nCHECKMATE! BLACK WINS!\n");
+                break 'game;
+            }
+        }else if wking_checks.len() == 1 { // king in check
+            if wking_safe_squares.len() == 0 { // and has no safe squares to go to
+                if get_pieces_checking_the_black_king(wking_checks[0], &board).len() < 1 {
+                    // white pieces can't take the checking piece
+                    if board[(wking_checks[0]) as usize] != 'k' { // checking piece is not a knight
+                        if white_king > wking_checks[0] {
+                            if get_line(white_king) == get_line(wking_checks[0]) {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king-square, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king-square == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (white_king-wking_checks[0])%8 == 0 {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king-square*8, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king-square*8 == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (white_king-wking_checks[0])%7 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king-diagonal*7, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king-diagonal*7 == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (white_king-wking_checks[0])%9 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king-diagonal*9, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king-diagonal*9 == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }
+                        }else if white_king < wking_checks[0] {
+                            if get_line(white_king) == get_line(wking_checks[0]) {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king+square, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king+square == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (white_king-wking_checks[0])%8 == 0 {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king+square*8, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king+square*8 == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (white_king-wking_checks[0])%7 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king+diagonal*7, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king+diagonal*7 == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (white_king-wking_checks[0])%9 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_black_king(white_king+diagonal*9, &board).len() > 0 {
+                                        break; // white pieces can block the check
+                                    }else if white_king+diagonal*9 == wking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! BLACK WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }
+                        }
+                    }else{ // checking piece is a knight
+                        // you can't block a knight's check
+                        println!("\nCHECKMATE! BLACK WINS!\n");
+                        break 'game;
+                    } 
+                }
+            }
+        }
         try_again = true;
-        show_board(&board); //print the board
 
         'white: while try_again { // white's turn
 
-            player_move.clear(); //has to be cleared, otherwise read_line would just append the string to the last move registered in player_move
+            player_move.clear(); // has to be cleared, otherwise read_line would just append the string to the last move registered in player_move
 
             println!("White moves");
 
@@ -167,7 +262,7 @@ fn main() {
 
             if san_move.len() <= 1 {
                 println!("To move, input atleast a letter from 'a' to 'h' and a number from 1 to 8 (i.e. 'e4')");
-                continue;
+                continue 'white;
             }
 
             if is_piece(san_move[0]) && san_move[1] != 'x' { // piece movement
@@ -2517,19 +2612,19 @@ fn main() {
                                 try_again = false;
                             }else{
                                 println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
-                                continue;
+                                continue 'white;
                             }
                         }else{
                             println!("You may not castle while in check!\n");
-                            continue;
+                            continue 'white;
                         }
                     }else{
                         println!("The path between your king and rook must be free to castle!\n");
-                        continue;
+                        continue 'white;
                     }
                 }else{
                     println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
-                    continue;
+                    continue 'white;
                 }
             }else if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" { // queenside castling
                 if has_white_rook1_moved == false {
@@ -2554,19 +2649,19 @@ fn main() {
                                 try_again = false;
                             }else{
                                 println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
-                                continue;
+                                continue 'white;
                             }
                         }else{
                             println!("You may not castle while in check!\n");
-                            continue;
+                            continue 'white;
                         }
                     }else{
                         println!("The path between your king and rook must be free to castle!\n");
-                        continue;
+                        continue 'white;
                     }
                 }else{
                     println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
-                    continue;
+                    continue 'white;
                 }
             }else{ // pawn movement
                 if san_move[1] != 'x' { // not a pawn capture
@@ -2597,7 +2692,7 @@ fn main() {
 
                     if column >= 100 || line >= 100 {
                         println!("Not a possible move, try again!\n");
-                        continue;
+                        continue 'white;
                     }
 
                     desired_position = column + line;
@@ -2613,7 +2708,7 @@ fn main() {
 
                             // the piece to be moved does not block the check
                             println!("That move did not block the check completely!\n");
-                            continue;
+                            continue 'white;
                         }
                     }else if wking_checks.len() > 1 {
                         println!("Your king is being double checked. You have to move it!\n");
@@ -2636,7 +2731,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_a_enpassant = true;
+                                            //white_column_a_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 7);
 
                                             break;
                                         }else if desired_position - *pawn == -8 { // one square up
@@ -2683,7 +2779,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_b_enpassant = true;
+                                            //white_column_b_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 6);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -2730,7 +2827,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_c_enpassant = true;
+                                            //white_column_c_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 5);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -2777,7 +2875,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_d_enpassant = true;
+                                            //white_column_d_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 4);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -2824,7 +2923,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_e_enpassant = true;
+                                            //white_column_e_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 3);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -2871,7 +2971,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_f_enpassant = true;
+                                            //white_column_f_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 2);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -2918,7 +3019,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_g_enpassant = true;
+                                            //white_column_g_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 1);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -2965,7 +3067,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            white_column_h_enpassant = true;
+                                            //white_column_h_enpassant = true;
+                                            white_columns_enpassant = white_columns_enpassant | (1 << 0);
 
                                             break;
                                         }else if desired_position - *pawn == -8 {
@@ -3259,7 +3362,7 @@ fn main() {
 
                     if column >= 100 || line >= 100 {
                         println!("Not a possible move, try again!\n");
-                        continue;
+                        continue 'white;
                     }
 
                     desired_position = column + line;
@@ -3275,67 +3378,67 @@ fn main() {
 
                             // the piece to be moved does not block the check
                             println!("That move did not block the check completely!\n");
-                            continue;
+                            continue 'white;
                         }
                     }else if wking_checks.len() > 1 {
                         println!("Your king is being double checked. You have to move it!\n");
-                        continue;
+                        continue 'white;
                     }
 
                     if is_black(board[desired_position as usize])
                     || (get_line(desired_position) == 6 && board[(desired_position+8) as usize] == BLACK_PAWN && match san_move[2] {
                         // checks if the desired square's column can be a victim of en passant
                         'a' => {
-                            if black_column_a_enpassant == true {
+                            if (black_columns_enpassant >> 7) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'b' => {
-                            if black_column_b_enpassant == true {
+                            if (black_columns_enpassant >> 6) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'c' => {
-                            if black_column_c_enpassant == true {
+                            if (black_columns_enpassant >> 5) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'd' => {
-                            if black_column_d_enpassant == true {
+                            if (black_columns_enpassant >> 4) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'e' => {
-                            if black_column_e_enpassant == true {
+                            if (black_columns_enpassant >> 3) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'f' => {
-                            if black_column_f_enpassant == true {
+                            if (black_columns_enpassant >> 2) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'g' => {
-                            if black_column_g_enpassant == true {
+                            if (black_columns_enpassant >> 1) == 0b1 {
                                 true
                             }else{
                                 false
                             }
                         },
                         'h' => {
-                            if black_column_h_enpassant == true {
+                            if (black_columns_enpassant >> 0) == 0b1 {
                                 true
                             }else{
                                 false
@@ -3599,7 +3702,7 @@ fn main() {
                                 'j' => {
                                     match san_move[2] {
                                         'a' => {
-                                            if black_column_a_enpassant == false {
+                                            if (black_columns_enpassant >> 7) == 0b0 {
                                                 for pawn in 0..black_column_a.len() {
                                                     if black_column_a[pawn] == desired_position {
                                                         black_column_a.swap_remove(pawn);
@@ -3616,7 +3719,7 @@ fn main() {
                                             }
                                         },
                                         'b' => {
-                                            if black_column_b_enpassant == false {
+                                            if (black_columns_enpassant >> 6) == 0b0 {
                                                 for pawn in 0..black_column_b.len() {
                                                     if black_column_b[pawn] == desired_position {
                                                         black_column_b.swap_remove(pawn);
@@ -3633,7 +3736,7 @@ fn main() {
                                             }
                                         },
                                         'c' => {
-                                            if black_column_c_enpassant == false {
+                                            if (black_columns_enpassant >> 5) == 0b0 {
                                                 for pawn in 0..black_column_c.len() {
                                                     if black_column_c[pawn] == desired_position {
                                                         black_column_c.swap_remove(pawn);
@@ -3650,7 +3753,7 @@ fn main() {
                                             }
                                         },
                                         'd' => {
-                                            if black_column_d_enpassant == false {
+                                            if (black_columns_enpassant >> 4) == 0b0 {
                                                 for pawn in 0..black_column_d.len() {
                                                     if black_column_d[pawn] == desired_position {
                                                         black_column_d.swap_remove(pawn);
@@ -3667,7 +3770,7 @@ fn main() {
                                             }
                                         },
                                         'e' => {
-                                            if black_column_e_enpassant == false {
+                                            if (black_columns_enpassant >> 3) == 0b0 {
                                                 for pawn in 0..black_column_d.len() {
                                                     if black_column_d[pawn] == desired_position {
                                                         black_column_d.swap_remove(pawn);
@@ -3684,7 +3787,7 @@ fn main() {
                                             }
                                         },
                                         'f' => {
-                                            if black_column_f_enpassant == false {
+                                            if (black_columns_enpassant >> 2) == 0b0 {
                                                 for pawn in 0..black_column_f.len() {
                                                     if black_column_f[pawn] == desired_position {
                                                         black_column_f.swap_remove(pawn);
@@ -3701,7 +3804,7 @@ fn main() {
                                             }
                                         },
                                         'g' => {
-                                            if black_column_g_enpassant == false {
+                                            if (black_columns_enpassant >> 1) == 0b0 {
                                                 for pawn in 0..black_column_g.len() {
                                                     if black_column_g[pawn] == desired_position {
                                                         black_column_g.swap_remove(pawn);
@@ -3718,7 +3821,7 @@ fn main() {
                                             }
                                         },
                                         'h' => {
-                                            if black_column_h_enpassant == false {
+                                            if (black_columns_enpassant >> 0) == 0b0 {
                                                 for pawn in 0..black_column_h.len() {
                                                     if black_column_h[pawn] == desired_position {
                                                         black_column_h.swap_remove(pawn);
@@ -4017,17 +4120,116 @@ fn main() {
         // BLACK'S TURN:
         let bking_checks = get_pieces_checking_the_black_king(black_king, &board);
         let bpinned: Vec<i8> = get_pinned_black_pieces(black_king, &board);
-        try_again = true;
-        show_board(&board); //print the board
+        let bking_safe_squares: Vec<i8> = get_safe_squares_for_king(black_king, &board);
 
-        black_column_a_enpassant = false;
-        black_column_b_enpassant = false;
-        black_column_c_enpassant = false;
-        black_column_d_enpassant = false;
-        black_column_e_enpassant = false;
-        black_column_f_enpassant = false;
-        black_column_g_enpassant = false;
-        black_column_h_enpassant = false;
+        show_board(&board); //print the board
+        // checkmate test:
+        if bking_checks.len() == 2 { // king double-checked
+            if bking_safe_squares.len() == 0 { // and has no safe squares to go to
+                println!("\nCHECKMATE! WHITE WINS!\n");
+                break 'game;
+            }
+        }else if bking_checks.len() == 1 { // king in check
+            if bking_safe_squares.len() == 0 { // and has no safe squares to go to
+                if get_pieces_checking_the_white_king(bking_checks[0], &board).len() < 1 {
+                    // black pieces can't take the checking piece
+                    if board[(bking_checks[0]) as usize] != 'k' { // checking piece is not a knight
+                        if black_king > bking_checks[0] {
+                            if get_line(black_king) == get_line(bking_checks[0]) {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king-square, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king-square == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (black_king-bking_checks[0])%8 == 0 {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king-square*8, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king-square*8 == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (black_king-bking_checks[0])%7 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king-diagonal*7, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king-diagonal*7 == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (black_king-bking_checks[0])%9 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king-diagonal*9, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king-diagonal*9 == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }
+                        }else if black_king < bking_checks[0] {
+                            if get_line(black_king) == get_line(bking_checks[0]) {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king+square, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king+square == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (black_king-bking_checks[0])%8 == 0 {
+                                for square in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king+square*8, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king+square*8 == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (black_king-bking_checks[0])%7 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king+diagonal*7, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king+diagonal*7 == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }else if (black_king-bking_checks[0])%9 == 0 {
+                                for diagonal in 1..8 {
+                                    if get_pieces_checking_the_white_king(black_king+diagonal*9, &board).len() > 0 {
+                                        break; // black pieces can block the check
+                                    }else if black_king+diagonal*9 == bking_checks[0] {
+                                        // nothing could block the check
+                                        println!("\nCHECKMATE! WHITE WINS!\n");
+                                        break 'game;
+                                    }
+                                }
+                            }
+                        }
+                    }else{ // checking piece is a knight
+                        // you can't block a knight's check
+                        println!("\nCHECKMATE! WHITE WINS!\n");
+                        break 'game;
+                    } 
+                }
+            }
+        }
+        try_again = true;
+
+        black_columns_enpassant = 0b00000000 & black_columns_enpassant;
 
         'black: while try_again{ // black's turn
             player_move.clear();
@@ -4042,7 +4244,7 @@ fn main() {
 
             if san_move.len() <= 1 {
                 println!("To move, input atleast a letter from 'a' to 'h' and a number from 1 to 8 (i.e. 'e4')");
-                continue
+                continue 'black;
             }
 
             if is_piece(san_move[0]) && san_move[1] != 'x' {
@@ -6354,19 +6556,19 @@ fn main() {
                                 try_again = false;
                             }else{
                                 println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
-                                continue;
+                                continue 'black;
                             }
                         }else{
                             println!("You may not castle while in check!\n");
-                            continue;
+                            continue 'black;
                         }
                     }else{
                         println!("The path between your king and rook must be free to castle!\n");
-                        continue;
+                        continue 'black;
                     }
                 }else{
                     println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
-                    continue;
+                    continue 'black;
                 }
             }else if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" { // queenside castling
                 if has_black_rook1_moved == false {
@@ -6391,19 +6593,19 @@ fn main() {
                                 try_again = false;
                             }else{
                                 println!("You may not castle if there are pieces/pawns attacking the path between your rook and king!\n");
-                                continue;
+                                continue 'black;
                             }
                         }else{
                             println!("You may not castle while in check!\n");
-                            continue;
+                            continue 'black;
                         }
                     }else{
                         println!("The path between your king and rook must be free to castle!\n");
-                        continue;
+                        continue 'black;
                     }
                 }else{
                     println!("You have moved your king/rook before. You may not castle to this side anymore!\n");
-                    continue;
+                    continue 'black;
                 }
             }else{ // pawn movement
                 if san_move[1] != 'x' {
@@ -6434,7 +6636,7 @@ fn main() {
 
                     if column >= 100 || line >= 100 {
                         println!("Not a possible move, try again!\n");
-                        continue;
+                        continue 'black;
                     }
 
                     desired_position = column + line;
@@ -6450,11 +6652,11 @@ fn main() {
 
                             // the piece to be moved does not block the check
                             println!("That move did not block the check completely!\n");
-                            continue;
+                            continue 'black;
                         }
                     }else if bking_checks.len() > 1 {
                         println!("Your king is being double checked. You have to move it!\n");
-                        continue;
+                        continue 'black;
                     }
 
                     if board[desired_position as usize] == NOTHING {
@@ -6475,7 +6677,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_a_enpassant = true;
+                                            //black_column_a_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 7);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6522,7 +6725,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_b_enpassant = true;
+                                            //black_column_b_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 6);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6569,7 +6773,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_c_enpassant = true;
+                                            //black_column_c_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 5);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6616,7 +6821,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_d_enpassant = true;
+                                            //black_column_d_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 4);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6663,7 +6869,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_e_enpassant = true;
+                                            //black_column_e_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 3);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6710,7 +6917,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_f_enpassant = true;
+                                            //black_column_f_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 2);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6757,7 +6965,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_g_enpassant = true;
+                                            //black_column_g_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 1);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -6804,7 +7013,8 @@ fn main() {
                                             *pawn = desired_position;
                                             
                                             try_again = false;
-                                            black_column_h_enpassant = true;
+                                            //black_column_h_enpassant = true;
+                                            black_columns_enpassant = black_columns_enpassant | (1 << 0);
 
                                             break;
                                         }else if desired_position - *pawn == 8 {
@@ -7098,7 +7308,7 @@ fn main() {
 
                     if column >= 100 || line >= 100 {
                         println!("Not a possible move, try again!\n");
-                        continue;
+                        continue 'black;
                     }
 
                     desired_position = column + line;
@@ -7114,66 +7324,66 @@ fn main() {
 
                             // the piece to be moved does not block the check
                             println!("That move did not block the check completely!\n");
-                            continue;
+                            continue 'black;
                         }
                     }else if bking_checks.len() > 1 {
                         println!("Your king is being double checked. You have to move it!\n");
-                        continue;
+                        continue 'black;
                     }
 
-                    if is_white(board[desired_position as usize]) 
+                    if is_white(board[desired_position as usize]) // if its white or prone to en passant it can be captured
                     || (get_line(desired_position) == 3 && board[(desired_position-8) as usize] == WHITE_PAWN && match san_move[2] { // checks if the desired square's column can be a victim of en passant
                     'a' => {
-                        if white_column_a_enpassant == true {
+                        if (white_columns_enpassant >> 7) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'b' => {
-                        if white_column_b_enpassant == true {
+                        if (white_columns_enpassant >> 6) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'c' => {
-                        if white_column_c_enpassant == true {
+                        if (white_columns_enpassant >> 5) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'd' => {
-                        if white_column_d_enpassant == true {
+                        if (white_columns_enpassant >> 4) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'e' => {
-                        if white_column_e_enpassant == true {
+                        if (white_columns_enpassant >> 3) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'f' => {
-                        if white_column_f_enpassant == true {
+                        if (white_columns_enpassant >> 2) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'g' => {
-                        if white_column_g_enpassant == true {
+                        if (white_columns_enpassant >> 1) == 0b1 {
                             true
                         }else{
                             false
                         }
                     },
                     'h' => {
-                        if white_column_h_enpassant == true {
+                        if (white_columns_enpassant >> 0) == 0b1 {
                             true
                         }else{
                             false
@@ -7427,7 +7637,7 @@ fn main() {
                                 'i' => {
                                     match san_move[2] {
                                         'a' => {
-                                            if white_column_a_enpassant == false {
+                                            if (white_columns_enpassant >> 7) == 0b0 {
                                                 for pawn in 0..white_column_a.len() {
                                                     if white_column_a[pawn] == desired_position {
                                                         white_column_a.swap_remove(pawn);
@@ -7444,7 +7654,7 @@ fn main() {
                                             }
                                         },
                                         'b' => {
-                                            if white_column_b_enpassant == false {
+                                            if (white_columns_enpassant >> 6) == 0b0 {
                                                 for pawn in 0..white_column_b.len() {
                                                     if white_column_b[pawn] == desired_position {
                                                         white_column_b.swap_remove(pawn);
@@ -7461,7 +7671,7 @@ fn main() {
                                             }
                                         },
                                         'c' => {
-                                            if white_column_c_enpassant == false {
+                                            if (white_columns_enpassant >> 5) == 0b0 {
                                                 for pawn in 0..white_column_c.len() {
                                                     if white_column_c[pawn] == desired_position {
                                                         white_column_c.swap_remove(pawn);
@@ -7478,7 +7688,7 @@ fn main() {
                                             }
                                         },
                                         'd' => {
-                                            if white_column_d_enpassant == false {
+                                            if (white_columns_enpassant >> 4) == 0b0 {
                                                 for pawn in 0..white_column_d.len() {
                                                     if white_column_d[pawn] == desired_position {
                                                         white_column_d.swap_remove(pawn);
@@ -7495,7 +7705,7 @@ fn main() {
                                             }
                                         },
                                         'e' => {
-                                            if white_column_e_enpassant == false {
+                                            if (white_columns_enpassant >> 3) == 0b0 {
                                                 for pawn in 0..white_column_e.len() {
                                                     if white_column_e[pawn] == desired_position {
                                                         white_column_e.swap_remove(pawn);
@@ -7512,7 +7722,7 @@ fn main() {
                                             }
                                         },
                                         'f' => {
-                                            if white_column_f_enpassant == false {
+                                            if (white_columns_enpassant >> 2) == 0b0 {
                                                 for pawn in 0..white_column_f.len() {
                                                     if white_column_f[pawn] == desired_position {
                                                         white_column_f.swap_remove(pawn);
@@ -7529,7 +7739,7 @@ fn main() {
                                             }
                                         },
                                         'g' => {
-                                            if white_column_g_enpassant == false {
+                                            if (white_columns_enpassant >> 1) == 0b0 {
                                                 for pawn in 0..white_column_g.len() {
                                                     if white_column_g[pawn] == desired_position {
                                                         white_column_g.swap_remove(pawn);
@@ -7546,7 +7756,7 @@ fn main() {
                                             }
                                         },
                                         'h' => {
-                                            if white_column_h_enpassant == false {
+                                            if (white_columns_enpassant >> 0) == 0b0 {
                                                 for pawn in 0..white_column_h.len() {
                                                     if white_column_h[pawn] == desired_position {
                                                         white_column_h.swap_remove(pawn);
@@ -7841,14 +8051,7 @@ fn main() {
             }
         }
 
-        white_column_a_enpassant = false;
-        white_column_b_enpassant = false;
-        white_column_c_enpassant = false;
-        white_column_d_enpassant = false;
-        white_column_e_enpassant = false;
-        white_column_f_enpassant = false;
-        white_column_g_enpassant = false;
-        white_column_h_enpassant = false;
+        white_columns_enpassant = 0b00000000 & white_columns_enpassant;
     
     } // loop end
 } 
