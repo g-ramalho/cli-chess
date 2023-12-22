@@ -155,7 +155,14 @@ fn main() {
                         if white_king > wking_checks[0] {
                             if get_line(white_king) == get_line(wking_checks[0]) {
                                 for square in 1..8 {
-                                    if get_pieces_checking_the_black_king(white_king-square, &board).len() > 0 {
+                                    let mut white_pieces_reaching_the_square = get_pieces_checking_the_black_king(white_king-square, &board);
+                                    for i in (0..white_pieces_reaching_the_square.len()).rev() {
+                                        if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
+                                        && board[(white_king-square) as usize] == NOTHING {
+                                            white_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if white_pieces_reaching_the_square.len() > 0 {
                                         break; // white pieces can block the check
                                     }else if white_king-square == wking_checks[0] {
                                         // nothing could block the check
@@ -165,7 +172,14 @@ fn main() {
                                 }
                             }else if (white_king-wking_checks[0])%8 == 0 {
                                 for square in 1..8 {
-                                    if get_pieces_checking_the_black_king(white_king-square*8, &board).len() > 0 {
+                                    let mut white_pieces_reaching_the_square = get_pieces_checking_the_black_king(white_king-square*8, &board);
+                                    for i in (0..white_pieces_reaching_the_square.len()).rev() {
+                                        if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
+                                        && board[(white_king-square*8) as usize] == NOTHING {
+                                            white_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if white_pieces_reaching_the_square.len() > 0 {
                                         break; // white pieces can block the check
                                     }else if white_king-square*8 == wking_checks[0] {
                                         // nothing could block the check
@@ -175,7 +189,24 @@ fn main() {
                                 }
                             }else if (white_king-wking_checks[0])%7 == 0 {
                                 for diagonal in 1..8 {
-                                    if get_pieces_checking_the_black_king(white_king-diagonal*7, &board).len() > 0 {
+                                    let mut white_pieces_reaching_the_square = get_pieces_checking_the_black_king(white_king-diagonal*7, &board);
+                                    for i in (0..white_pieces_reaching_the_square.len()).rev() {
+                                        if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
+                                        && board[(white_king-diagonal*7) as usize] == NOTHING {
+                                            white_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if (white_king-diagonal*7 + 8) < 63 {
+                                        if board[(white_king-diagonal*7 + 8) as usize] == WHITE_PAWN {
+                                            white_pieces_reaching_the_square.insert(0, white_king-diagonal*7+8);
+                                        }
+                                    }
+                                    if (white_king-diagonal*7 + 16) < 63 {
+                                       if get_line(white_king-diagonal*7 + 16) == 2 {
+                                            white_pieces_reaching_the_square.insert(0, white_king-diagonal*7+16);
+                                        }
+                                    }
+                                    if white_pieces_reaching_the_square.len() > 0 {
                                         break; // white pieces can block the check
                                     }else if white_king-diagonal*7 == wking_checks[0] {
                                         // nothing could block the check
@@ -185,7 +216,24 @@ fn main() {
                                 }
                             }else if (white_king-wking_checks[0])%9 == 0 {
                                 for diagonal in 1..8 {
-                                    if get_pieces_checking_the_black_king(white_king-diagonal*9, &board).len() > 0 {
+                                    let mut white_pieces_reaching_the_square = get_pieces_checking_the_black_king(white_king-diagonal*9, &board);
+                                    for i in (0..white_pieces_reaching_the_square.len()).rev() {
+                                        if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
+                                        && board[(white_king-diagonal*9) as usize] == NOTHING {
+                                            white_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if (white_king-diagonal*9 + 8) < 63 {
+                                        if board[(white_king-diagonal*9 + 8) as usize] == WHITE_PAWN {
+                                            white_pieces_reaching_the_square.insert(0, white_king-diagonal*9+8);
+                                        }
+                                    }
+                                    if (white_king-diagonal*9 + 16) < 63 {
+                                       if get_line(white_king-diagonal*9 + 16) == 2 {
+                                            white_pieces_reaching_the_square.insert(0, white_king-diagonal*9+16);
+                                        }
+                                    }
+                                    if white_pieces_reaching_the_square.len() > 0 {
                                         break; // white pieces can block the check
                                     }else if white_king-diagonal*9 == wking_checks[0] {
                                         // nothing could block the check
@@ -320,7 +368,7 @@ fn main() {
                         || (wking_checks[0] > white_king && desired_position > wking_checks[0]) // blocking piece must be between the king and the checking piece
                         || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking piece must also be lower
                         || (wking_checks[0] < white_king && desired_position < wking_checks[0]) // blocking piece must be between the king and the checking piece
-                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the piece is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%7 == 0 && wking_checks[0]-white_king < 49 && (desired_position-white_king)%7 != 0) // the piece is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the piece is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the piece is not blocking the file
 
@@ -921,7 +969,8 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - white_king {
                                 -9 => {
-                                    if !upper_left_diagonal(white_king, 1) {
+                                    if !upper_left_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-9, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -934,7 +983,8 @@ fn main() {
                                         }
                                     },
                                 -8 => {
-                                    if !rook_up(white_king, 1) {
+                                    if !rook_up(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-8, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -945,7 +995,8 @@ fn main() {
                                         }
                                     },
                                 -7 => {
-                                    if !upper_right_diagonal(white_king, 1) {
+                                    if !upper_right_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-7, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -956,7 +1007,8 @@ fn main() {
                                         }
                                     },
                                 -1 => {
-                                    if !rook_left(white_king, 1) {
+                                    if !rook_left(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-1, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -967,7 +1019,8 @@ fn main() {
                                         }
                                     },
                                 1 => {
-                                    if !rook_right(white_king, 1) {
+                                    if !rook_right(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+1, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -978,7 +1031,8 @@ fn main() {
                                         }
                                     },
                                 7 => {
-                                    if !inferior_left_diagonal(white_king, 1) {
+                                    if !inferior_left_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+7, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -989,7 +1043,8 @@ fn main() {
                                         }
                                     },
                                 8 => {
-                                    if !rook_down(white_king, 1) {
+                                    if !rook_down(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+8, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -1000,7 +1055,8 @@ fn main() {
                                         }
                                     },
                                 9 => {
-                                    if !inferior_right_diagonal(white_king, 1) {
+                                    if !inferior_right_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+9, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -1423,7 +1479,7 @@ fn main() {
                         || (wking_checks[0] > white_king && desired_position > wking_checks[0])
                         || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking piece must also be lower
                         || (wking_checks[0] < white_king && desired_position < wking_checks[0])
-                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the piece is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%7 == 0 && wking_checks[0]-white_king < 49 && (desired_position-white_king)%7 != 0) // the piece is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the piece is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the piece is not blocking the file
 
@@ -2020,7 +2076,8 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - white_king {
                                 -9 => {
-                                    if !upper_left_diagonal(white_king, 1) {
+                                    if !upper_left_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-9, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2033,7 +2090,8 @@ fn main() {
                                         }
                                     },
                                 -8 => {
-                                    if !rook_up(white_king, 1) {
+                                    if !rook_up(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-8, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2044,7 +2102,8 @@ fn main() {
                                         }
                                     },
                                 -7 => {
-                                    if !upper_right_diagonal(white_king, 1) {
+                                    if !upper_right_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-7, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2055,7 +2114,8 @@ fn main() {
                                         }
                                     },
                                 -1 => {
-                                    if !rook_left(white_king, 1) {
+                                    if !rook_left(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king-1, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2066,7 +2126,8 @@ fn main() {
                                         }
                                     },
                                 1 => {
-                                    if !rook_right(white_king, 1) {
+                                    if !rook_right(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+1, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2077,7 +2138,8 @@ fn main() {
                                         }
                                     },
                                 7 => {
-                                    if !inferior_left_diagonal(white_king, 1) {
+                                    if !inferior_left_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+7, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2088,7 +2150,8 @@ fn main() {
                                         }
                                     },
                                 8 => {
-                                    if !rook_down(white_king, 1) {
+                                    if !rook_down(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+8, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2099,7 +2162,8 @@ fn main() {
                                         }
                                     },
                                 9 => {
-                                    if !inferior_right_diagonal(white_king, 1) {
+                                    if !inferior_right_diagonal(white_king, 1)
+                                    && get_pieces_checking_the_white_king(white_king+9, &board).len() == 0 {
                                         board[white_king as usize] = NOTHING;
                                         board[desired_position as usize] = WHITE_KING;
                                         white_king = desired_position;
@@ -2490,7 +2554,7 @@ fn main() {
                     if try_again == false { // prevents captured pawns/pieces from being moved later
                         match captured_piece {
                             'j' => {
-                                match san_move[1] {
+                                match san_move[2] {
                                     'a' => {
                                         for pawn in 0..black_column_a.len() {
                                             if black_column_a[pawn] == desired_position {
@@ -2710,7 +2774,7 @@ fn main() {
                         || (wking_checks[0] > white_king && desired_position > wking_checks[0])
                         || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
                         || (wking_checks[0] < white_king && desired_position < wking_checks[0])
-                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%7 == 0 && wking_checks[0]-white_king < 49 && (desired_position-white_king)%7 != 0) // the pawn is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the pawn is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the pawn is not blocking the file
 
@@ -3384,7 +3448,7 @@ fn main() {
                         || (wking_checks[0] > white_king && desired_position > wking_checks[0])
                         || (wking_checks[0] < white_king && desired_position > white_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
                         || (wking_checks[0] < white_king && desired_position < wking_checks[0])
-                        || ((wking_checks[0]-white_king)%7 == 0 && (desired_position-white_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((wking_checks[0]-white_king)%7 == 0 && wking_checks[0]-white_king < 49 && (desired_position-white_king)%7 != 0) // the pawn is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%9 == 0 && (desired_position-white_king)%9 != 0) // the pawn is not blocking the diagonal
                         || ((wking_checks[0]-white_king)%8 == 0 && (desired_position-white_king)%8 != 0) { // the pawn is not blocking the file
 
@@ -3722,8 +3786,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_a.len() {
-                                                    if black_column_a[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_a.len()).rev() {
+                                                    if black_column_a[pawn] == desired_position
+                                                    || black_column_a[pawn] == desired_position+8 {
                                                         black_column_a.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3739,8 +3804,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_b.len() {
-                                                    if black_column_b[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_b.len()).rev() {
+                                                    if black_column_b[pawn] == desired_position
+                                                    || black_column_b[pawn] == desired_position+8 {
                                                         black_column_b.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3756,8 +3822,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_c.len() {
-                                                    if black_column_c[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_c.len()).rev() {
+                                                    if black_column_c[pawn] == desired_position
+                                                    || black_column_c[pawn] == desired_position+8 {
                                                         black_column_c.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3773,8 +3840,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_d.len() {
-                                                    if black_column_d[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_d.len()).rev() {
+                                                    if black_column_d[pawn] == desired_position
+                                                    || black_column_d[pawn] == desired_position+8 {
                                                         black_column_d.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3790,8 +3858,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_d.len() {
-                                                    if black_column_d[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_d.len()).rev() {
+                                                    if black_column_d[pawn] == desired_position
+                                                    || black_column_d[pawn] == desired_position+8 {
                                                         black_column_d.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3807,8 +3876,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_f.len() {
-                                                    if black_column_f[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_f.len()).rev() {
+                                                    if black_column_f[pawn] == desired_position
+                                                    || black_column_f[pawn] == desired_position+8 {
                                                         black_column_f.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3824,8 +3894,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_g.len() {
-                                                    if black_column_g[pawn] == desired_position+8 {
+                                                for pawn in (0..black_column_g.len()).rev() {
+                                                    if black_column_g[pawn] == desired_position
+                                                    || black_column_g[pawn] == desired_position+8 {
                                                         black_column_g.swap_remove(pawn);
                                                         break;
                                                     }
@@ -3841,8 +3912,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..black_column_h.len() {
-                                                    if black_column_h[pawn] == desired_position+8{
+                                                for pawn in (0..black_column_h.len()).rev() {
+                                                    if black_column_h[pawn] == desired_position
+                                                    || black_column_h[pawn] == desired_position+8{
                                                         black_column_h.swap_remove(pawn);
                                                         break;
                                                     }
@@ -4191,7 +4263,14 @@ fn main() {
                         }else if black_king < bking_checks[0] {
                             if get_line(black_king) == get_line(bking_checks[0]) {
                                 for square in 1..8 {
-                                    if get_pieces_checking_the_white_king(black_king+square, &board).len() > 0 {
+                                    let mut black_pieces_reaching_the_square = get_pieces_checking_the_white_king(black_king+square, &board);
+                                    for i in (0..black_pieces_reaching_the_square.len()).rev() {
+                                        if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
+                                        && board[(black_king+square) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if black_pieces_reaching_the_square.len() > 0 {
                                         break; // black pieces can block the check
                                     }else if black_king+square == bking_checks[0] {
                                         // nothing could block the check
@@ -4201,7 +4280,14 @@ fn main() {
                                 }
                             }else if (black_king-bking_checks[0])%8 == 0 {
                                 for square in 1..8 {
-                                    if get_pieces_checking_the_white_king(black_king+square*8, &board).len() > 0 {
+                                    let mut black_pieces_reaching_the_square = get_pieces_checking_the_white_king(black_king+square*8, &board);
+                                    for i in (0..black_pieces_reaching_the_square.len()).rev() {
+                                        if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
+                                        && board[(black_king+square*8) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if black_pieces_reaching_the_square.len() > 0 {
                                         break; // black pieces can block the check
                                     }else if black_king+square*8 == bking_checks[0] {
                                         // nothing could block the check
@@ -4211,7 +4297,24 @@ fn main() {
                                 }
                             }else if (black_king-bking_checks[0])%7 == 0 {
                                 for diagonal in 1..8 {
-                                    if get_pieces_checking_the_white_king(black_king+diagonal*7, &board).len() > 0 {
+                                    let mut black_pieces_reaching_the_square = get_pieces_checking_the_white_king(black_king+diagonal*7, &board);
+                                    for i in (0..black_pieces_reaching_the_square.len()).rev() {
+                                        if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
+                                        && board[(black_king+diagonal*7) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if (black_king+diagonal*7 + 8) < 63 {
+                                        if board[(black_king+diagonal*7 + 8) as usize] == BLACK_PAWN {
+                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*7+8);
+                                        }
+                                    }
+                                    if (black_king+diagonal*7 + 16) < 63 {
+                                       if get_line(black_king+diagonal*7 + 16) == 2 {
+                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*7+16);
+                                        }
+                                    }
+                                    if black_pieces_reaching_the_square.len() > 0 {
                                         break; // black pieces can block the check
                                     }else if black_king+diagonal*7 == bking_checks[0] {
                                         // nothing could block the check
@@ -4221,7 +4324,24 @@ fn main() {
                                 }
                             }else if (black_king-bking_checks[0])%9 == 0 {
                                 for diagonal in 1..8 {
-                                    if get_pieces_checking_the_white_king(black_king+diagonal*9, &board).len() > 0 {
+                                    let mut black_pieces_reaching_the_square = get_pieces_checking_the_white_king(black_king+diagonal*9, &board);
+                                    for i in (0..black_pieces_reaching_the_square.len()).rev() {
+                                        if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
+                                        && board[(black_king+diagonal*9) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.swap_remove(i);
+                                        }
+                                    }
+                                    if (black_king+diagonal*9 + 8) < 63 {
+                                        if board[(black_king+diagonal*9 + 8) as usize] == BLACK_PAWN {
+                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*9+8);
+                                        }
+                                    }
+                                    if (black_king+diagonal*9 + 16) < 63 {
+                                       if get_line(black_king+diagonal*9 + 16) == 2 {
+                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*9+16);
+                                        }
+                                    }
+                                    if black_pieces_reaching_the_square.len() > 0 {
                                         break; // black pieces can block the check
                                     }else if black_king+diagonal*9 == bking_checks[0] {
                                         // nothing could block the check
@@ -4314,7 +4434,7 @@ fn main() {
                         || (bking_checks[0] > black_king && desired_position > bking_checks[0]) // blocking piece is "behind" the checking piece
                         || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking piece must also be lower
                         || (bking_checks[0] < black_king && desired_position < bking_checks[0])
-                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the piece is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%7 == 0 && bking_checks[0]-black_king < 49 && (desired_position-black_king)%7 != 0) // the piece is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the piece is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the piece is not blocking the file
 
@@ -4413,7 +4533,7 @@ fn main() {
                                 for b_knight in black_knights.iter_mut() {
                                     match *b_knight - desired_position {
                                         -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            for piece in wpinned.iter() {
+                                            for piece in bpinned.iter() {
                                                 if *b_knight == *piece {
                                                 // knights cant move out of absolute pins
                                                 println!("That knight is pinned and may not move right now!\n");
@@ -4891,7 +5011,8 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - black_king {
                                 -9 => {
-                                    if !upper_left_diagonal(black_king, 1) {
+                                    if !upper_left_diagonal(black_king, 1) 
+                                    && get_pieces_checking_the_black_king(black_king-9, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4902,7 +5023,8 @@ fn main() {
                                         }
                                     },
                                 -8 => {
-                                    if !rook_up(black_king, 1) {
+                                    if !rook_up(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king-8, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4913,7 +5035,8 @@ fn main() {
                                         }
                                     },
                                 -7 => {
-                                    if !upper_right_diagonal(black_king, 1) {
+                                    if !upper_right_diagonal(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king-7, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4924,7 +5047,8 @@ fn main() {
                                         }
                                     },
                                 -1 => {
-                                    if !rook_left(black_king, 1) {
+                                    if !rook_left(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king-1, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4935,7 +5059,8 @@ fn main() {
                                         }
                                     },
                                 1 => {
-                                    if !rook_right(black_king, 1) {
+                                    if !rook_right(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+1, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4946,7 +5071,8 @@ fn main() {
                                         }
                                     },
                                 7 => {
-                                    if !inferior_left_diagonal(black_king, 1) {
+                                    if !inferior_left_diagonal(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+7, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4957,7 +5083,8 @@ fn main() {
                                         }
                                     },
                                 8 => {
-                                    if !rook_down(black_king, 1) {
+                                    if !rook_down(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+8, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -4968,7 +5095,8 @@ fn main() {
                                         }
                                     },
                                 9 => {
-                                    if !inferior_right_diagonal(black_king, 1) {
+                                    if !inferior_right_diagonal(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+9, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -5410,7 +5538,7 @@ fn main() {
                         || (bking_checks[0] > black_king && desired_position > bking_checks[0])
                         || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking piece must also be lower
                         || (bking_checks[0] < black_king && desired_position < bking_checks[0])
-                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the piece is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%7 == 0 && bking_checks[0]-black_king < 49 && (desired_position-black_king)%7 != 0) // the piece is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the piece is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the piece is not blocking the file
 
@@ -5505,7 +5633,7 @@ fn main() {
                                 for b_knight in black_knights.iter_mut() {
                                     match *b_knight - desired_position {
                                         -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            for piece in wpinned.iter() {
+                                            for piece in bpinned.iter() {
                                                 if *b_knight == *piece {
                                                 // knights cant move out of absolute pins
                                                 println!("That knight is pinned and may not move right now!\n");
@@ -5983,7 +6111,8 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - black_king {
                                 -9 => {
-                                    if !upper_left_diagonal(black_king, 1) {
+                                    if !upper_left_diagonal(black_king, 1) 
+                                    && get_pieces_checking_the_black_king(black_king-9, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -5994,7 +6123,8 @@ fn main() {
                                         }
                                     },
                                 -8 => {
-                                    if !rook_up(black_king, 1) {
+                                    if !rook_up(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king-8, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6005,7 +6135,8 @@ fn main() {
                                         }
                                     },
                                 -7 => {
-                                    if !upper_right_diagonal(black_king, 1) {
+                                    if !upper_right_diagonal(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king-7, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6016,7 +6147,8 @@ fn main() {
                                         }
                                     },
                                 -1 => {
-                                    if !rook_left(black_king, 1) {
+                                    if !rook_left(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king-1, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6027,7 +6159,8 @@ fn main() {
                                         }
                                     },
                                 1 => {
-                                    if !rook_right(black_king, 1) {
+                                    if !rook_right(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+1, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6038,7 +6171,8 @@ fn main() {
                                         }
                                     },
                                 7 => {
-                                    if !inferior_left_diagonal(black_king, 1) {
+                                    if !inferior_left_diagonal(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+7, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6049,7 +6183,8 @@ fn main() {
                                         }
                                     },
                                 8 => {
-                                    if !rook_down(black_king, 1) {
+                                    if !rook_down(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+8, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6060,7 +6195,8 @@ fn main() {
                                         }
                                     },
                                 9 => {
-                                    if !inferior_right_diagonal(black_king, 1) {
+                                    if !inferior_right_diagonal(black_king, 1)
+                                    && get_pieces_checking_the_black_king(black_king+9, &board).len() == 0 {
                                         board[black_king as usize] = NOTHING;
                                         board[desired_position as usize] = BLACK_KING;
                                         black_king = desired_position;
@@ -6450,7 +6586,7 @@ fn main() {
                     if try_again == false {
                         match captured_piece {
                             'i' => {
-                                match san_move[1] {
+                                match san_move[2] {
                                     'a' => {
                                         for pawn in 0..white_column_a.len() {
                                             if white_column_a[pawn] == desired_position {
@@ -6670,7 +6806,7 @@ fn main() {
                         || (bking_checks[0] > black_king && desired_position > bking_checks[0])
                         || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
                         || (bking_checks[0] < black_king && desired_position < bking_checks[0])
-                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%7 == 0 && bking_checks[0]-black_king < 49 && (desired_position-black_king)%7 != 0) // the pawn is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the pawn is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the pawn is not blocking the file
 
@@ -7346,7 +7482,7 @@ fn main() {
                         || (bking_checks[0] > black_king && desired_position > bking_checks[0])
                         || (bking_checks[0] < black_king && desired_position > black_king) // if the checking piece has a lower index than the king, the blocking pawn must also be lower
                         || (bking_checks[0] < black_king && desired_position < bking_checks[0])
-                        || ((bking_checks[0]-black_king)%7 == 0 && (desired_position-black_king)%7 != 0) // the pawn is not blocking the diagonal
+                        || ((bking_checks[0]-black_king)%7 == 0 && bking_checks[0]-black_king < 49 && (desired_position-black_king)%7 != 0) // the pawn is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%9 == 0 && (desired_position-black_king)%9 != 0) // the pawn is not blocking the diagonal
                         || ((bking_checks[0]-black_king)%8 == 0 && (desired_position-black_king)%8 != 0) { // the pawn is not blocking the file
 
@@ -7673,8 +7809,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_a.len() {
-                                                    if white_column_a[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_a.len()).rev() {
+                                                    if white_column_a[pawn] == desired_position
+                                                    || white_column_a[pawn] == desired_position-8 {
                                                         white_column_a.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7690,8 +7827,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_b.len() {
-                                                    if white_column_b[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_b.len()).rev() {
+                                                    if white_column_b[pawn] == desired_position
+                                                    || white_column_b[pawn] == desired_position-8 {
                                                         white_column_b.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7707,8 +7845,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_c.len() {
-                                                    if white_column_c[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_c.len()).rev() {
+                                                    if white_column_c[pawn] == desired_position
+                                                    || white_column_c[pawn] == desired_position-8 {
                                                         white_column_c.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7724,8 +7863,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_d.len() {
-                                                    if white_column_d[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_d.len()).rev() {
+                                                    if white_column_d[pawn] == desired_position
+                                                    || white_column_d[pawn] == desired_position-8 {
                                                         white_column_d.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7741,8 +7881,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_e.len() {
-                                                    if white_column_e[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_e.len()).rev() {
+                                                    if white_column_e[pawn] == desired_position
+                                                    || white_column_e[pawn] == desired_position-8 {
                                                         white_column_e.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7758,8 +7899,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_f.len() {
-                                                    if white_column_f[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_f.len()).rev() {
+                                                    if white_column_f[pawn] == desired_position
+                                                    || white_column_f[pawn] == desired_position-8 {
                                                         white_column_f.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7775,8 +7917,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_g.len() {
-                                                    if white_column_g[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_g.len()).rev() {
+                                                    if white_column_g[pawn] == desired_position
+                                                    || white_column_g[pawn] == desired_position-8 {
                                                         white_column_g.swap_remove(pawn);
                                                         break;
                                                     }
@@ -7792,8 +7935,9 @@ fn main() {
                                                     }
                                                 };
                                             }else{
-                                                for pawn in 0..white_column_h.len() {
-                                                    if white_column_h[pawn] == desired_position-8 {
+                                                for pawn in (0..white_column_h.len()).rev() {
+                                                    if white_column_h[pawn] == desired_position
+                                                    || white_column_h[pawn] == desired_position-8 {
                                                         white_column_h.swap_remove(pawn);
                                                         break;
                                                     }
@@ -8099,7 +8243,7 @@ fn show_board(board: &[char; 64]) { //print the board
         };
 }
 
-// piece/color checks
+// piece/color tests
 fn is_piece(piece: char) -> bool {
     match piece {
         'n'|'N' |
@@ -8136,7 +8280,7 @@ fn is_black(piece: char) -> bool {
 }
 
 
-// diagonal checks
+// diagonal tests
 fn upper_right_diagonal(b: i8, i: i8) -> bool {
     // if the index is one of the following,
     // return true
@@ -8181,7 +8325,7 @@ fn inferior_left_diagonal(b: i8, i: i8) -> bool {
 }
 
 
-// rook-like movement checks
+// rook-like movement tests
 fn rook_right(b: i8, i: i8) -> bool {
     match b + i {
         8 | 16 | 24 | 32 | 40 | 48 | 56 | 64 => true,
