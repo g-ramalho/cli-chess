@@ -94,36 +94,52 @@ fn main() {
     let mut board = [NOTHING; 64];
 
     // pawns setup
-    for i in 0..8 {
-        board[i+8] = BLACK_PAWN;
-        board[i+48] = WHITE_PAWN;
-    };
+    for column in [&white_column_a, &white_column_b, &white_column_c, &white_column_d, &white_column_e, &white_column_f, &white_column_g, &white_column_h].iter() {
+        for pawn in column.iter() {
+            board[*pawn as usize] = WHITE_PAWN;
+        }
+    }
+    for column in [&black_column_a, &black_column_b, &black_column_c, &black_column_d, &black_column_e, &black_column_f, &black_column_g, &black_column_h].iter() {
+        for pawn in column.iter() {
+            board[*pawn as usize] = BLACK_PAWN;
+        }
+    }
 
     //rook setup 0, 7, 56, 63
-    board[0] = BLACK_ROOK;
-    board[7] = BLACK_ROOK;
-    board[56] = WHITE_ROOK;
-    board[63] = WHITE_ROOK;
+    for rook in black_rooks.iter() {
+        board[*rook as usize] = BLACK_ROOK;
+    }
+    for rook in white_rooks.iter() {
+        board[*rook as usize] = WHITE_ROOK;
+    }
 
     //knight setup 1, 6, 57, 62
-    board[1] = BLACK_KNIGHT;
-    board[6] = BLACK_KNIGHT;
-    board[57] = WHITE_KNIGHT;
-    board[62] = WHITE_KNIGHT;
+    for knight in black_knights.iter() {
+        board[*knight as usize] = BLACK_KNIGHT;
+    }
+    for knight in white_knights.iter() {
+        board[*knight as usize] = WHITE_KNIGHT;
+    }
 
     //bishop setup 2, 5, 58, 61
-    board[2] = BLACK_BISHOP;
-    board[5] = BLACK_BISHOP;
-    board[58] = WHITE_BISHOP;
-    board[61] = WHITE_BISHOP;
+    for bishop in black_bishops.iter() {
+        board[*bishop as usize] = BLACK_BISHOP;
+    }
+    for bishop in white_bishops.iter() {
+        board[*bishop as usize] = WHITE_BISHOP;
+    }
 
     //queen setup 3, 59
-    board[3] = BLACK_QUEEN;
-    board[59] = WHITE_QUEEN;
+    for queen in black_queens.iter() {
+        board[*queen as usize] = BLACK_QUEEN;
+    }
+    for queen in white_queens.iter() {
+        board[*queen as usize] = WHITE_QUEEN;
+    }
 
     //king setup 4, 60
-    board[4] = BLACK_KING;
-    board[60] = WHITE_KING;
+    board[black_king as usize] = BLACK_KING;
+    board[white_king as usize] = WHITE_KING;
 
     'game: loop {
     
@@ -149,7 +165,7 @@ fn main() {
             }
         }else if wking_checks.len() == 1 { // king in check
             if wking_safe_squares.len() == 0 { // and has no safe squares to go to
-                if  get_pieces_checking_the_black_king(wking_checks[0], &board).len() < 1 {
+                if get_pieces_checking_the_black_king(wking_checks[0], &board).len() < 1 {
                     // white pieces can't take the checking piece
                     if board[(wking_checks[0]) as usize] != 'n' { // checking piece is not a knight
                         if white_king > wking_checks[0] {
@@ -159,7 +175,19 @@ fn main() {
                                     for i in (0..white_pieces_reaching_the_square.len()).rev() {
                                         if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
                                         && board[(white_king-square) as usize] == NOTHING {
-                                            white_pieces_reaching_the_square.swap_remove(i);
+                                            // 
+                                            white_pieces_reaching_the_square.remove(i);
+                                        }
+                                    }
+                                    if white_king-square + 8 <= 63 && white_king-square + 8 >= 0 {
+                                        if board[(white_king-square + 8) as usize] == WHITE_PAWN {
+                                            white_pieces_reaching_the_square.insert(0, white_king-square+8);
+                                        }
+                                    }else if white_king-square + 16 <= 63 && white_king-square + 16 >= 0 {
+                                       if get_line(white_king-square + 16) == 2
+                                       && board[(white_king-square + 16) as usize] == WHITE_PAWN
+                                       && board[(white_king-square + 8) as usize] == NOTHING {
+                                            white_pieces_reaching_the_square.insert(0, white_king-square+16);
                                         }
                                     }
                                     if white_pieces_reaching_the_square.len() > 0 {
@@ -176,7 +204,7 @@ fn main() {
                                     for i in (0..white_pieces_reaching_the_square.len()).rev() {
                                         if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
                                         && board[(white_king-square*8) as usize] == NOTHING {
-                                            white_pieces_reaching_the_square.swap_remove(i);
+                                            white_pieces_reaching_the_square.remove(i);
                                         }
                                     }
                                     if white_pieces_reaching_the_square.len() > 0 {
@@ -193,16 +221,17 @@ fn main() {
                                     for i in (0..white_pieces_reaching_the_square.len()).rev() {
                                         if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
                                         && board[(white_king-diagonal*7) as usize] == NOTHING {
-                                            white_pieces_reaching_the_square.swap_remove(i);
+                                            white_pieces_reaching_the_square.remove(i);
                                         }
                                     }
-                                    if (white_king-diagonal*7 + 8) < 63 {
+                                    if white_king-diagonal*7 + 8 <= 63 && white_king-diagonal*7 + 8 >= 0 {
                                         if board[(white_king-diagonal*7 + 8) as usize] == WHITE_PAWN {
                                             white_pieces_reaching_the_square.insert(0, white_king-diagonal*7+8);
                                         }
-                                    }
-                                    if (white_king-diagonal*7 + 16) < 63 {
-                                       if get_line(white_king-diagonal*7 + 16) == 2 {
+                                    }else if white_king-diagonal*7 + 16 <= 63 && white_king-diagonal*7 + 16 >= 0 {
+                                       if get_line(white_king-diagonal*7 + 16) == 2
+                                       && board[(white_king-diagonal*7 + 16) as usize] == WHITE_PAWN
+                                       && board[(white_king-diagonal*7 + 8) as usize] == NOTHING {
                                             white_pieces_reaching_the_square.insert(0, white_king-diagonal*7+16);
                                         }
                                     }
@@ -220,16 +249,17 @@ fn main() {
                                     for i in (0..white_pieces_reaching_the_square.len()).rev() {
                                         if board[white_pieces_reaching_the_square[i] as usize] == WHITE_PAWN
                                         && board[(white_king-diagonal*9) as usize] == NOTHING {
-                                            white_pieces_reaching_the_square.swap_remove(i);
+                                            white_pieces_reaching_the_square.remove(i);
                                         }
                                     }
-                                    if (white_king-diagonal*9 + 8) < 63 {
+                                    if white_king-diagonal*9 + 8 <= 63 && white_king-diagonal*9 + 8 >= 0 {
                                         if board[(white_king-diagonal*9 + 8) as usize] == WHITE_PAWN {
                                             white_pieces_reaching_the_square.insert(0, white_king-diagonal*9+8);
                                         }
-                                    }
-                                    if (white_king-diagonal*9 + 16) < 63 {
-                                       if get_line(white_king-diagonal*9 + 16) == 2 {
+                                    }else if white_king-diagonal*9 + 16 <= 63 && white_king-diagonal*9 + 16 >= 0{
+                                       if get_line(white_king-diagonal*9 + 16) == 2
+                                       && board[(white_king-diagonal*9 + 16)as usize] == WHITE_PAWN
+                                       && board[(white_king-diagonal*9 + 8) as usize] == NOTHING  {
                                             white_pieces_reaching_the_square.insert(0, white_king-diagonal*9+16);
                                         }
                                     }
@@ -292,6 +322,211 @@ fn main() {
                     } 
                 }
             }
+        }else if wking_checks.len() == 0 && wking_safe_squares.len() == 0 { // test if the game is drawn (king not in check)
+            let total_white_pawns = white_column_a.len()+white_column_b.len()+white_column_c.len()+white_column_d.len()+white_column_e.len()+white_column_f.len()+white_column_g.len()+white_column_h.len();
+            
+            let total_white_pieces = white_bishops.len()+white_knights.len()+white_rooks.len()+white_queens.len();
+
+            let total_black_pawns = black_column_a.len()+black_column_b.len()+black_column_c.len()+black_column_d.len()+black_column_e.len()+black_column_f.len()+black_column_g.len()+black_column_h.len();
+
+            //no more white pawns
+            if total_white_pawns == 0 && total_black_pawns == 0 {
+                if white_rooks.len() == 0 && white_queens.len() == 0 && black_rooks.len() == 0 && black_queens.len() == 0 {
+                    if (white_bishops.len() == 1 && white_knights.len() < 1)
+                    || (white_bishops.len() < 1 && white_knights.len() <= 2) {
+                        if (black_bishops.len() == 1 && black_knights.len() < 1)
+                        || (black_bishops.len() < 1 && black_knights.len() <= 2) {
+                            println!("\nINSUFFICIENT MATERIAL FOR CHECKMATE! IT'S A DRAW!\n");
+                            break 'game;
+                        }
+                    }
+                }
+            }
+            if (wpinned.len() as i8) - (total_white_pawns as i8) <= total_white_pieces as i8 {
+                // all avaliable pieces are pinned (or there are no pieces left)
+                // otherwise there are unpinned (and maybe movable) pieces
+                let mut draw_counter: usize = 0;
+
+                'test_if_there_are_movable_white_pawns: 
+                for column in [&white_column_a, &white_column_b, &white_column_c, &white_column_d, &white_column_e, &white_column_f, &white_column_g, &white_column_h].iter() {
+                    if column.len() == 0 {
+                        continue 'test_if_there_are_movable_white_pawns;
+                    }
+                    'pawn: for pawn in column.iter() {
+                        for i in wpinned.iter() {
+                            if *pawn == *i {
+                                draw_counter += 1;
+                                break 'pawn;
+                            }
+                        }
+                        if *pawn-9 >= 0 {
+                            if is_black(board[(*pawn-9) as usize])
+                            || board[(*pawn-8) as usize] == NOTHING
+                            || is_black(board[(*pawn-7) as usize]) {
+                                continue 'test_if_there_are_movable_white_pawns;
+                            }
+                        }else if *pawn-8 >= 0 {
+                            if board[(*pawn-8) as usize] == NOTHING 
+                            || is_black(board[(*pawn-7) as usize]) {
+                                continue 'test_if_there_are_movable_white_pawns;
+                            }
+                        }else if *pawn-7 >= 0 {
+                            if is_black(board[(*pawn-7) as usize]) {
+                                continue 'test_if_there_are_movable_white_pawns;
+                            }
+                        }
+                        draw_counter += 1;
+                    }
+                }
+
+                'bishops: for bishop in white_bishops.iter() {
+                    if *bishop-7 >= 0 {
+                        if !upper_right_diagonal(*bishop, 1) {
+                            if !is_white(board[(*bishop-7) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    if *bishop-9 >= 0 {
+                        if !upper_left_diagonal(*bishop, 1) {
+                            if !is_white(board[(*bishop-9) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    if *bishop+9 <= 63 {
+                        if !inferior_right_diagonal(*bishop, 1) {
+                            if !is_white(board[(*bishop+9) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    if *bishop+7 <= 63 {
+                        if !upper_left_diagonal(*bishop, 1) {
+                            if !is_white(board[(*bishop+7) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                    // if no 'continue' is triggered, the piece has no squares to go
+                }
+
+                'knights: for knight in white_knights.iter() {
+                    for nmove in [-17,-15,15,17].iter() {
+                        let position = *knight+*nmove;
+                        if position >= 0 && position <= 63 {
+                            if get_line(position)-get_line(*knight) == 2
+                            || get_line(position)-get_line(*knight) == -2 {
+                                if !is_white(board[position as usize]) {
+                                    continue 'knights;
+                                }
+                            }
+                        }
+                    }
+                    for nmove in [-10,-6,6,10].iter() {
+                        let position = *knight+*nmove;
+                        if position >= 0 && position <= 63 {
+                            if get_line(position)-get_line(*knight) == 1
+                            || get_line(position)-get_line(*knight) == -1 {
+                                if !is_white(board[position as usize]) {
+                                    continue 'knights;
+                                }
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                }
+            
+                'rooks: for rook in white_rooks.iter() {
+                    if *rook-8 >= 0 {
+                        if !is_white(board[(*rook-8) as usize]){
+                            continue 'rooks;
+                        }
+                    }
+                    if *rook-1 >= 0 {
+                        if !rook_left(*rook, 1) {
+                            if !is_white(board[(*rook-1) as usize]) {
+                                continue 'rooks;
+                            }
+                        }
+                    }
+                    if *rook+8 <= 63 {
+                        if !is_white(board[(*rook+8) as usize]) {
+                            continue 'rooks;
+                        }
+                    }
+                    if *rook+1 <= 63 {
+                        if !rook_right(*rook, 1) {
+                            if !is_white(board[(*rook+1) as usize]) {
+                                continue 'rooks;
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                }
+            
+                'queens: for queen in white_queens.iter() {
+                    if *queen+9 <= 63 {
+                        if !inferior_right_diagonal(*queen, 1) {
+                            if !is_white(board[(*queen+9) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen+8 <= 63 {
+                        if !is_white(board[(*queen+8) as usize]) {
+                            continue 'queens;
+                        }
+                    }
+                    if *queen+7 <= 63 {
+                        if !inferior_left_diagonal(*queen, 1) {
+                            if !is_white(board[(*queen+7) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen+1 <= 63 {
+                        if !rook_right(*queen, 1) {
+                            if !is_white(board[(*queen+1) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen-9 >= 0 {
+                        if !upper_left_diagonal(*queen, 1) {
+                            if !is_white(board[(*queen-9) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen-8 >= 0 {
+                        if !is_white(board[(*queen-8) as usize]) {
+                            continue 'queens;
+                        }
+                    }
+                    if *queen-7 >= 0 {
+                        if !upper_right_diagonal(*queen, 1) {
+                            if !is_white(board[(*queen-7) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen-1 >= 0 {
+                        if !rook_left(*queen, 1) {
+                            if !is_white(board[(*queen-1) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                }
+
+                if draw_counter == total_white_pawns+total_white_pieces {
+                    println!("\nTHE WHITE KING HAS NO VALID MOVES AND IS NOT IN CHECK! IT'S A STALEMATE!\n");
+                    break 'game;
+                }
+            }
         }
         try_again = true;
 
@@ -313,7 +548,7 @@ fn main() {
                 continue 'white;
             }
 
-            if is_piece(san_move[0]) && san_move[1] != 'x' && san_move.len() >= 3 { // piece movement
+            if is_piece(san_move[0]) && san_move[1] != 'x' { // piece movement
                 column = match san_move[1] {
                     'a' => 0,
                     'b' => 1,
@@ -445,51 +680,91 @@ fn main() {
 
                                 for w_knight in white_knights.iter_mut() {
                                     if knight_column + knight_line == *w_knight {
-                                        match *w_knight - desired_position {
-                                            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                                for piece in wpinned.iter() {
-                                                    if knight_column + knight_line == *piece {
-                                                        // knights cant move out of absolute pins
-                                                        println!("That knight is pinned and may not move right now!\n");
-                                                        continue 'white;
+                                        if get_line(*w_knight)-get_line(desired_position) == 2 
+                                        || get_line(*w_knight)-get_line(desired_position) == -2 {
+                                            match desired_position-*w_knight {
+                                                -17 | -15 | 15 | 17 => {
+                                                    for piece in wpinned.iter() {
+                                                        if knight_column + knight_line == *piece {
+                                                            // knights cant move out of absolute pins
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
                                                     }
-                                                }
-                                                //last position is freed
-                                                board[*w_knight as usize] = NOTHING;
+                                                    //last position is freed
+                                                    board[*w_knight as usize] = NOTHING;
 
-                                                //piece is moved to new position
-                                                board[desired_position as usize] = WHITE_KNIGHT;
+                                                    //piece is moved to new position
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
 
-                                                //current position is updated
-                                                *w_knight = desired_position;
+                                                    //current position is updated
+                                                    *w_knight = desired_position;
 
-                                                try_again = false;
-                                                break;
-                                            },
-                                            _ => ()
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
+                                        }else if get_line(*w_knight)-get_line(desired_position) == 1
+                                        || get_line(*w_knight)-get_line(desired_position) == -1 {
+                                            match desired_position-*w_knight {
+                                                -10 | -6 | 6 | 10 => {
+                                                    for piece in wpinned.iter() {
+                                                        if knight_column + knight_line == *piece {
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
+                                                    }
+                                                    board[*w_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    *w_knight = desired_position;
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
                                         }
                                     }
-                                }
+                                };
                             }else{
                                 for w_knight in white_knights.iter_mut() {
-                                    match *w_knight - desired_position {
-                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            for piece in wpinned.iter() {
-                                                if *w_knight == *piece {
-                                                // knights cant move out of absolute pins
-                                                println!("That knight is pinned and may not move right now!\n");
-                                                continue 'white;
-                                                }
-                                            }
-                                            board[*w_knight as usize] = NOTHING;
-                                            board[desired_position as usize] = WHITE_KNIGHT;
-                                            *w_knight = desired_position;
-
-                                            try_again = false;
-                                            break;
-                                        },
-                                        _ => ()
-                                    }
+                                    if get_line(*w_knight)-get_line(desired_position) == 2 
+                                        || get_line(*w_knight)-get_line(desired_position) == -2 {
+                                            match desired_position-*w_knight {
+                                                -17 | -15 | 15 | 17 => {
+                                                    for piece in wpinned.iter() {
+                                                        if *w_knight == *piece {
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
+                                                    }
+                                                    board[*w_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    *w_knight = desired_position;
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
+                                        }else if get_line(*w_knight)-get_line(desired_position) == 1
+                                        || get_line(*w_knight)-get_line(desired_position) == -1 {
+                                            match desired_position-*w_knight {
+                                                -10 | -6 | 6 | 10 => {
+                                                    for piece in wpinned.iter() {
+                                                        if *w_knight == *piece {
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
+                                                    }
+                                                    board[*w_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    *w_knight = desired_position;
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
+                                        }
                                 };
                             }
                         },
@@ -556,9 +831,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop - diagonal*7) as usize]) 
-                                                    || is_black(board[((*w_bishop - diagonal*7) as usize)]) 
-                                                    || upper_right_diagonal(*w_bishop, diagonal){
+                                                    }else if upper_right_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop - diagonal*7) as usize]) 
+                                                    || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
                                                         // otherwise, if there are any white/black pieces on the way, the square is unreachable
                                                         break;
                                                     }
@@ -576,9 +851,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop - diagonal*9) as usize]) 
-                                                    || is_black(board[((*w_bishop - diagonal*9) as usize)]) 
-                                                    || upper_left_diagonal(*w_bishop, diagonal) {
+                                                    }else if upper_left_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop - diagonal*9) as usize]) 
+                                                    || is_black(board[((*w_bishop - diagonal*9) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -597,9 +872,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*w_bishop + 7*diagonal) as usize])
-                                                    || inferior_left_diagonal(*w_bishop, diagonal) {
+                                                    }else if inferior_left_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*w_bishop + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -616,9 +891,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                    || inferior_right_diagonal(*w_bishop, diagonal){
+                                                    }else if inferior_right_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -645,9 +920,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop - diagonal*7) as usize]) 
-                                                || is_black(board[((*w_bishop - diagonal*7) as usize)]) 
-                                                || upper_right_diagonal(*w_bishop, diagonal) {
+                                                }else if upper_right_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop - diagonal*7) as usize]) 
+                                                || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
                                                     // otherwise, if there are any white/black pieces on the way, the square is unreachable
                                                     break;
                                                 }
@@ -665,9 +940,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop - diagonal*9) as usize]) 
-                                                || is_black(board[((*w_bishop - diagonal*9) as usize)]) 
-                                                || upper_left_diagonal(*w_bishop, diagonal) {
+                                                }else if upper_left_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop - diagonal*9) as usize]) 
+                                                || is_black(board[((*w_bishop - diagonal*9) as usize)]) {
                                                     break;
                                                 }
                                             }
@@ -686,9 +961,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) 
-                                                || is_black(board[(*w_bishop + 7*diagonal) as usize]) 
-                                                || inferior_left_diagonal(*w_bishop, diagonal) {
+                                                }else if inferior_left_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                || is_black(board[(*w_bishop + 7*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -705,9 +980,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                || is_black(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                || inferior_right_diagonal(*w_bishop, diagonal) {
+                                                }else if inferior_right_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -718,7 +993,7 @@ fn main() {
                         },
                         'r'|'R' => {
                             // check if more than one rook can reach the desired square
-                            if test_multiple_rooks(&mut white_rooks, desired_position) == true {
+                            if test_multiple_rooks(&mut white_rooks, desired_position, &board) == true {
                                 println!("Specify the current square of the rook to be moved");
                                 player_move.clear();
                                 san_move.clear();
@@ -775,16 +1050,16 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook - square) as usize]) 
-                                                    || is_black(board[(*w_rook - square) as usize])
-                                                    || rook_left(*w_rook, square) {
+                                                    }else if rook_left(*w_rook, square)
+                                                    || is_white(board[(*w_rook - square) as usize]) 
+                                                    || is_black(board[(*w_rook - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*w_rook - desired_position)%8 == 0 {
                                                 // otherwise, test if it is on the same file
                                                 for square in 1..8 {
-                                                    if *w_rook - square*8 == desired_position && !rook_up(*w_rook, square) {
+                                                    if *w_rook - square*8 == desired_position && *w_rook-square*8 >= 0 {
                                                         if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -800,9 +1075,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook - square*8) as usize]) 
-                                                    || is_black(board[(*w_rook - square*8) as usize])
-                                                    || rook_up(*w_rook, square) {
+                                                    }else if *w_rook-square*8 < 0
+                                                    || is_white(board[(*w_rook - square*8) as usize]) 
+                                                    || is_black(board[(*w_rook - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -826,15 +1101,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook + square) as usize]) 
-                                                    || is_black(board[(*w_rook + square) as usize]) 
-                                                    || rook_right(*w_rook, square) {
+                                                    }else if rook_right(*w_rook, square)
+                                                    || is_white(board[(*w_rook + square) as usize]) 
+                                                    || is_black(board[(*w_rook + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *w_rook)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *w_rook + square*8 == desired_position && !rook_down(*w_rook, square) {
+                                                    if *w_rook + square*8 == desired_position && *w_rook+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -850,9 +1125,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook + square*8) as usize]) 
-                                                    || is_black(board[(*w_rook + square*8) as usize])
-                                                    || rook_down(*w_rook, square) {
+                                                    }else if *w_rook+square*8 > 63
+                                                    || is_white(board[(*w_rook + square*8) as usize]) 
+                                                    || is_black(board[(*w_rook + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -861,7 +1136,7 @@ fn main() {
                                     }
                                 };
                             }else{ // only one rook may reach the desired square
-                                for w_rook in &mut white_rooks.iter_mut() {    
+                                'rook: for w_rook in &mut white_rooks.iter_mut() {    
                                     if *w_rook > desired_position {
                                         if get_line(*w_rook) == get_line(desired_position) {
                                             for square in 1..8 {
@@ -880,16 +1155,16 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook - square) as usize]) 
-                                                || is_black(board[(*w_rook - square) as usize]) 
-                                                || rook_left(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_left(*w_rook, square)
+                                                || is_white(board[(*w_rook - square) as usize]) 
+                                                || is_black(board[(*w_rook - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*w_rook - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_rook - square*8 == desired_position && !rook_up(*w_rook, square) {
+                                                if *w_rook - square*8 == desired_position && *w_rook-square*8 >= 0 {
                                                     if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -904,10 +1179,10 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook - square*8) as usize]) 
-                                                || is_black(board[(*w_rook - square*8) as usize]) 
-                                                || rook_up(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if *w_rook-square*8 < 0
+                                                || is_white(board[(*w_rook - square*8) as usize]) 
+                                                || is_black(board[(*w_rook - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -930,16 +1205,16 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook + square) as usize]) 
-                                                || is_black(board[(*w_rook + square) as usize]) 
-                                                || rook_right(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_right(*w_rook, square)
+                                                || is_white(board[(*w_rook + square) as usize]) 
+                                                || is_black(board[(*w_rook + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *w_rook)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_rook + square*8 == desired_position && !rook_down(*w_rook, square) {
+                                                if *w_rook + square*8 == desired_position && *w_rook+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -954,10 +1229,10 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook + square*8) as usize]) 
-                                                || is_black(board[(*w_rook + square*8) as usize]) 
-                                                || rook_down(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if *w_rook+square*8 > 63
+                                                || is_white(board[(*w_rook + square*8) as usize]) 
+                                                || is_black(board[(*w_rook + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -969,103 +1244,127 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - white_king {
                                 -9 => {
-                                    if !upper_left_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-9, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !upper_left_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-9 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        // the rooks might have not actually moved,
-                                        // but a king move invalidates both castling maneuvers
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
-                                        }
-                                    },
+                                                // the rooks might have not actually moved,
+                                                // but a king move invalidates both castling maneuvers
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
+                                        }    
+                                    }
+                                },
                                 -8 => {
-                                    if !rook_up(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-8, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if white_king-8 >= 0 {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-8 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    } 
+                                },
                                 -7 => {
-                                    if !upper_right_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-7, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !upper_right_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-7 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 -1 => {
-                                    if !rook_left(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-1, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !rook_left(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-1 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 1 => {
-                                    if !rook_right(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+1, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !rook_right(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+1 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 7 => {
-                                    if !inferior_left_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+7, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_left_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+7 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 8 => {
-                                    if !rook_down(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+8, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if white_king+8 <= 63 {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+8 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 9 => {
-                                    if !inferior_right_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+9, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_right_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+9 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 _ => ()
                             }
                         },
@@ -1123,7 +1422,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - diagonal*7) as usize]) || is_black(board[((*w_queen - diagonal*7) as usize)]) {
+                                                    }else if upper_right_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen - diagonal*7) as usize])
+                                                    || is_black(board[(*w_queen - diagonal*7) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1140,12 +1441,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - diagonal*9) as usize]) || is_black(board[((*w_queen - diagonal*9) as usize)]){
+                                                    }else if upper_left_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen - diagonal*9) as usize]) 
+                                                    || is_black(board[(*w_queen - diagonal*9) as usize]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*w_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
@@ -1159,13 +1461,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - square) as usize]) || is_black(board[(*w_queen - square) as usize]) {
+                                                    }else if rook_left(*w_queen, square)
+                                                    || is_white(board[(*w_queen - square) as usize])
+                                                    || is_black(board[(*w_queen - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*w_queen - desired_position)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                    if *w_queen - square*8 == desired_position && *w_queen-square*8 >= 0 {
                                                         if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -1176,7 +1480,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - square*8) as usize]) || is_black(board[(*w_queen - square*8) as usize]) {
+                                                    }else if *w_queen-square*8 < 0
+                                                    || is_white(board[(*w_queen - square*8) as usize]) 
+                                                    || is_black(board[(*w_queen - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1196,7 +1502,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + 7*diagonal) as usize]) || is_black(board[(*w_queen + 7*diagonal) as usize]){
+                                                    }else if inferior_left_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*w_queen + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1213,12 +1521,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + 9*diagonal) as usize]) || is_black(board[(*w_queen + 9*diagonal) as usize]) {
+                                                    }else if inferior_right_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*w_queen + 9*diagonal) as usize]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*w_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
@@ -1232,13 +1541,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + square) as usize]) || is_black(board[(*w_queen + square) as usize]) {
+                                                    }else if rook_right(*w_queen, square)
+                                                    || is_white(board[(*w_queen + square) as usize]) 
+                                                    || is_black(board[(*w_queen + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *w_queen)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                    if *w_queen + square*8 == desired_position && *w_queen+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -1249,7 +1560,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + square*8) as usize]) || is_black(board[(*w_queen + square*8) as usize]) {
+                                                    }else if *w_queen+square*8 > 63
+                                                    || is_white(board[(*w_queen + square*8) as usize]) 
+                                                    || is_black(board[(*w_queen + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1258,7 +1571,7 @@ fn main() {
                                     }
                                 };
                             }else{
-                                for w_queen in white_queens.iter_mut() {
+                                'queen: for w_queen in white_queens.iter_mut() {
                                     if *w_queen > desired_position {
                                         // DIAGONAL MOVEMENT:
                                         if (*w_queen - desired_position)%7 == 0 {
@@ -1273,10 +1586,10 @@ fn main() {
                                                     *w_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen - diagonal*7) as usize]) 
-                                                || is_black(board[((*w_queen - diagonal*7) as usize)]) 
-                                                || upper_right_diagonal(*w_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if upper_right_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen - diagonal*7) as usize])
+                                                || is_black(board[(*w_queen - diagonal*7) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -1292,15 +1605,14 @@ fn main() {
                                                     *w_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen - diagonal*9) as usize]) 
-                                                || is_black(board[((*w_queen - diagonal*9) as usize)]) 
-                                                || upper_left_diagonal(*w_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if upper_left_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen - diagonal*9) as usize])
+                                                || is_black(board[(*w_queen - diagonal*9) as usize]) {
                                                     break;
                                                 }
-                                            }
+                                            } // ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*w_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
@@ -1313,16 +1625,16 @@ fn main() {
                                                     *w_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen - square) as usize]) 
-                                                || is_black(board[(*w_queen - square) as usize])
-                                                || rook_left(*w_queen, square) {
+                                                    break 'queen;
+                                                }else if rook_left(*w_queen, square)
+                                                || is_white(board[(*w_queen - square) as usize])
+                                                || is_black(board[(*w_queen - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*w_queen - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                if *w_queen - square*8 == desired_position && *w_queen-square*8 >= 0 {
                                                     if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -1332,10 +1644,10 @@ fn main() {
                                                     *w_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen - square*8) as usize]) 
-                                                || is_black(board[(*w_queen - square*8) as usize])
-                                                || rook_up(*w_queen, square) {
+                                                    break 'queen;
+                                                }else if *w_queen-square*8 < 0
+                                                || is_white(board[(*w_queen - square*8) as usize])
+                                                || is_black(board[(*w_queen - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -1354,10 +1666,10 @@ fn main() {
                                                     *w_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen + 7*diagonal) as usize]) 
-                                                || is_black(board[(*w_queen + 7*diagonal) as usize]) 
-                                                || inferior_left_diagonal(*w_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if inferior_left_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen + 7*diagonal) as usize])
+                                                || is_black(board[(*w_queen + 7*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -1373,15 +1685,14 @@ fn main() {
                                                     *w_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen + 9*diagonal) as usize]) 
-                                                || is_black(board[(*w_queen + 9*diagonal) as usize])
-                                                || inferior_right_diagonal(*w_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if inferior_right_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen + 9*diagonal) as usize])
+                                                || is_black(board[(*w_queen + 9*diagonal) as usize]) {
                                                     break;
                                                 }
-                                            }
+                                            }// ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*w_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
@@ -1394,16 +1705,16 @@ fn main() {
                                                     *w_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen + square) as usize]) 
-                                                || is_black(board[(*w_queen + square) as usize])
-                                                || rook_right(*w_queen, square) {
+                                                    break 'queen;
+                                                }else if rook_right(*w_queen, square)
+                                                || is_white(board[(*w_queen + square) as usize])
+                                                || is_black(board[(*w_queen + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *w_queen)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                if *w_queen + square*8 == desired_position && *w_queen+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -1413,10 +1724,10 @@ fn main() {
                                                     *w_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_queen + square*8) as usize]) 
-                                                || is_black(board[(*w_queen + square*8) as usize])
-                                                || rook_down(*w_queen, square) {
+                                                    break 'queen;
+                                                }else if *w_queen+square*8 > 63
+                                                || is_white(board[(*w_queen + square*8) as usize])
+                                                || is_black(board[(*w_queen + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -1552,51 +1863,91 @@ fn main() {
 
                                 for w_knight in white_knights.iter_mut() {
                                     if knight_column + knight_line == *w_knight {
-                                        match *w_knight - desired_position {
-                                            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                                for piece in wpinned.iter() {
-                                                    if knight_column + knight_line == *piece {
-                                                        // knights cant move out of absolute pins
-                                                        println!("That knight is pinned and may not move right now!\n");
-                                                        continue 'white;
+                                        if get_line(*w_knight)-get_line(desired_position) == 2 
+                                        || get_line(*w_knight)-get_line(desired_position) == -2 {
+                                            match desired_position-*w_knight {
+                                                -17 | -15 | 15 | 17 => {
+                                                    for piece in wpinned.iter() {
+                                                        if knight_column + knight_line == *piece {
+                                                            // knights cant move out of absolute pins
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
                                                     }
-                                                }
-                                                //last position is freed
-                                                board[*w_knight as usize] = NOTHING;
+                                                    //last position is freed
+                                                    board[*w_knight as usize] = NOTHING;
 
-                                                //piece is moved to new position
-                                                board[desired_position as usize] = WHITE_KNIGHT;
+                                                    //piece is moved to new position
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
 
-                                                //current position is updated
-                                                *w_knight = desired_position;
+                                                    //current position is updated
+                                                    *w_knight = desired_position;
 
-                                                try_again = false;
-                                                break;
-                                            },
-                                            _ => ()
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
+                                        }else if get_line(*w_knight)-get_line(desired_position) == 1
+                                        || get_line(*w_knight)-get_line(desired_position) == -1 {
+                                            match desired_position-*w_knight {
+                                                -10 | -6 | 6 | 10 => {
+                                                    for piece in wpinned.iter() {
+                                                        if knight_column + knight_line == *piece {
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
+                                                    }
+                                                    board[*w_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    *w_knight = desired_position;
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
                                         }
                                     }
-                                }
+                                };
                             }else{
                                 for w_knight in white_knights.iter_mut() {
-                                    match *w_knight - desired_position {
-                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            for piece in wpinned.iter() {
-                                                if *w_knight == *piece {
-                                                // knights cant move out of absolute pins
-                                                println!("That knight is pinned and may not move right now!\n");
-                                                continue 'white;
-                                                }
-                                            }
-                                            board[*w_knight as usize] = NOTHING;
-                                            board[desired_position as usize] = WHITE_KNIGHT;
-                                            *w_knight = desired_position;
-
-                                            try_again = false;
-                                            break;
-                                        },
-                                        _ => ()
-                                    }
+                                    if get_line(*w_knight)-get_line(desired_position) == 2 
+                                        || get_line(*w_knight)-get_line(desired_position) == -2 {
+                                            match desired_position-*w_knight {
+                                                -17 | -15 | 15 | 17 => {
+                                                    for piece in wpinned.iter() {
+                                                        if *w_knight == *piece {
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
+                                                    }
+                                                    board[*w_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    *w_knight = desired_position;
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
+                                        }else if get_line(*w_knight)-get_line(desired_position) == 1
+                                        || get_line(*w_knight)-get_line(desired_position) == -1 {
+                                            match desired_position-*w_knight {
+                                                -10 | -6 | 6 | 10 => {
+                                                    for piece in wpinned.iter() {
+                                                        if *w_knight == *piece {
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'white;
+                                                        }
+                                                    }
+                                                    board[*w_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = WHITE_KNIGHT;
+                                                    *w_knight = desired_position;
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            } 
+                                        }
                                 };
                             }
                         },
@@ -1663,9 +2014,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop - diagonal*7) as usize]) 
-                                                    || is_black(board[((*w_bishop - diagonal*7) as usize)]) 
-                                                    || upper_right_diagonal(*w_bishop, diagonal){
+                                                    }else if upper_right_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop - diagonal*7) as usize]) 
+                                                    || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
                                                         // otherwise, if there are any white/black pieces on the way, the square is unreachable
                                                         break;
                                                     }
@@ -1683,9 +2034,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop - diagonal*9) as usize]) 
-                                                    || is_black(board[((*w_bishop - diagonal*9) as usize)]) 
-                                                    || upper_left_diagonal(*w_bishop, diagonal) {
+                                                    }else if upper_left_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop - diagonal*9) as usize]) 
+                                                    || is_black(board[((*w_bishop - diagonal*9) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -1704,9 +2055,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*w_bishop + 7*diagonal) as usize])
-                                                    || inferior_left_diagonal(*w_bishop, diagonal) {
+                                                    }else if inferior_left_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*w_bishop + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1723,9 +2074,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                    || inferior_right_diagonal(*w_bishop, diagonal){
+                                                    }else if inferior_right_diagonal(*w_bishop, diagonal)
+                                                    || is_white(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1752,9 +2103,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop - diagonal*7) as usize]) 
-                                                || is_black(board[((*w_bishop - diagonal*7) as usize)]) 
-                                                || upper_right_diagonal(*w_bishop, diagonal) {
+                                                }else if upper_right_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop - diagonal*7) as usize]) 
+                                                || is_black(board[((*w_bishop - diagonal*7) as usize)]) {
                                                     // otherwise, if there are any white/black pieces on the way, the square is unreachable
                                                     break;
                                                 }
@@ -1772,9 +2123,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop - diagonal*9) as usize]) 
-                                                || is_black(board[((*w_bishop - diagonal*9) as usize)]) 
-                                                || upper_left_diagonal(*w_bishop, diagonal) {
+                                                }else if upper_left_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop - diagonal*9) as usize]) 
+                                                || is_black(board[((*w_bishop - diagonal*9) as usize)]) {
                                                     break;
                                                 }
                                             }
@@ -1793,9 +2144,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop + 7*diagonal) as usize]) 
-                                                || is_black(board[(*w_bishop + 7*diagonal) as usize]) 
-                                                || inferior_left_diagonal(*w_bishop, diagonal) {
+                                                }else if inferior_left_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop + 7*diagonal) as usize]) 
+                                                || is_black(board[(*w_bishop + 7*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -1812,9 +2163,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                || is_black(board[(*w_bishop + 9*diagonal) as usize]) 
-                                                || inferior_right_diagonal(*w_bishop, diagonal) {
+                                                }else if inferior_right_diagonal(*w_bishop, diagonal)
+                                                || is_white(board[(*w_bishop + 9*diagonal) as usize]) 
+                                                || is_black(board[(*w_bishop + 9*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -1825,7 +2176,7 @@ fn main() {
                         },
                         'r'|'R' => {
                             // check if more than one rook can reach the desired square
-                            if test_multiple_rooks(&mut white_rooks, desired_position) == true {
+                            if test_multiple_rooks(&mut white_rooks, desired_position, &board) == true {
                                 println!("Specify the current square of the rook to be moved");
                                 player_move.clear();
                                 san_move.clear();
@@ -1882,16 +2233,16 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook - square) as usize]) 
-                                                    || is_black(board[(*w_rook - square) as usize])
-                                                    || rook_left(*w_rook, square) {
+                                                    }else if rook_left(*w_rook, square)
+                                                    || is_white(board[(*w_rook - square) as usize]) 
+                                                    || is_black(board[(*w_rook - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*w_rook - desired_position)%8 == 0 {
                                                 // otherwise, test if it is on the same file
                                                 for square in 1..8 {
-                                                    if *w_rook - square*8 == desired_position && !rook_up(*w_rook, square) {
+                                                    if *w_rook - square*8 == desired_position && *w_rook-square*8 >= 0 {
                                                         if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -1907,9 +2258,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook - square*8) as usize]) 
-                                                    || is_black(board[(*w_rook - square*8) as usize])
-                                                    || rook_up(*w_rook, square) {
+                                                    }else if *w_rook-square*8 < 0
+                                                    || is_white(board[(*w_rook - square*8) as usize]) 
+                                                    || is_black(board[(*w_rook - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1933,15 +2284,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook + square) as usize]) 
-                                                    || is_black(board[(*w_rook + square) as usize]) 
-                                                    || rook_right(*w_rook, square) {
+                                                    }else if rook_right(*w_rook, square)
+                                                    || is_white(board[(*w_rook + square) as usize]) 
+                                                    || is_black(board[(*w_rook + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *w_rook)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *w_rook + square*8 == desired_position && !rook_down(*w_rook, square) {
+                                                    if *w_rook + square*8 == desired_position && *w_rook+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -1957,9 +2308,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_rook + square*8) as usize]) 
-                                                    || is_black(board[(*w_rook + square*8) as usize])
-                                                    || rook_down(*w_rook, square) {
+                                                    }else if *w_rook+square*8 > 63
+                                                    || is_white(board[(*w_rook + square*8) as usize]) 
+                                                    || is_black(board[(*w_rook + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -1968,7 +2319,7 @@ fn main() {
                                     }
                                 };
                             }else{ // only one rook may reach the desired square
-                                for w_rook in &mut white_rooks.iter_mut() {    
+                                'rook: for w_rook in &mut white_rooks.iter_mut() {    
                                     if *w_rook > desired_position {
                                         if get_line(*w_rook) == get_line(desired_position) {
                                             for square in 1..8 {
@@ -1987,16 +2338,16 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook - square) as usize]) 
-                                                || is_black(board[(*w_rook - square) as usize]) 
-                                                || rook_left(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_left(*w_rook, square)
+                                                || is_white(board[(*w_rook - square) as usize]) 
+                                                || is_black(board[(*w_rook - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*w_rook - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_rook - square*8 == desired_position && !rook_up(*w_rook, square) {
+                                                if *w_rook - square*8 == desired_position && *w_rook-square*8 >= 0 {
                                                     if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -2011,10 +2362,10 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook - square*8) as usize]) 
-                                                || is_black(board[(*w_rook - square*8) as usize]) 
-                                                || rook_up(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if *w_rook-square*8 < 0
+                                                || is_white(board[(*w_rook - square*8) as usize]) 
+                                                || is_black(board[(*w_rook - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -2037,16 +2388,16 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook + square) as usize]) 
-                                                || is_black(board[(*w_rook + square) as usize]) 
-                                                || rook_right(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_right(*w_rook, square)
+                                                || is_white(board[(*w_rook + square) as usize]) 
+                                                || is_black(board[(*w_rook + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *w_rook)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_rook + square*8 == desired_position && !rook_down(*w_rook, square) {
+                                                if *w_rook + square*8 == desired_position && *w_rook+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*w_rook, white_king, desired_position, &wpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -2061,10 +2412,10 @@ fn main() {
                                                     *w_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*w_rook + square*8) as usize]) 
-                                                || is_black(board[(*w_rook + square*8) as usize]) 
-                                                || rook_down(*w_rook, square) {
+                                                    break 'rook;
+                                                }else if *w_rook+square*8 > 63
+                                                || is_white(board[(*w_rook + square*8) as usize]) 
+                                                || is_black(board[(*w_rook + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -2076,103 +2427,127 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - white_king {
                                 -9 => {
-                                    if !upper_left_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-9, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !upper_left_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-9 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        // the rooks might have not actually moved,
-                                        // but a king move invalidates both castling maneuvers
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
-                                        }
-                                    },
+                                                // the rooks might have not actually moved,
+                                                // but a king move invalidates both castling maneuvers
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
+                                        }    
+                                    }
+                                },
                                 -8 => {
-                                    if !rook_up(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-8, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if white_king-8 >= 0 {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-8 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    } 
+                                },
                                 -7 => {
-                                    if !upper_right_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-7, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !upper_right_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-7 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 -1 => {
-                                    if !rook_left(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king-1, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !rook_left(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king-1 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 1 => {
-                                    if !rook_right(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+1, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !rook_right(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+1 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 7 => {
-                                    if !inferior_left_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+7, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_left_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+7 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 8 => {
-                                    if !rook_down(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+8, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if white_king+8 <= 63 {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+8 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 9 => {
-                                    if !inferior_right_diagonal(white_king, 1)
-                                    && get_pieces_checking_the_white_king(white_king+9, &board).len() == 0 {
-                                        board[white_king as usize] = NOTHING;
-                                        board[desired_position as usize] = WHITE_KING;
-                                        white_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_right_diagonal(white_king, 1) {
+                                        for safe in wking_safe_squares.iter() {
+                                            if white_king+9 == *safe {
+                                                board[white_king as usize] = NOTHING;
+                                                board[desired_position as usize] = WHITE_KING;
+                                                white_king = desired_position;
+                                                try_again = false;
 
-                                        has_white_rook1_moved = true;
-                                        has_white_rook2_moved = true;
+                                                has_white_rook1_moved = true;
+                                                has_white_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 _ => ()
                             }
                         },
@@ -2230,9 +2605,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - diagonal*7) as usize])
-                                                    || is_black(board[(*w_queen - diagonal*7) as usize])
-                                                    || upper_right_diagonal(*w_queen, diagonal) {
+                                                    }else if upper_right_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen - diagonal*7) as usize])
+                                                    || is_black(board[(*w_queen - diagonal*7) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -2249,14 +2624,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - diagonal*9) as usize]) 
-                                                    || is_black(board[(*w_queen - diagonal*9) as usize])
-                                                    || upper_left_diagonal(*w_queen, diagonal) {
+                                                    }else if upper_left_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen - diagonal*9) as usize]) 
+                                                    || is_black(board[(*w_queen - diagonal*9) as usize]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*w_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
@@ -2270,15 +2644,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - square) as usize])
-                                                    || is_black(board[(*w_queen - square) as usize]) 
-                                                    || rook_left(*w_queen, square) {
+                                                    }else if rook_left(*w_queen, square)
+                                                    || is_white(board[(*w_queen - square) as usize])
+                                                    || is_black(board[(*w_queen - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*w_queen - desired_position)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                    if *w_queen - square*8 == desired_position && *w_queen-square*8 >= 0 {
                                                         if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -2289,9 +2663,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen - square*8) as usize]) 
-                                                    || is_black(board[(*w_queen - square*8) as usize])
-                                                    || rook_up(*w_queen, square) {
+                                                    }else if *w_queen-square*8 < 0
+                                                    || is_white(board[(*w_queen - square*8) as usize]) 
+                                                    || is_black(board[(*w_queen - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -2311,9 +2685,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*w_queen + 7*diagonal) as usize])
-                                                    || inferior_left_diagonal(*w_queen, diagonal) {
+                                                    }else if inferior_left_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*w_queen + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -2330,14 +2704,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*w_queen + 9*diagonal) as usize]) 
-                                                    || inferior_right_diagonal(*w_queen, diagonal) {
+                                                    }else if inferior_right_diagonal(*w_queen, diagonal)
+                                                    || is_white(board[(*w_queen + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*w_queen + 9*diagonal) as usize]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*w_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
@@ -2351,15 +2724,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + square) as usize]) 
-                                                    || is_black(board[(*w_queen + square) as usize])
-                                                    || rook_right(*w_queen, square) {
+                                                    }else if rook_right(*w_queen, square)
+                                                    || is_white(board[(*w_queen + square) as usize]) 
+                                                    || is_black(board[(*w_queen + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *w_queen)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                    if *w_queen + square*8 == desired_position && *w_queen+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'white;
@@ -2370,9 +2743,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*w_queen + square*8) as usize]) 
-                                                    || is_black(board[(*w_queen + square*8) as usize])
-                                                    || rook_down(*w_queen, square) {
+                                                    }else if *w_queen+square*8 > 63
+                                                    || is_white(board[(*w_queen + square*8) as usize]) 
+                                                    || is_black(board[(*w_queen + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -2397,9 +2770,9 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - diagonal*7) as usize])
-                                                || is_black(board[(*w_queen - diagonal*7) as usize])
-                                                || upper_right_diagonal(*w_queen, diagonal) {
+                                                }else if upper_right_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen - diagonal*7) as usize])
+                                                || is_black(board[(*w_queen - diagonal*7) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -2416,14 +2789,13 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - diagonal*9) as usize])
-                                                || is_black(board[(*w_queen - diagonal*9) as usize])
-                                                || upper_left_diagonal(*w_queen, diagonal) {
+                                                }else if upper_left_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen - diagonal*9) as usize])
+                                                || is_black(board[(*w_queen - diagonal*9) as usize]) {
                                                     break;
                                                 }
-                                            }
+                                            } // ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*w_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_queen - square == desired_position && !rook_left(*w_queen, square) {
@@ -2437,15 +2809,15 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - square) as usize])
-                                                || is_black(board[(*w_queen - square) as usize])
-                                                || rook_left(*w_queen, square) {
+                                                }else if rook_left(*w_queen, square)
+                                                || is_white(board[(*w_queen - square) as usize])
+                                                || is_black(board[(*w_queen - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*w_queen - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_queen - square*8 == desired_position && !rook_up(*w_queen, square) {
+                                                if *w_queen - square*8 == desired_position && *w_queen-square*8 >= 0 {
                                                     if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -2456,9 +2828,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen - square*8) as usize])
-                                                || is_black(board[(*w_queen - square*8) as usize])
-                                                || rook_up(*w_queen, square) {
+                                                }else if *w_queen-square*8 < 0
+                                                || is_white(board[(*w_queen - square*8) as usize])
+                                                || is_black(board[(*w_queen - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -2478,9 +2850,9 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + 7*diagonal) as usize])
-                                                || is_black(board[(*w_queen + 7*diagonal) as usize]) 
-                                                || inferior_left_diagonal(*w_queen, diagonal) {
+                                                }else if inferior_left_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen + 7*diagonal) as usize])
+                                                || is_black(board[(*w_queen + 7*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -2497,14 +2869,13 @@ fn main() {
     
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + 9*diagonal) as usize])
-                                                || is_black(board[(*w_queen + 9*diagonal) as usize])
-                                                || inferior_right_diagonal(*w_queen, diagonal) {
+                                                }else if inferior_right_diagonal(*w_queen, diagonal)
+                                                || is_white(board[(*w_queen + 9*diagonal) as usize])
+                                                || is_black(board[(*w_queen + 9*diagonal) as usize]) {
                                                     break;
                                                 }
-                                            }
+                                            }// ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*w_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *w_queen + square == desired_position && !rook_right(*w_queen, square) {
@@ -2518,15 +2889,15 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + square) as usize])
-                                                || is_black(board[(*w_queen + square) as usize])
-                                                || rook_right(*w_queen, square) {
+                                                }else if rook_right(*w_queen, square)
+                                                || is_white(board[(*w_queen + square) as usize])
+                                                || is_black(board[(*w_queen + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *w_queen)%8 == 0 {
                                             for square in 1..8 {
-                                                if *w_queen + square*8 == desired_position && !rook_down(*w_queen, square) {
+                                                if *w_queen + square*8 == desired_position && *w_queen+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*w_queen, white_king, desired_position, &wpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'white;
@@ -2537,9 +2908,9 @@ fn main() {
             
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*w_queen + square*8) as usize])
-                                                || is_black(board[(*w_queen + square*8) as usize])
-                                                || rook_down(*w_queen, square) {
+                                                }else if *w_queen+square*8 > 63
+                                                || is_white(board[(*w_queen + square*8) as usize])
+                                                || is_black(board[(*w_queen + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -2558,7 +2929,7 @@ fn main() {
                                     'a' => {
                                         for pawn in 0..black_column_a.len() {
                                             if black_column_a[pawn] == desired_position {
-                                                black_column_a.swap_remove(pawn);
+                                                black_column_a.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2566,7 +2937,7 @@ fn main() {
                                     'b' => {
                                         for pawn in 0..black_column_b.len() {
                                             if black_column_b[pawn] == desired_position {
-                                                black_column_b.swap_remove(pawn);
+                                                black_column_b.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2574,7 +2945,7 @@ fn main() {
                                     'c' => {
                                         for pawn in 0..black_column_c.len() {
                                             if black_column_c[pawn] == desired_position {
-                                                black_column_c.swap_remove(pawn);
+                                                black_column_c.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2582,7 +2953,7 @@ fn main() {
                                     'd' => {
                                         for pawn in 0..black_column_d.len() {
                                             if black_column_d[pawn] == desired_position {
-                                                black_column_d.swap_remove(pawn);
+                                                black_column_d.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2590,7 +2961,7 @@ fn main() {
                                     'e' => {
                                         for pawn in 0..black_column_e.len() {
                                             if black_column_e[pawn] == desired_position {
-                                                black_column_e.swap_remove(pawn);
+                                                black_column_e.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2598,7 +2969,7 @@ fn main() {
                                     'f' => {
                                         for pawn in 0..black_column_f.len() {
                                             if black_column_f[pawn] == desired_position {
-                                                black_column_f.swap_remove(pawn);
+                                                black_column_f.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2606,7 +2977,7 @@ fn main() {
                                     'g' => {
                                         for pawn in 0..black_column_g.len() {
                                             if black_column_g[pawn] == desired_position {
-                                                black_column_g.swap_remove(pawn);
+                                                black_column_g.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2614,7 +2985,7 @@ fn main() {
                                     'h' => {
                                         for pawn in 0..black_column_h.len() {
                                             if black_column_h[pawn] == desired_position {
-                                                black_column_h.swap_remove(pawn);
+                                                black_column_h.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -2625,7 +2996,7 @@ fn main() {
                             'q' => {
                                 for i in 0..black_queens.len() {
                                     if black_queens[i] == desired_position {
-                                        black_queens.swap_remove(i);
+                                        black_queens.remove(i);
                                         break;
                                     }
                                 };
@@ -2633,7 +3004,7 @@ fn main() {
                             'b' => {
                                 for i in 0..black_bishops.len() {
                                     if black_bishops[i] == desired_position {
-                                        black_bishops.swap_remove(i);
+                                        black_bishops.remove(i);
                                         break;
                                     }
                                 };
@@ -2641,7 +3012,7 @@ fn main() {
                             'n' => {
                                 for i in 0..black_knights.len() {
                                     if black_knights[i] == desired_position {
-                                        black_knights.swap_remove(i);
+                                        black_knights.remove(i);
                                         break;
                                     }
                                 };
@@ -2649,7 +3020,7 @@ fn main() {
                             'r' => {
                                 for i in 0..black_rooks.len() {
                                     if black_rooks[i] == desired_position {
-                                        black_rooks.swap_remove(i);
+                                        black_rooks.remove(i);
                                         break;
                                     }
                                 };
@@ -3781,7 +4152,7 @@ fn main() {
                                             if (black_columns_enpassant >> 7) == 0b0 {
                                                 for pawn in 0..black_column_a.len() {
                                                     if black_column_a[pawn] == desired_position {
-                                                        black_column_a.swap_remove(pawn);
+                                                        black_column_a.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3789,7 +4160,7 @@ fn main() {
                                                 for pawn in (0..black_column_a.len()).rev() {
                                                     if black_column_a[pawn] == desired_position
                                                     || black_column_a[pawn] == desired_position+8 {
-                                                        black_column_a.swap_remove(pawn);
+                                                        black_column_a.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3799,7 +4170,7 @@ fn main() {
                                             if (black_columns_enpassant >> 6) == 0b0 {
                                                 for pawn in 0..black_column_b.len() {
                                                     if black_column_b[pawn] == desired_position {
-                                                        black_column_b.swap_remove(pawn);
+                                                        black_column_b.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3807,7 +4178,7 @@ fn main() {
                                                 for pawn in (0..black_column_b.len()).rev() {
                                                     if black_column_b[pawn] == desired_position
                                                     || black_column_b[pawn] == desired_position+8 {
-                                                        black_column_b.swap_remove(pawn);
+                                                        black_column_b.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3817,7 +4188,7 @@ fn main() {
                                             if (black_columns_enpassant >> 5) == 0b0 {
                                                 for pawn in 0..black_column_c.len() {
                                                     if black_column_c[pawn] == desired_position {
-                                                        black_column_c.swap_remove(pawn);
+                                                        black_column_c.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3825,7 +4196,7 @@ fn main() {
                                                 for pawn in (0..black_column_c.len()).rev() {
                                                     if black_column_c[pawn] == desired_position
                                                     || black_column_c[pawn] == desired_position+8 {
-                                                        black_column_c.swap_remove(pawn);
+                                                        black_column_c.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3835,7 +4206,7 @@ fn main() {
                                             if (black_columns_enpassant >> 4) == 0b0 {
                                                 for pawn in 0..black_column_d.len() {
                                                     if black_column_d[pawn] == desired_position {
-                                                        black_column_d.swap_remove(pawn);
+                                                        black_column_d.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3843,7 +4214,7 @@ fn main() {
                                                 for pawn in (0..black_column_d.len()).rev() {
                                                     if black_column_d[pawn] == desired_position
                                                     || black_column_d[pawn] == desired_position+8 {
-                                                        black_column_d.swap_remove(pawn);
+                                                        black_column_d.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3853,7 +4224,7 @@ fn main() {
                                             if (black_columns_enpassant >> 3) == 0b0 {
                                                 for pawn in 0..black_column_d.len() {
                                                     if black_column_d[pawn] == desired_position {
-                                                        black_column_d.swap_remove(pawn);
+                                                        black_column_d.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3861,7 +4232,7 @@ fn main() {
                                                 for pawn in (0..black_column_d.len()).rev() {
                                                     if black_column_d[pawn] == desired_position
                                                     || black_column_d[pawn] == desired_position+8 {
-                                                        black_column_d.swap_remove(pawn);
+                                                        black_column_d.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3871,7 +4242,7 @@ fn main() {
                                             if (black_columns_enpassant >> 2) == 0b0 {
                                                 for pawn in 0..black_column_f.len() {
                                                     if black_column_f[pawn] == desired_position {
-                                                        black_column_f.swap_remove(pawn);
+                                                        black_column_f.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3879,7 +4250,7 @@ fn main() {
                                                 for pawn in (0..black_column_f.len()).rev() {
                                                     if black_column_f[pawn] == desired_position
                                                     || black_column_f[pawn] == desired_position+8 {
-                                                        black_column_f.swap_remove(pawn);
+                                                        black_column_f.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3889,7 +4260,7 @@ fn main() {
                                             if (black_columns_enpassant >> 1) == 0b0 {
                                                 for pawn in 0..black_column_g.len() {
                                                     if black_column_g[pawn] == desired_position {
-                                                        black_column_g.swap_remove(pawn);
+                                                        black_column_g.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3897,7 +4268,7 @@ fn main() {
                                                 for pawn in (0..black_column_g.len()).rev() {
                                                     if black_column_g[pawn] == desired_position
                                                     || black_column_g[pawn] == desired_position+8 {
-                                                        black_column_g.swap_remove(pawn);
+                                                        black_column_g.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3907,7 +4278,7 @@ fn main() {
                                             if (black_columns_enpassant >> 0) == 0b0 {
                                                 for pawn in 0..black_column_h.len() {
                                                     if black_column_h[pawn] == desired_position {
-                                                        black_column_h.swap_remove(pawn);
+                                                        black_column_h.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3915,7 +4286,7 @@ fn main() {
                                                 for pawn in (0..black_column_h.len()).rev() {
                                                     if black_column_h[pawn] == desired_position
                                                     || black_column_h[pawn] == desired_position+8{
-                                                        black_column_h.swap_remove(pawn);
+                                                        black_column_h.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -3927,7 +4298,7 @@ fn main() {
                                 'q' => {
                                     for i in 0..black_queens.len() {
                                         if black_queens[i] == desired_position {
-                                            black_queens.swap_remove(i);
+                                            black_queens.remove(i);
                                             break;
                                         }
                                     };
@@ -3935,7 +4306,7 @@ fn main() {
                                 'b' => {
                                     for i in 0..black_bishops.len() {
                                         if black_bishops[i] == desired_position {
-                                            black_bishops.swap_remove(i);
+                                            black_bishops.remove(i);
                                             break;
                                         }
                                     };
@@ -3943,7 +4314,7 @@ fn main() {
                                 'n' => {
                                     for i in 0..black_knights.len() {
                                         if black_knights[i] == desired_position {
-                                            black_knights.swap_remove(i);
+                                            black_knights.remove(i);
                                             break;
                                         }
                                     };
@@ -3951,7 +4322,7 @@ fn main() {
                                 'r' => {
                                     for i in 0..black_rooks.len() {
                                         if black_rooks[i] == desired_position {
-                                            black_rooks.swap_remove(i);
+                                            black_rooks.remove(i);
                                             break;
                                         }
                                     };
@@ -4267,7 +4638,18 @@ fn main() {
                                     for i in (0..black_pieces_reaching_the_square.len()).rev() {
                                         if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
                                         && board[(black_king+square) as usize] == NOTHING {
-                                            black_pieces_reaching_the_square.swap_remove(i);
+                                            black_pieces_reaching_the_square.remove(i);
+                                        }
+                                    }
+                                    if black_king+square - 8 >= 0 && black_king+square - 8 <= 63 {
+                                        if board[(black_king+square + 8) as usize] == BLACK_PAWN {
+                                            black_pieces_reaching_the_square.insert(0, black_king+square-8);
+                                        }
+                                    }else if black_king+square - 16 >= 0 && black_king+square - 16 <= 63 {
+                                       if get_line(black_king+square - 16) == 7
+                                       && board[(white_king+square - 16)as usize] == BLACK_PAWN
+                                       && board[(white_king+square - 8) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.insert(0, black_king+square-16);
                                         }
                                     }
                                     if black_pieces_reaching_the_square.len() > 0 {
@@ -4284,7 +4666,7 @@ fn main() {
                                     for i in (0..black_pieces_reaching_the_square.len()).rev() {
                                         if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
                                         && board[(black_king+square*8) as usize] == NOTHING {
-                                            black_pieces_reaching_the_square.swap_remove(i);
+                                            black_pieces_reaching_the_square.remove(i);
                                         }
                                     }
                                     if black_pieces_reaching_the_square.len() > 0 {
@@ -4301,17 +4683,18 @@ fn main() {
                                     for i in (0..black_pieces_reaching_the_square.len()).rev() {
                                         if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
                                         && board[(black_king+diagonal*7) as usize] == NOTHING {
-                                            black_pieces_reaching_the_square.swap_remove(i);
+                                            black_pieces_reaching_the_square.remove(i);
                                         }
                                     }
-                                    if (black_king+diagonal*7 + 8) < 63 {
+                                    if black_king+diagonal*7 - 8 >= 0 && black_king+diagonal*7 - 8 <= 63 {
                                         if board[(black_king+diagonal*7 + 8) as usize] == BLACK_PAWN {
-                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*7+8);
+                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*7-8);
                                         }
-                                    }
-                                    if (black_king+diagonal*7 + 16) < 63 {
-                                       if get_line(black_king+diagonal*7 + 16) == 2 {
-                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*7+16);
+                                    }else if black_king+diagonal*7 - 16 >= 0 && black_king+diagonal*7 - 16 <= 63 {
+                                       if get_line(black_king+diagonal*7 - 16) == 7
+                                       && board[(white_king+diagonal*7 - 16)as usize] == BLACK_PAWN
+                                       && board[(white_king+diagonal*7 - 8) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*7-16);
                                         }
                                     }
                                     if black_pieces_reaching_the_square.len() > 0 {
@@ -4328,17 +4711,18 @@ fn main() {
                                     for i in (0..black_pieces_reaching_the_square.len()).rev() {
                                         if board[black_pieces_reaching_the_square[i] as usize] == BLACK_PAWN
                                         && board[(black_king+diagonal*9) as usize] == NOTHING {
-                                            black_pieces_reaching_the_square.swap_remove(i);
+                                            black_pieces_reaching_the_square.remove(i);
                                         }
                                     }
-                                    if (black_king+diagonal*9 + 8) < 63 {
-                                        if board[(black_king+diagonal*9 + 8) as usize] == BLACK_PAWN {
-                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*9+8);
+                                    if black_king+diagonal*9 - 8 >= 0 && black_king+diagonal*9 - 8 <= 63{
+                                        if board[(black_king+diagonal*9 - 8) as usize] == BLACK_PAWN {
+                                            black_pieces_reaching_the_square.insert(0, black_king-diagonal*9-8);
                                         }
-                                    }
-                                    if (black_king+diagonal*9 + 16) < 63 {
-                                       if get_line(black_king+diagonal*9 + 16) == 2 {
-                                            black_pieces_reaching_the_square.insert(0, black_king+diagonal*9+16);
+                                    }else if black_king+diagonal*9 - 16 >= 0 && black_king+diagonal*9 - 16 <= 63 {
+                                       if get_line(black_king+diagonal*9 - 16) == 7
+                                       && board[(white_king+diagonal*9 - 16)as usize] == BLACK_PAWN
+                                       && board[(white_king+diagonal*9 - 8) as usize] == NOTHING {
+                                            black_pieces_reaching_the_square.insert(0, black_king-diagonal*9-16);
                                         }
                                     }
                                     if black_pieces_reaching_the_square.len() > 0 {
@@ -4356,6 +4740,211 @@ fn main() {
                         println!("\nCHECKMATE! WHITE WINS!\n");
                         break 'game;
                     } 
+                }
+            }
+        }else if bking_checks.len() == 0 && bking_safe_squares.len() == 0 { // test if the game is drawn (king not in check)
+            let total_black_pawns = black_column_a.len()+black_column_b.len()+black_column_c.len()+black_column_d.len()+black_column_e.len()+black_column_f.len()+black_column_g.len()+black_column_h.len();
+            
+            let total_black_pieces = black_bishops.len()+black_knights.len()+black_rooks.len()+black_queens.len();
+
+            let total_white_pawns = white_column_a.len()+white_column_b.len()+white_column_c.len()+white_column_d.len()+white_column_e.len()+white_column_f.len()+white_column_g.len()+white_column_h.len();
+
+            //no more black pawns
+            if total_black_pawns == 0 && total_white_pawns == 0 {
+                if black_rooks.len() == 0 && black_queens.len() == 0 && black_rooks.len() == 0 && black_queens.len() == 0 {
+                    if (black_bishops.len() == 1 && black_knights.len() < 1)
+                    || (black_bishops.len() < 1 && black_knights.len() <= 2) {
+                        if (black_bishops.len() == 1 && black_knights.len() < 1)
+                        || (black_bishops.len() < 1 && black_knights.len() <= 2) {
+                            println!("\nINSUFFICIENT MATERIAL FOR CHECKMATE! IT'S A DRAW!\n");
+                            break 'game;
+                        }
+                    }
+                }
+            }
+            if (bpinned.len() as i8) - (total_black_pawns as i8) <= total_black_pieces as i8 {
+                // all avaliable pieces are pinned (or there are no pieces left)
+                // otherwise there are unpinned (and maybe movable) pieces
+                let mut draw_counter: usize = 0;
+
+                'test_if_there_are_movable_black_pawns:
+                for column in [&black_column_a, &black_column_b, &black_column_c, &black_column_d, &black_column_e, &black_column_f, &black_column_g, &black_column_h].iter() {
+                    if column.len() == 0 {
+                        continue 'test_if_there_are_movable_black_pawns;
+                    }
+                    'pawn: for pawn in column.iter() {
+                        for i in bpinned.iter() {
+                            if *pawn == *i {
+                                draw_counter += 1;
+                                break 'pawn;
+                            }
+                        }
+                        if *pawn+9 <= 63 {
+                            if is_white(board[(*pawn+9) as usize])
+                            || board[(*pawn+8) as usize] == NOTHING
+                            || is_white(board[(*pawn+7) as usize]) {
+                                continue 'test_if_there_are_movable_black_pawns;
+                            }
+                        }else if *pawn+8 <= 63 {
+                            if board[(*pawn+8) as usize] == NOTHING 
+                            || is_white(board[(*pawn+7) as usize]) {
+                                continue 'test_if_there_are_movable_black_pawns;
+                            }
+                        }else if *pawn+7 <= 63 {
+                            if is_white(board[(*pawn+7) as usize]) {
+                                continue 'test_if_there_are_movable_black_pawns;
+                            }
+                        }
+                        draw_counter += 1;
+                    }
+                }
+
+                'bishops: for bishop in black_bishops.iter() {
+                    if *bishop-7 >= 0 {
+                        if !upper_right_diagonal(*bishop, 1) {
+                            if !is_black(board[(*bishop-7) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    if *bishop-9 >= 0 {
+                        if !upper_left_diagonal(*bishop, 1) {
+                            if !is_black(board[(*bishop-9) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    if *bishop+9 <= 63 {
+                        if !inferior_right_diagonal(*bishop, 1) {
+                            if !is_black(board[(*bishop+9) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    if *bishop+7 <= 63 {
+                        if !upper_left_diagonal(*bishop, 1) {
+                            if !is_black(board[(*bishop+7) as usize]) {
+                                continue 'bishops
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                    // if no 'continue' is triggered, the piece has no squares to go
+                }
+
+                'knights: for knight in black_knights.iter() {
+                    for nmove in [-17,-15,15,17].iter() {
+                        let position = *knight+*nmove;
+                        if position >= 0 && position <= 63 {
+                            if get_line(position)-get_line(*knight) == 2
+                            || get_line(position)-get_line(*knight) == -2 {
+                                if !is_black(board[position as usize]) {
+                                    continue 'knights;
+                                }
+                            }
+                        }
+                    }
+                    for nmove in [-10,-6,6,10].iter() {
+                        let position = *knight+*nmove;
+                        if position >= 0 && position <= 63 {
+                            if get_line(position)-get_line(*knight) == 1
+                            || get_line(position)-get_line(*knight) == -1 {
+                                if !is_black(board[position as usize]) {
+                                    continue 'knights;
+                                }
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                }
+            
+                'rooks: for rook in black_rooks.iter() {
+                    if *rook-8 >= 0 {
+                        if !is_black(board[(*rook-8) as usize]){
+                            continue 'rooks;
+                        }
+                    }
+                    if *rook-1 >= 0 {
+                        if !rook_left(*rook, 1) {
+                            if !is_black(board[(*rook-1) as usize]) {
+                                continue 'rooks;
+                            }
+                        }
+                    }
+                    if *rook+8 <= 63 {
+                        if !is_black(board[(*rook+8) as usize]) {
+                            continue 'rooks;
+                        }
+                    }
+                    if *rook+1 <= 63 {
+                        if !rook_right(*rook, 1) {
+                            if !is_black(board[(*rook+1) as usize]) {
+                                continue 'rooks;
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                }
+            
+                'queens: for queen in black_queens.iter() {
+                    if *queen+9 <= 63 {
+                        if !inferior_right_diagonal(*queen, 1) {
+                            if !is_black(board[(*queen+9) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen+8 <= 63 {
+                        if !is_black(board[(*queen+8) as usize]) {
+                            continue 'queens;
+                        }
+                    }
+                    if *queen+7 <= 63 {
+                        if !inferior_left_diagonal(*queen, 1) {
+                            if !is_black(board[(*queen+7) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen+1 <= 63 {
+                        if !rook_right(*queen, 1) {
+                            if !is_black(board[(*queen+1) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen-9 >= 0 {
+                        if !upper_left_diagonal(*queen, 1) {
+                            if !is_black(board[(*queen-9) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen-8 >= 0 {
+                        if !is_black(board[(*queen-8) as usize]) {
+                            continue 'queens;
+                        }
+                    }
+                    if *queen-7 >= 0 {
+                        if !upper_right_diagonal(*queen, 1) {
+                            if !is_black(board[(*queen-7) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    if *queen-1 >= 0 {
+                        if !rook_left(*queen, 1) {
+                            if !is_black(board[(*queen-1) as usize]) {
+                                continue 'queens;
+                            }
+                        }
+                    }
+                    draw_counter += 1;
+                }
+
+                if draw_counter == total_black_pawns+total_black_pieces {
+                    println!("\nTHE BLACK KING HAS NO VALID MOVES AND IS NOT IN CHECK! IT'S A STALEMATE!\n");
+                    break 'game;
                 }
             }
         }
@@ -4379,7 +4968,7 @@ fn main() {
                 continue 'black;
             }
 
-            if is_piece(san_move[0]) && san_move[1] != 'x' && san_move.len() >= 3 {
+            if is_piece(san_move[0]) && san_move[1] != 'x' {
                 column = match san_move[1] {
                     'a' => 0,
                     'b' => 1,
@@ -4509,10 +5098,57 @@ fn main() {
 
                                 for b_knight in black_knights.iter_mut() {
                                     if knight_column + knight_line == *b_knight {
-                                        match *b_knight - desired_position {
-                                            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                        if get_line(*b_knight) - get_line(desired_position) == 2
+                                        || get_line(*b_knight) - get_line(desired_position) == -2 {
+                                            match desired_position-*b_knight {
+                                                -17 | -15 | 17 | 15 => {
+                                                    for piece in bpinned.iter() {
+                                                        if *b_knight == *piece {
+                                                            // knights cant move out of absolute pins
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'black;
+                                                        }
+                                                    }
+                                                    board[*b_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    *b_knight = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            }
+                                        }else if get_line(*b_knight) - get_line(desired_position) == 1
+                                        || get_line(*b_knight) - get_line(desired_position) == -1 {
+                                            match desired_position-*b_knight {
+                                                -10 | -6 | 10 | 6 => {
+                                                    for piece in bpinned.iter() {
+                                                        if *b_knight == *piece {
+                                                            // knights cant move out of absolute pins
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'black;
+                                                        }
+                                                    }
+                                                    board[*b_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    *b_knight = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            }
+                                        }
+                                    }
+                                };
+                            }else{
+                                for b_knight in black_knights.iter_mut() {
+                                    if get_line(*b_knight) - get_line(desired_position) == 2
+                                    || get_line(*b_knight) - get_line(desired_position) == -2 {
+                                        match desired_position-*b_knight {
+                                            -17 | -15 | 17 | 15 => {
                                                 for piece in bpinned.iter() {
-                                                    if knight_column + knight_line == *piece {
+                                                    if *b_knight == *piece {
                                                         // knights cant move out of absolute pins
                                                         println!("That knight is pinned and may not move right now!\n");
                                                         continue 'black;
@@ -4527,27 +5163,26 @@ fn main() {
                                             },
                                             _ => ()
                                         }
-                                    }
-                                }
-                            }else{
-                                for b_knight in black_knights.iter_mut() {
-                                    match *b_knight - desired_position {
-                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            for piece in bpinned.iter() {
-                                                if *b_knight == *piece {
-                                                // knights cant move out of absolute pins
-                                                println!("That knight is pinned and may not move right now!\n");
-                                                continue 'black;
+                                    }else if get_line(*b_knight) - get_line(desired_position) == 1
+                                    || get_line(*b_knight) - get_line(desired_position) == -1 {
+                                        match desired_position-*b_knight {
+                                            -10 | -6 | 10 | 6 => {
+                                                for piece in bpinned.iter() {
+                                                    if *b_knight == *piece {
+                                                        // knights cant move out of absolute pins
+                                                        println!("That knight is pinned and may not move right now!\n");
+                                                        continue 'black;
+                                                    }
                                                 }
-                                            }
-                                            board[*b_knight as usize] = NOTHING;
-                                            board[desired_position as usize] = BLACK_KNIGHT;
-                                            *b_knight = desired_position;
+                                                board[*b_knight as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KNIGHT;
+                                                *b_knight = desired_position;
 
-                                            try_again = false;
-                                            break;
-                                        },
-                                        _ => ()
+                                                try_again = false;
+                                                break;
+                                            },
+                                            _ => ()
+                                        }
                                     }
                                 };
                             }
@@ -4606,9 +5241,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop - diagonal*7) as usize]) 
-                                                    || is_black(board[((*b_bishop - diagonal*7) as usize)])
-                                                    || upper_right_diagonal(*b_bishop, diagonal) {
+                                                    }else if upper_right_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop - diagonal*7) as usize]) 
+                                                    || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -4625,9 +5260,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop - diagonal*9) as usize]) 
-                                                    || is_black(board[((*b_bishop - diagonal*9) as usize)]) 
-                                                    || upper_left_diagonal(*b_bishop, diagonal) {
+                                                    }else if upper_left_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop - diagonal*9) as usize]) 
+                                                    || is_black(board[((*b_bishop - diagonal*9) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -4646,9 +5281,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*b_bishop + 7*diagonal) as usize]) 
-                                                    || inferior_left_diagonal(*b_bishop, diagonal) {
+                                                    }else if inferior_left_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*b_bishop + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -4665,9 +5300,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*b_bishop + 9*diagonal) as usize])
-                                                    || inferior_right_diagonal(*b_bishop, diagonal) {
+                                                    }else if inferior_right_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -4710,9 +5345,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop - diagonal*9) as usize]) 
-                                                || is_black(board[((*b_bishop - diagonal*9) as usize)]) 
-                                                || upper_left_diagonal(*b_bishop, diagonal) {
+                                                }else if upper_left_diagonal(*b_bishop, diagonal)
+                                                || is_white(board[(*b_bishop - diagonal*9) as usize]) 
+                                                || is_black(board[((*b_bishop - diagonal*9) as usize)]) {
                                                     break;
                                                 }
                                             }
@@ -4750,9 +5385,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) 
-                                                || is_black(board[(*b_bishop + 9*diagonal) as usize])
-                                                || inferior_right_diagonal(*b_bishop, diagonal) {
+                                                }else if inferior_right_diagonal(*b_bishop, diagonal)
+                                                || is_white(board[(*b_bishop + 9*diagonal) as usize]) 
+                                                || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -4763,7 +5398,7 @@ fn main() {
                         },
                         'r'|'R' => {
                             // check if more than one rook can reach the desired square
-                            if test_multiple_rooks(&mut black_rooks, desired_position) == true {
+                            if test_multiple_rooks(&mut black_rooks, desired_position, &board) == true {
                                 println!("Specify the current square of the rook to be moved");
                                 player_move.clear();
                                 san_move.clear();
@@ -4818,15 +5453,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook - square) as usize]) 
-                                                    || is_black(board[(*b_rook - square) as usize])
-                                                    || rook_left(*b_rook, square) {
+                                                    }else if rook_left(*b_rook, square)
+                                                    || is_white(board[(*b_rook - square) as usize]) 
+                                                    || is_black(board[(*b_rook - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*b_rook - desired_position)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_rook - square*8 == desired_position && !rook_up(*b_rook, square) {
+                                                    if *b_rook - square*8 == desired_position && *b_rook-square*8 >= 0{
                                                         if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -4842,9 +5477,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook - square*8) as usize]) 
-                                                    || is_black(board[(*b_rook - square*8) as usize])
-                                                    || rook_up(*b_rook, square) {
+                                                    }else if *b_rook-square*8 < 0
+                                                    || is_white(board[(*b_rook - square*8) as usize]) 
+                                                    || is_black(board[(*b_rook - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -4868,15 +5503,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook + square) as usize]) 
-                                                    || is_black(board[(*b_rook + square) as usize])
-                                                    || rook_right(*b_rook, square) {
+                                                    }else if rook_right(*b_rook, square)
+                                                    || is_white(board[(*b_rook + square) as usize]) 
+                                                    || is_black(board[(*b_rook + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *b_rook)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_rook + square*8 == desired_position && !rook_down(*b_rook, square) {
+                                                    if *b_rook + square*8 == desired_position && *b_rook+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -4892,9 +5527,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook + square*8) as usize]) 
-                                                    || is_black(board[(*b_rook + square*8) as usize])
-                                                    || rook_down(*b_rook, square) {
+                                                    }else if *b_rook+square*8 > 63
+                                                    || is_white(board[(*b_rook + square*8) as usize]) 
+                                                    || is_black(board[(*b_rook + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -4903,7 +5538,7 @@ fn main() {
                                     }
                                 };
                             }else{ // only one rook may reach the desired square
-                                for b_rook in &mut black_rooks.iter_mut() {    
+                                'rook: for b_rook in &mut black_rooks.iter_mut() {    
                                     if *b_rook > desired_position && !is_black(board[desired_position as usize]) {
                                         if get_line(*b_rook) == get_line(desired_position) {
                                             for square in 1..8 {
@@ -4922,16 +5557,16 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook - square) as usize]) 
-                                                || is_black(board[(*b_rook - square) as usize])
-                                                || rook_left(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_left(*b_rook, square)
+                                                || is_white(board[(*b_rook - square) as usize]) 
+                                                || is_black(board[(*b_rook - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*b_rook - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_rook - square*8 == desired_position && !rook_up(*b_rook, square) {
+                                                if *b_rook - square*8 == desired_position && *b_rook-square*8 >= 0{
                                                     if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -4946,10 +5581,10 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook - square*8) as usize]) 
-                                                || is_black(board[(*b_rook - square*8) as usize])
-                                                || rook_up(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if *b_rook-square*8 < 0
+                                                || is_white(board[(*b_rook - square*8) as usize]) 
+                                                || is_black(board[(*b_rook - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -4972,16 +5607,16 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook + square) as usize]) 
-                                                || is_black(board[(*b_rook + square) as usize])
-                                                || rook_right(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_right(*b_rook, square)
+                                                || is_white(board[(*b_rook + square) as usize]) 
+                                                || is_black(board[(*b_rook + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *b_rook)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_rook + square*8 == desired_position && !rook_down(*b_rook, square) {
+                                                if *b_rook + square*8 == desired_position && *b_rook+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -4996,10 +5631,10 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook + square*8) as usize]) 
-                                                || is_black(board[(*b_rook + square*8) as usize])
-                                                || rook_down(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if *b_rook+square*8 > 63
+                                                || is_white(board[(*b_rook + square*8) as usize]) 
+                                                || is_black(board[(*b_rook + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -5011,101 +5646,127 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - black_king {
                                 -9 => {
-                                    if !upper_left_diagonal(black_king, 1) 
-                                    && get_pieces_checking_the_black_king(black_king-9, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !upper_left_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-9 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
-                                        }
-                                    },
+                                                // the rooks might have not actually moved,
+                                                // but a king move invalidates both castling maneuvers
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
+                                        }    
+                                    }
+                                },
                                 -8 => {
-                                    if !rook_up(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king-8, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if black_king-8 >= 0 {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-8 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    } 
+                                },
                                 -7 => {
-                                    if !upper_right_diagonal(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king-7, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !upper_right_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-7 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 -1 => {
-                                    if !rook_left(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king-1, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !rook_left(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-1 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 1 => {
-                                    if !rook_right(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+1, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !rook_right(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+1 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 7 => {
-                                    if !inferior_left_diagonal(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+7, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_left_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+7 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 8 => {
-                                    if !rook_down(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+8, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if black_king+8 <= 63 {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+8 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 9 => {
-                                    if !inferior_right_diagonal(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+9, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_right_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+9 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 _ => ()
                             }
                         },
@@ -5162,9 +5823,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - diagonal*7) as usize]) 
-                                                    || is_black(board[((*b_queen - diagonal*7) as usize)])
-                                                    || upper_right_diagonal(*b_queen, diagonal) {
+                                                    }else if upper_right_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen - diagonal*7) as usize]) 
+                                                    || is_black(board[((*b_queen - diagonal*7) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -5181,14 +5842,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - diagonal*9) as usize]) 
-                                                    || is_black(board[((*b_queen - diagonal*9) as usize)]) 
-                                                    || upper_left_diagonal(*b_queen, diagonal) {
+                                                    }else if upper_left_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen - diagonal*9) as usize]) 
+                                                    || is_black(board[((*b_queen - diagonal*9) as usize)]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*b_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
@@ -5202,15 +5862,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - square) as usize]) 
-                                                    || is_black(board[(*b_queen - square) as usize])
-                                                    || rook_left(*b_queen, square) {
+                                                    }else if rook_left(*b_queen, square)
+                                                    || is_white(board[(*b_queen - square) as usize]) 
+                                                    || is_black(board[(*b_queen - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*b_queen - desired_position)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                    if *b_queen - square*8 == desired_position && *b_queen-square*8 >= 0 {
                                                         if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -5221,9 +5881,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - square*8) as usize]) 
-                                                    || is_black(board[(*b_queen - square*8) as usize])
-                                                    || rook_up(*b_queen, square) {
+                                                    }else if *b_queen-square*8 < 0
+                                                    || is_white(board[(*b_queen - square*8) as usize]) 
+                                                    || is_black(board[(*b_queen - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -5243,9 +5903,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*b_queen + 7*diagonal) as usize])
-                                                    || inferior_left_diagonal(*b_queen, diagonal) {
+                                                    }else if inferior_left_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*b_queen + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -5262,14 +5922,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*b_queen + 9*diagonal) as usize])
-                                                    || inferior_right_diagonal(*b_queen, diagonal) {
+                                                    }else if inferior_right_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*b_queen + 9*diagonal) as usize]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*b_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
@@ -5283,15 +5942,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + square) as usize]) 
-                                                    || is_black(board[(*b_queen + square) as usize])
-                                                    || rook_right(*b_queen, square) {
+                                                    }else if rook_right(*b_queen, square)
+                                                    || is_white(board[(*b_queen + square) as usize]) 
+                                                    || is_black(board[(*b_queen + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *b_queen)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                    if *b_queen + square*8 == desired_position && *b_queen+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -5302,9 +5961,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + square*8) as usize]) 
-                                                    || is_black(board[(*b_queen + square*8) as usize])
-                                                    || rook_down(*b_queen, square) {
+                                                    }else if *b_queen+square*8 > 63
+                                                    || is_white(board[(*b_queen + square*8) as usize]) 
+                                                    || is_black(board[(*b_queen + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -5313,7 +5972,7 @@ fn main() {
                                     }
                                 };
                             }else{
-                                for b_queen in black_queens.iter_mut() {
+                                'queen: for b_queen in black_queens.iter_mut() {
                                     if *b_queen > desired_position {
                                         // DIAGONAL MOVEMENT:
                                         if (*b_queen - desired_position)%7 == 0 {
@@ -5328,10 +5987,10 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - diagonal*7) as usize]) 
-                                                || is_black(board[((*b_queen - diagonal*7) as usize)])
-                                                || upper_right_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if upper_right_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen - diagonal*7) as usize]) 
+                                                || is_black(board[((*b_queen - diagonal*7) as usize)]) {
                                                     break;
                                                 }
                                             }
@@ -5347,15 +6006,14 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - diagonal*9) as usize]) 
-                                                || is_black(board[((*b_queen - diagonal*9) as usize)])
-                                                || upper_left_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if upper_left_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen - diagonal*9) as usize]) 
+                                                || is_black(board[((*b_queen - diagonal*9) as usize)]) {
                                                     break;
                                                 }
-                                            }
+                                            }// ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*b_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
@@ -5368,16 +6026,16 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - square) as usize])
-                                                || is_black(board[(*b_queen - square) as usize])
-                                                || rook_left(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if rook_left(*b_queen, square)
+                                                || is_white(board[(*b_queen - square) as usize])
+                                                || is_black(board[(*b_queen - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*b_queen - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                if *b_queen - square*8 == desired_position && *b_queen-square*8 >= 0 {
                                                     if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -5387,10 +6045,10 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - square*8) as usize])
-                                                || is_black(board[(*b_queen - square*8) as usize])
-                                                || rook_up(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if *b_queen-square*8 < 0
+                                                || is_white(board[(*b_queen - square*8) as usize])
+                                                || is_black(board[(*b_queen - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -5409,10 +6067,10 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + 7*diagonal) as usize])
-                                                || is_black(board[(*b_queen + 7*diagonal) as usize])
-                                                || inferior_left_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if inferior_left_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen + 7*diagonal) as usize])
+                                                || is_black(board[(*b_queen + 7*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -5428,15 +6086,14 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + 9*diagonal) as usize])
-                                                || is_black(board[(*b_queen + 9*diagonal) as usize])
-                                                || inferior_right_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if inferior_right_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen + 9*diagonal) as usize])
+                                                || is_black(board[(*b_queen + 9*diagonal) as usize]) {
                                                     break;
                                                 }
-                                            }
+                                            }// ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*b_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
@@ -5449,16 +6106,16 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + square) as usize])
-                                                || is_black(board[(*b_queen + square) as usize])
-                                                || rook_right(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if rook_right(*b_queen, square)
+                                                || is_white(board[(*b_queen + square) as usize])
+                                                || is_black(board[(*b_queen + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *b_queen)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                if *b_queen + square*8 == desired_position && *b_queen+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -5468,10 +6125,10 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + square*8) as usize])
-                                                || is_black(board[(*b_queen + square*8) as usize])
-                                                || rook_down(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if *b_queen+square*8 > 63 
+                                                || is_white(board[(*b_queen + square*8) as usize])
+                                                || is_black(board[(*b_queen + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -5609,10 +6266,57 @@ fn main() {
 
                                 for b_knight in black_knights.iter_mut() {
                                     if knight_column + knight_line == *b_knight {
-                                        match *b_knight - desired_position {
-                                            -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
+                                        if get_line(*b_knight) - get_line(desired_position) == 2
+                                        || get_line(*b_knight) - get_line(desired_position) == -2 {
+                                            match desired_position-*b_knight {
+                                                -17 | -15 | 17 | 15 => {
+                                                    for piece in bpinned.iter() {
+                                                        if *b_knight == *piece {
+                                                            // knights cant move out of absolute pins
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'black;
+                                                        }
+                                                    }
+                                                    board[*b_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    *b_knight = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            }
+                                        }else if get_line(*b_knight) - get_line(desired_position) == 1
+                                        || get_line(*b_knight) - get_line(desired_position) == -1 {
+                                            match desired_position-*b_knight {
+                                                -10 | -6 | 10 | 6 => {
+                                                    for piece in bpinned.iter() {
+                                                        if *b_knight == *piece {
+                                                            // knights cant move out of absolute pins
+                                                            println!("That knight is pinned and may not move right now!\n");
+                                                            continue 'black;
+                                                        }
+                                                    }
+                                                    board[*b_knight as usize] = NOTHING;
+                                                    board[desired_position as usize] = BLACK_KNIGHT;
+                                                    *b_knight = desired_position;
+    
+                                                    try_again = false;
+                                                    break;
+                                                },
+                                                _ => ()
+                                            }
+                                        }
+                                    }
+                                };
+                            }else{
+                                for b_knight in black_knights.iter_mut() {
+                                    if get_line(*b_knight) - get_line(desired_position) == 2
+                                    || get_line(*b_knight) - get_line(desired_position) == -2 {
+                                        match desired_position-*b_knight {
+                                            -17 | -15 | 17 | 15 => {
                                                 for piece in bpinned.iter() {
-                                                    if knight_column + knight_line == *piece {
+                                                    if *b_knight == *piece {
                                                         // knights cant move out of absolute pins
                                                         println!("That knight is pinned and may not move right now!\n");
                                                         continue 'black;
@@ -5627,27 +6331,26 @@ fn main() {
                                             },
                                             _ => ()
                                         }
-                                    }
-                                }
-                            }else{
-                                for b_knight in black_knights.iter_mut() {
-                                    match *b_knight - desired_position {
-                                        -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                                            for piece in bpinned.iter() {
-                                                if *b_knight == *piece {
-                                                // knights cant move out of absolute pins
-                                                println!("That knight is pinned and may not move right now!\n");
-                                                continue 'black;
+                                    }else if get_line(*b_knight) - get_line(desired_position) == 1
+                                    || get_line(*b_knight) - get_line(desired_position) == -1 {
+                                        match desired_position-*b_knight {
+                                            -10 | -6 | 10 | 6 => {
+                                                for piece in bpinned.iter() {
+                                                    if *b_knight == *piece {
+                                                        // knights cant move out of absolute pins
+                                                        println!("That knight is pinned and may not move right now!\n");
+                                                        continue 'black;
+                                                    }
                                                 }
-                                            }
-                                            board[*b_knight as usize] = NOTHING;
-                                            board[desired_position as usize] = BLACK_KNIGHT;
-                                            *b_knight = desired_position;
+                                                board[*b_knight as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KNIGHT;
+                                                *b_knight = desired_position;
 
-                                            try_again = false;
-                                            break;
-                                        },
-                                        _ => ()
+                                                try_again = false;
+                                                break;
+                                            },
+                                            _ => ()
+                                        }
                                     }
                                 };
                             }
@@ -5706,9 +6409,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop - diagonal*7) as usize]) 
-                                                    || is_black(board[((*b_bishop - diagonal*7) as usize)])
-                                                    || upper_right_diagonal(*b_bishop, diagonal) {
+                                                    }else if upper_right_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop - diagonal*7) as usize]) 
+                                                    || is_black(board[((*b_bishop - diagonal*7) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -5725,9 +6428,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop - diagonal*9) as usize]) 
-                                                    || is_black(board[((*b_bishop - diagonal*9) as usize)]) 
-                                                    || upper_left_diagonal(*b_bishop, diagonal) {
+                                                    }else if upper_left_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop - diagonal*9) as usize]) 
+                                                    || is_black(board[((*b_bishop - diagonal*9) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -5746,9 +6449,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*b_bishop + 7*diagonal) as usize]) 
-                                                    || inferior_left_diagonal(*b_bishop, diagonal) {
+                                                    }else if inferior_left_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*b_bishop + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -5765,9 +6468,9 @@ fn main() {
     
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*b_bishop + 9*diagonal) as usize])
-                                                    || inferior_right_diagonal(*b_bishop, diagonal) {
+                                                    }else if inferior_right_diagonal(*b_bishop, diagonal)
+                                                    || is_white(board[(*b_bishop + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -5810,9 +6513,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop - diagonal*9) as usize]) 
-                                                || is_black(board[((*b_bishop - diagonal*9) as usize)]) 
-                                                || upper_left_diagonal(*b_bishop, diagonal) {
+                                                }else if upper_left_diagonal(*b_bishop, diagonal)
+                                                || is_white(board[(*b_bishop - diagonal*9) as usize]) 
+                                                || is_black(board[((*b_bishop - diagonal*9) as usize)]) {
                                                     break;
                                                 }
                                             }
@@ -5850,9 +6553,9 @@ fn main() {
 
                                                     try_again = false;
                                                     break;
-                                                }else if is_white(board[(*b_bishop + 9*diagonal) as usize]) 
-                                                || is_black(board[(*b_bishop + 9*diagonal) as usize])
-                                                || inferior_right_diagonal(*b_bishop, diagonal) {
+                                                }else if inferior_right_diagonal(*b_bishop, diagonal)
+                                                || is_white(board[(*b_bishop + 9*diagonal) as usize]) 
+                                                || is_black(board[(*b_bishop + 9*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -5863,7 +6566,7 @@ fn main() {
                         },
                         'r'|'R' => {
                             // check if more than one rook can reach the desired square
-                            if test_multiple_rooks(&mut black_rooks, desired_position) == true {
+                            if test_multiple_rooks(&mut black_rooks, desired_position, &board) == true {
                                 println!("Specify the current square of the rook to be moved");
                                 player_move.clear();
                                 san_move.clear();
@@ -5918,15 +6621,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook - square) as usize]) 
-                                                    || is_black(board[(*b_rook - square) as usize])
-                                                    || rook_left(*b_rook, square) {
+                                                    }else if rook_left(*b_rook, square)
+                                                    || is_white(board[(*b_rook - square) as usize]) 
+                                                    || is_black(board[(*b_rook - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*b_rook - desired_position)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_rook - square*8 == desired_position && !rook_up(*b_rook, square) {
+                                                    if *b_rook - square*8 == desired_position && *b_rook-square*8 >= 0{
                                                         if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -5942,9 +6645,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook - square*8) as usize]) 
-                                                    || is_black(board[(*b_rook - square*8) as usize])
-                                                    || rook_up(*b_rook, square) {
+                                                    }else if *b_rook-square*8 < 0
+                                                    || is_white(board[(*b_rook - square*8) as usize]) 
+                                                    || is_black(board[(*b_rook - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -5968,15 +6671,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook + square) as usize]) 
-                                                    || is_black(board[(*b_rook + square) as usize])
-                                                    || rook_right(*b_rook, square) {
+                                                    }else if rook_right(*b_rook, square)
+                                                    || is_white(board[(*b_rook + square) as usize]) 
+                                                    || is_black(board[(*b_rook + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *b_rook)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_rook + square*8 == desired_position && !rook_down(*b_rook, square) {
+                                                    if *b_rook + square*8 == desired_position && *b_rook+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                             println!("That rook is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -5992,9 +6695,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_rook + square*8) as usize]) 
-                                                    || is_black(board[(*b_rook + square*8) as usize])
-                                                    || rook_down(*b_rook, square) {
+                                                    }else if *b_rook+square*8 > 63
+                                                    || is_white(board[(*b_rook + square*8) as usize]) 
+                                                    || is_black(board[(*b_rook + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -6003,7 +6706,7 @@ fn main() {
                                     }
                                 };
                             }else{ // only one rook may reach the desired square
-                                for b_rook in &mut black_rooks.iter_mut() {    
+                                'rook: for b_rook in &mut black_rooks.iter_mut() {    
                                     if *b_rook > desired_position && !is_black(board[desired_position as usize]) {
                                         if get_line(*b_rook) == get_line(desired_position) {
                                             for square in 1..8 {
@@ -6022,16 +6725,16 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook - square) as usize]) 
-                                                || is_black(board[(*b_rook - square) as usize])
-                                                || rook_left(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_left(*b_rook, square)
+                                                || is_white(board[(*b_rook - square) as usize]) 
+                                                || is_black(board[(*b_rook - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*b_rook - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_rook - square*8 == desired_position && !rook_up(*b_rook, square) {
+                                                if *b_rook - square*8 == desired_position && *b_rook-square*8 >= 0{
                                                     if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -6046,10 +6749,10 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook - square*8) as usize]) 
-                                                || is_black(board[(*b_rook - square*8) as usize])
-                                                || rook_up(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if *b_rook-square*8 < 0
+                                                || is_white(board[(*b_rook - square*8) as usize]) 
+                                                || is_black(board[(*b_rook - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -6072,16 +6775,16 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook + square) as usize]) 
-                                                || is_black(board[(*b_rook + square) as usize])
-                                                || rook_right(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if rook_right(*b_rook, square)
+                                                || is_white(board[(*b_rook + square) as usize]) 
+                                                || is_black(board[(*b_rook + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *b_rook)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_rook + square*8 == desired_position && !rook_down(*b_rook, square) {
+                                                if *b_rook + square*8 == desired_position && *b_rook+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*b_rook, black_king, desired_position, &bpinned) == false {
                                                         println!("That rook is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -6096,10 +6799,10 @@ fn main() {
                                                     *b_rook = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_rook + square*8) as usize]) 
-                                                || is_black(board[(*b_rook + square*8) as usize])
-                                                || rook_down(*b_rook, square) {
+                                                    break 'rook;
+                                                }else if *b_rook+square*8 > 63
+                                                || is_white(board[(*b_rook + square*8) as usize]) 
+                                                || is_black(board[(*b_rook + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -6111,101 +6814,127 @@ fn main() {
                         'k'|'K' => {
                             match desired_position - black_king {
                                 -9 => {
-                                    if !upper_left_diagonal(black_king, 1) 
-                                    && get_pieces_checking_the_black_king(black_king-9, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !upper_left_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-9 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
-                                        }
-                                    },
+                                                // the rooks might have not actually moved,
+                                                // but a king move invalidates both castling maneuvers
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
+                                        }    
+                                    }
+                                },
                                 -8 => {
-                                    if !rook_up(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king-8, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if black_king-8 >= 0 {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-8 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    } 
+                                },
                                 -7 => {
-                                    if !upper_right_diagonal(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king-7, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !upper_right_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-7 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 -1 => {
-                                    if !rook_left(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king-1, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !rook_left(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king-1 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 1 => {
-                                    if !rook_right(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+1, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !rook_right(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+1 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 7 => {
-                                    if !inferior_left_diagonal(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+7, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_left_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+7 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 8 => {
-                                    if !rook_down(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+8, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if black_king+8 <= 63 {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+8 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 9 => {
-                                    if !inferior_right_diagonal(black_king, 1)
-                                    && get_pieces_checking_the_black_king(black_king+9, &board).len() == 0 {
-                                        board[black_king as usize] = NOTHING;
-                                        board[desired_position as usize] = BLACK_KING;
-                                        black_king = desired_position;
-                                        try_again = false;
+                                    if !inferior_right_diagonal(black_king, 1) {
+                                        for safe in bking_safe_squares.iter() {
+                                            if black_king+9 == *safe {
+                                                board[black_king as usize] = NOTHING;
+                                                board[desired_position as usize] = BLACK_KING;
+                                                black_king = desired_position;
+                                                try_again = false;
 
-                                        has_black_rook1_moved = true;
-                                        has_black_rook2_moved = true;
+                                                has_black_rook1_moved = true;
+                                                has_black_rook2_moved = true;
+                                            }
                                         }
-                                    },
+                                    }
+                                },
                                 _ => ()
                             }
                         },
@@ -6262,9 +6991,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - diagonal*7) as usize]) 
-                                                    || is_black(board[((*b_queen - diagonal*7) as usize)])
-                                                    || upper_right_diagonal(*b_queen, diagonal) {
+                                                    }else if upper_right_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen - diagonal*7) as usize]) 
+                                                    || is_black(board[((*b_queen - diagonal*7) as usize)]) {
                                                         break;
                                                     }
                                                 }
@@ -6281,14 +7010,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - diagonal*9) as usize]) 
-                                                    || is_black(board[((*b_queen - diagonal*9) as usize)]) 
-                                                    || upper_left_diagonal(*b_queen, diagonal) {
+                                                    }else if upper_left_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen - diagonal*9) as usize]) 
+                                                    || is_black(board[((*b_queen - diagonal*9) as usize)]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*b_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
@@ -6302,15 +7030,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - square) as usize]) 
-                                                    || is_black(board[(*b_queen - square) as usize])
-                                                    || rook_left(*b_queen, square) {
+                                                    }else if rook_left(*b_queen, square)
+                                                    || is_white(board[(*b_queen - square) as usize]) 
+                                                    || is_black(board[(*b_queen - square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (*b_queen - desired_position)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                    if *b_queen - square*8 == desired_position && *b_queen-square*8 >= 0 {
                                                         if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -6321,9 +7049,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen - square*8) as usize]) 
-                                                    || is_black(board[(*b_queen - square*8) as usize])
-                                                    || rook_up(*b_queen, square) {
+                                                    }else if *b_queen-square*8 < 0
+                                                    || is_white(board[(*b_queen - square*8) as usize]) 
+                                                    || is_black(board[(*b_queen - square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -6343,9 +7071,9 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + 7*diagonal) as usize]) 
-                                                    || is_black(board[(*b_queen + 7*diagonal) as usize])
-                                                    || inferior_left_diagonal(*b_queen, diagonal) {
+                                                    }else if inferior_left_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen + 7*diagonal) as usize]) 
+                                                    || is_black(board[(*b_queen + 7*diagonal) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -6362,14 +7090,13 @@ fn main() {
         
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + 9*diagonal) as usize]) 
-                                                    || is_black(board[(*b_queen + 9*diagonal) as usize])
-                                                    || inferior_right_diagonal(*b_queen, diagonal) {
+                                                    }else if inferior_right_diagonal(*b_queen, diagonal)
+                                                    || is_white(board[(*b_queen + 9*diagonal) as usize]) 
+                                                    || is_black(board[(*b_queen + 9*diagonal) as usize]) {
                                                         break;
                                                     }
-                                                }
+                                                }// ROOK-LIKE MOVEMENT:
                                             }
-                                            // ROOK-LIKE MOVEMENT:
                                             if get_line(*b_queen) == get_line(desired_position) {
                                                 for square in 1..8 {
                                                     if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
@@ -6383,15 +7110,15 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + square) as usize]) 
-                                                    || is_black(board[(*b_queen + square) as usize])
-                                                    || rook_right(*b_queen, square) {
+                                                    }else if rook_right(*b_queen, square)
+                                                    || is_white(board[(*b_queen + square) as usize]) 
+                                                    || is_black(board[(*b_queen + square) as usize]) {
                                                         break;
                                                     }
                                                 }
                                             }else if (desired_position - *b_queen)%8 == 0 {
                                                 for square in 1..8 {
-                                                    if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                    if *b_queen + square*8 == desired_position && *b_queen+square*8 <= 63 {
                                                         if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                             println!("That queen is pinned and may not move to that square!\n");
                                                             continue 'black;
@@ -6402,9 +7129,9 @@ fn main() {
                 
                                                         try_again = false;
                                                         break;
-                                                    }else if is_white(board[(*b_queen + square*8) as usize]) 
-                                                    || is_black(board[(*b_queen + square*8) as usize])
-                                                    || rook_down(*b_queen, square) {
+                                                    }else if *b_queen+square*8 > 63
+                                                    || is_white(board[(*b_queen + square*8) as usize]) 
+                                                    || is_black(board[(*b_queen + square*8) as usize]) {
                                                         break;
                                                     }
                                                 }
@@ -6413,7 +7140,7 @@ fn main() {
                                     }
                                 };
                             }else{
-                                for b_queen in black_queens.iter_mut() {
+                                'queen: for b_queen in black_queens.iter_mut() {
                                     if *b_queen > desired_position {
                                         // DIAGONAL MOVEMENT:
                                         if (*b_queen - desired_position)%7 == 0 {
@@ -6428,10 +7155,10 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - diagonal*7) as usize]) 
-                                                || is_black(board[((*b_queen - diagonal*7) as usize)])
-                                                || upper_right_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if upper_right_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen - diagonal*7) as usize]) 
+                                                || is_black(board[((*b_queen - diagonal*7) as usize)]) {
                                                     break;
                                                 }
                                             }
@@ -6447,15 +7174,14 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - diagonal*9) as usize]) 
-                                                || is_black(board[((*b_queen - diagonal*9) as usize)])
-                                                || upper_left_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if upper_left_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen - diagonal*9) as usize]) 
+                                                || is_black(board[((*b_queen - diagonal*9) as usize)]) {
                                                     break;
                                                 }
-                                            }
+                                            }// ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*b_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_queen - square == desired_position && !rook_left(*b_queen, square) {
@@ -6468,16 +7194,16 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - square) as usize])
-                                                || is_black(board[(*b_queen - square) as usize])
-                                                || rook_left(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if rook_left(*b_queen, square)
+                                                || is_white(board[(*b_queen - square) as usize])
+                                                || is_black(board[(*b_queen - square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (*b_queen - desired_position)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_queen - square*8 == desired_position && !rook_up(*b_queen, square) {
+                                                if *b_queen - square*8 == desired_position && *b_queen-square*8 >= 0 {
                                                     if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -6487,10 +7213,10 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen - square*8) as usize])
-                                                || is_black(board[(*b_queen - square*8) as usize])
-                                                || rook_up(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if *b_queen-square*8 < 0
+                                                || is_white(board[(*b_queen - square*8) as usize])
+                                                || is_black(board[(*b_queen - square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -6509,10 +7235,10 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + 7*diagonal) as usize])
-                                                || is_black(board[(*b_queen + 7*diagonal) as usize])
-                                                || inferior_left_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if inferior_left_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen + 7*diagonal) as usize])
+                                                || is_black(board[(*b_queen + 7*diagonal) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -6528,15 +7254,14 @@ fn main() {
                                                     *b_queen = desired_position;
     
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + 9*diagonal) as usize])
-                                                || is_black(board[(*b_queen + 9*diagonal) as usize])
-                                                || inferior_right_diagonal(*b_queen, diagonal) {
+                                                    break 'queen;
+                                                }else if inferior_right_diagonal(*b_queen, diagonal)
+                                                || is_white(board[(*b_queen + 9*diagonal) as usize])
+                                                || is_black(board[(*b_queen + 9*diagonal) as usize]) {
                                                     break;
                                                 }
-                                            }
+                                            }// ROOK-LIKE MOVEMENT:
                                         }
-                                        // ROOK-LIKE MOVEMENT:
                                         if get_line(*b_queen) == get_line(desired_position) {
                                             for square in 1..8 {
                                                 if *b_queen + square == desired_position && !rook_right(*b_queen, square) {
@@ -6549,16 +7274,16 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + square) as usize])
-                                                || is_black(board[(*b_queen + square) as usize])
-                                                || rook_right(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if rook_right(*b_queen, square)
+                                                || is_white(board[(*b_queen + square) as usize])
+                                                || is_black(board[(*b_queen + square) as usize]) {
                                                     break;
                                                 }
                                             }
                                         }else if (desired_position - *b_queen)%8 == 0 {
                                             for square in 1..8 {
-                                                if *b_queen + square*8 == desired_position && !rook_down(*b_queen, square) {
+                                                if *b_queen + square*8 == desired_position && *b_queen+square*8 <= 63 {
                                                     if check_if_pinned_piece_can_move(*b_queen, black_king, desired_position, &bpinned) == false {
                                                         println!("That queen is pinned and may not move to that square!\n");
                                                         continue 'black;
@@ -6568,10 +7293,10 @@ fn main() {
                                                     *b_queen = desired_position;
             
                                                     try_again = false;
-                                                    break;
-                                                }else if is_white(board[(*b_queen + square*8) as usize])
-                                                || is_black(board[(*b_queen + square*8) as usize])
-                                                || rook_down(*b_queen, square) {
+                                                    break 'queen;
+                                                }else if *b_queen+square*8 > 63 
+                                                || is_white(board[(*b_queen + square*8) as usize])
+                                                || is_black(board[(*b_queen + square*8) as usize]) {
                                                     break;
                                                 }
                                             }
@@ -6590,7 +7315,7 @@ fn main() {
                                     'a' => {
                                         for pawn in 0..white_column_a.len() {
                                             if white_column_a[pawn] == desired_position {
-                                                white_column_a.swap_remove(pawn);
+                                                white_column_a.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6598,7 +7323,7 @@ fn main() {
                                     'b' => {
                                         for pawn in 0..white_column_b.len() {
                                             if white_column_b[pawn] == desired_position {
-                                                white_column_b.swap_remove(pawn);
+                                                white_column_b.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6606,7 +7331,7 @@ fn main() {
                                     'c' => {
                                         for pawn in 0..white_column_c.len() {
                                             if white_column_c[pawn] == desired_position {
-                                                white_column_c.swap_remove(pawn);
+                                                white_column_c.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6614,7 +7339,7 @@ fn main() {
                                     'd' => {
                                         for pawn in 0..white_column_d.len() {
                                             if white_column_d[pawn] == desired_position {
-                                                white_column_d.swap_remove(pawn);
+                                                white_column_d.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6622,7 +7347,7 @@ fn main() {
                                     'e' => {
                                         for pawn in 0..white_column_e.len() {
                                             if white_column_e[pawn] == desired_position {
-                                                white_column_e.swap_remove(pawn);
+                                                white_column_e.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6630,7 +7355,7 @@ fn main() {
                                     'f' => {
                                         for pawn in 0..white_column_f.len() {
                                             if white_column_f[pawn] == desired_position {
-                                                white_column_f.swap_remove(pawn);
+                                                white_column_f.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6638,7 +7363,7 @@ fn main() {
                                     'g' => {
                                         for pawn in 0..white_column_g.len() {
                                             if white_column_g[pawn] == desired_position {
-                                                white_column_g.swap_remove(pawn);
+                                                white_column_g.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6646,7 +7371,7 @@ fn main() {
                                     'h' => {
                                         for pawn in 0..white_column_h.len() {
                                             if white_column_h[pawn] == desired_position {
-                                                white_column_h.swap_remove(pawn);
+                                                white_column_h.remove(pawn);
                                                 break;
                                             }
                                         };
@@ -6657,7 +7382,7 @@ fn main() {
                             'Q' => {
                                 for i in 0..white_queens.len() {
                                     if white_queens[i] == desired_position {
-                                        white_queens.swap_remove(i);
+                                        white_queens.remove(i);
                                         break;
                                     }
                                 };
@@ -6665,7 +7390,7 @@ fn main() {
                             'B' => {
                                 for i in 0..white_bishops.len() {
                                     if white_bishops[i] == desired_position {
-                                        white_bishops.swap_remove(i);
+                                        white_bishops.remove(i);
                                         break;
                                     }
                                 };
@@ -6673,7 +7398,7 @@ fn main() {
                             'N' => {
                                 for i in 0..white_knights.len() {
                                     if white_knights[i] == desired_position {
-                                        white_knights.swap_remove(i);
+                                        white_knights.remove(i);
                                         break;
                                     }
                                 };
@@ -6681,7 +7406,7 @@ fn main() {
                             'R' => {
                                 for i in 0..white_rooks.len() {
                                     if white_rooks[i] == desired_position {
-                                        white_rooks.swap_remove(i);
+                                        white_rooks.remove(i);
                                         break;
                                     }
                                 };
@@ -7804,7 +8529,7 @@ fn main() {
                                             if (white_columns_enpassant >> 7) == 0b0 {
                                                 for pawn in 0..white_column_a.len() {
                                                     if white_column_a[pawn] == desired_position {
-                                                        white_column_a.swap_remove(pawn);
+                                                        white_column_a.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7812,7 +8537,7 @@ fn main() {
                                                 for pawn in (0..white_column_a.len()).rev() {
                                                     if white_column_a[pawn] == desired_position
                                                     || white_column_a[pawn] == desired_position-8 {
-                                                        white_column_a.swap_remove(pawn);
+                                                        white_column_a.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7822,7 +8547,7 @@ fn main() {
                                             if (white_columns_enpassant >> 6) == 0b0 {
                                                 for pawn in 0..white_column_b.len() {
                                                     if white_column_b[pawn] == desired_position {
-                                                        white_column_b.swap_remove(pawn);
+                                                        white_column_b.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7830,7 +8555,7 @@ fn main() {
                                                 for pawn in (0..white_column_b.len()).rev() {
                                                     if white_column_b[pawn] == desired_position
                                                     || white_column_b[pawn] == desired_position-8 {
-                                                        white_column_b.swap_remove(pawn);
+                                                        white_column_b.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7840,7 +8565,7 @@ fn main() {
                                             if (white_columns_enpassant >> 5) == 0b0 {
                                                 for pawn in 0..white_column_c.len() {
                                                     if white_column_c[pawn] == desired_position {
-                                                        white_column_c.swap_remove(pawn);
+                                                        white_column_c.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7848,7 +8573,7 @@ fn main() {
                                                 for pawn in (0..white_column_c.len()).rev() {
                                                     if white_column_c[pawn] == desired_position
                                                     || white_column_c[pawn] == desired_position-8 {
-                                                        white_column_c.swap_remove(pawn);
+                                                        white_column_c.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7858,7 +8583,7 @@ fn main() {
                                             if (white_columns_enpassant >> 4) == 0b0 {
                                                 for pawn in 0..white_column_d.len() {
                                                     if white_column_d[pawn] == desired_position {
-                                                        white_column_d.swap_remove(pawn);
+                                                        white_column_d.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7866,7 +8591,7 @@ fn main() {
                                                 for pawn in (0..white_column_d.len()).rev() {
                                                     if white_column_d[pawn] == desired_position
                                                     || white_column_d[pawn] == desired_position-8 {
-                                                        white_column_d.swap_remove(pawn);
+                                                        white_column_d.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7876,7 +8601,7 @@ fn main() {
                                             if (white_columns_enpassant >> 3) == 0b0 {
                                                 for pawn in 0..white_column_e.len() {
                                                     if white_column_e[pawn] == desired_position {
-                                                        white_column_e.swap_remove(pawn);
+                                                        white_column_e.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7884,7 +8609,7 @@ fn main() {
                                                 for pawn in (0..white_column_e.len()).rev() {
                                                     if white_column_e[pawn] == desired_position
                                                     || white_column_e[pawn] == desired_position-8 {
-                                                        white_column_e.swap_remove(pawn);
+                                                        white_column_e.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7894,7 +8619,7 @@ fn main() {
                                             if (white_columns_enpassant >> 2) == 0b0 {
                                                 for pawn in 0..white_column_f.len() {
                                                     if white_column_f[pawn] == desired_position {
-                                                        white_column_f.swap_remove(pawn);
+                                                        white_column_f.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7902,7 +8627,7 @@ fn main() {
                                                 for pawn in (0..white_column_f.len()).rev() {
                                                     if white_column_f[pawn] == desired_position
                                                     || white_column_f[pawn] == desired_position-8 {
-                                                        white_column_f.swap_remove(pawn);
+                                                        white_column_f.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7912,7 +8637,7 @@ fn main() {
                                             if (white_columns_enpassant >> 1) == 0b0 {
                                                 for pawn in 0..white_column_g.len() {
                                                     if white_column_g[pawn] == desired_position {
-                                                        white_column_g.swap_remove(pawn);
+                                                        white_column_g.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7920,7 +8645,7 @@ fn main() {
                                                 for pawn in (0..white_column_g.len()).rev() {
                                                     if white_column_g[pawn] == desired_position
                                                     || white_column_g[pawn] == desired_position-8 {
-                                                        white_column_g.swap_remove(pawn);
+                                                        white_column_g.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7930,7 +8655,7 @@ fn main() {
                                             if (white_columns_enpassant >> 0) == 0b0 {
                                                 for pawn in 0..white_column_h.len() {
                                                     if white_column_h[pawn] == desired_position {
-                                                        white_column_h.swap_remove(pawn);
+                                                        white_column_h.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7938,7 +8663,7 @@ fn main() {
                                                 for pawn in (0..white_column_h.len()).rev() {
                                                     if white_column_h[pawn] == desired_position
                                                     || white_column_h[pawn] == desired_position-8 {
-                                                        white_column_h.swap_remove(pawn);
+                                                        white_column_h.remove(pawn);
                                                         break;
                                                     }
                                                 };
@@ -7950,7 +8675,7 @@ fn main() {
                                 'Q' => {
                                     for i in 0..white_queens.len() {
                                         if white_queens[i] == desired_position {
-                                            white_queens.swap_remove(i);
+                                            white_queens.remove(i);
                                             break;
                                         }
                                     };
@@ -7958,7 +8683,7 @@ fn main() {
                                 'B' => {
                                     for i in 0..white_bishops.len() {
                                         if white_bishops[i] == desired_position {
-                                            white_bishops.swap_remove(i);
+                                            white_bishops.remove(i);
                                             break;
                                         }
                                     };
@@ -7966,7 +8691,7 @@ fn main() {
                                 'N' => {
                                     for i in 0..white_knights.len() {
                                         if white_knights[i] == desired_position {
-                                            white_knights.swap_remove(i);
+                                            white_knights.remove(i);
                                             break;
                                         }
                                     };
@@ -7974,7 +8699,7 @@ fn main() {
                                 'R' => {
                                     for i in 0..white_rooks.len() {
                                         if white_rooks[i] == desired_position {
-                                            white_rooks.swap_remove(i);
+                                            white_rooks.remove(i);
                                             break;
                                         }
                                     };
@@ -8307,7 +9032,7 @@ fn upper_left_diagonal(b: i8, i: i8) -> bool {
 fn inferior_right_diagonal(b: i8, i: i8) -> bool {
     match b + i*9 {
         // a bishop cannot trace a path after it hits the board's "walls" or corners
-        16 | 24 | 32 | 40 | 48 | 50 | 56 |
+        56 | 48 | 40 | 32 | 24 | 16 |
         // positions where adding to the index would exceed the array:
         64..=72  => true,
         _ => false
@@ -8317,7 +9042,7 @@ fn inferior_right_diagonal(b: i8, i: i8) -> bool {
 fn inferior_left_diagonal(b: i8, i: i8) -> bool {
     match b + i*7 {
         // a bishop cannot trace a path after it hits the board's "walls" or corners
-        7 | 15 | 23 | 31 | 39 | 47 | 55 | 63 |
+        63 | 55 | 47 | 39 | 31 | 23 | 15 | 7 |
         // positions where adding to the index would exceed the array:
         64..=70 => true,
         _ => false
@@ -8340,20 +9065,6 @@ fn rook_left(b: i8, i: i8) -> bool {
     }
 }
 
-fn rook_down(b: i8, i: i8) -> bool {
-    match b + i*8 {
-        64..= 71 => true,
-        _ => false
-    }
-}
-
-fn rook_up(b: i8, i: i8) -> bool {
-    match b - i*8 {
-        -1 | -2 | -3 | -4 | -5 | -6 | -7 | -8 => true,
-        _ => false
-    }
-}
-
 fn get_line(piece: i8) -> i8 {
     match piece {
         0..=7 => 8,
@@ -8369,7 +9080,7 @@ fn get_line(piece: i8) -> i8 {
 }
 
 
-fn test_multiple_rooks(pieces: &mut Vec<i8>, position: i8) -> bool {
+fn test_multiple_rooks(pieces: &mut Vec<i8>, position: i8, board: &[char;64]) -> bool {
     // this tests every rook or piece with rook-like 
     // movement inside a vector to see if 
     // more than one of them can reach the same square
@@ -8379,8 +9090,54 @@ fn test_multiple_rooks(pieces: &mut Vec<i8>, position: i8) -> bool {
 
     if pieces.len() >= 2 {
         for i in 0..pieces.len() {
-            if get_line(pieces[i]) == get_line(position) || (position - pieces[i])%8 == 0 {
-                counter += 1
+            if get_line(pieces[i]) == get_line(position) {
+                if pieces[i] > position {
+                    for square in 1..8 {
+                        if !rook_left(pieces[i], square)
+                        && pieces[i]-square == position {
+                            counter +=1;
+                        }else if rook_left(pieces[i], square)
+                        || is_white(board[(pieces[i]-square) as usize])
+                        || is_black(board[(pieces[i]-square) as usize]) {
+                            break;
+                        }
+                    }
+                }else if pieces[i] < position {
+                    for square in 1..8 {
+                        if !rook_right(pieces[i], square)
+                        && pieces[i]+square == position {
+                            counter +=1;
+                        }else if rook_right(pieces[i], square)
+                        || is_white(board[(pieces[i]+square) as usize])
+                        || is_black(board[(pieces[i]+square) as usize]) {
+                            break;
+                        }
+                    }
+                }
+            }else if (position - pieces[i])%8 == 0 {
+                if pieces[i] > position {
+                    for square in 1..8 {
+                        if pieces[i]-square*8 >= 0
+                        && pieces[i]-square*8 == position {
+                            counter +=1;
+                        }else if pieces[i]-square*8 < 0
+                        || is_white(board[(pieces[i]-square*8) as usize])
+                        || is_black(board[(pieces[i]-square*8) as usize]) {
+                            break;
+                        }
+                    }
+                }else if pieces[i] < position {
+                    for square in 1..8 {
+                        if pieces[i]+square*8 <= 63
+                        && pieces[i]+square*8 == position {
+                            counter +=1;
+                        }else if pieces[i]+square*8 > 63
+                        || is_white(board[(pieces[i]+square*8) as usize])
+                        || is_black(board[(pieces[i]+square*8) as usize]) {
+                            break;
+                        }
+                    }
+                }
             }
             if counter >= 2 {
                 return true
@@ -8444,13 +9201,23 @@ fn test_multiple_knights(pieces: &mut Vec<i8>, position: i8) -> bool {
     
     if pieces.len() >= 2 {
         for i in 0..pieces.len() {
-            match position - pieces[i]{
-                -17 | -15 | -10 | -6 | 6 | 10 | 15 | 17 => {
-                    counter += 1;
-                },
-                _ => ()
+            if get_line(pieces[i]) - get_line(position) == 2
+            || get_line(pieces[i]) - get_line(position) == -2 {
+                match position - pieces[i]{
+                    -17 | -15 | 15 | 17 => {
+                        counter += 1;
+                    },
+                    _ => ()
+                }
+            }else if get_line(pieces[i]) - get_line(position) == 1
+            || get_line(pieces[i]) - get_line(position) == -1 {
+                match position - pieces[i]{
+                    -10 | -6 | 6 | 10 => {
+                        counter += 1;
+                    },
+                    _ => ()
+                }
             }
-
             if counter >= 2 {
                 return true
             }
@@ -8518,12 +9285,12 @@ fn get_pieces_checking_the_white_king(kings_position: i8, board: &[char;64]) -> 
     }
 
     for down_square in 1..8 {
-        if !rook_down(kings_position, down_square)
+        if kings_position+down_square*8 <= 63
         && (board[(kings_position+down_square*8) as usize] == BLACK_ROOK 
         || board[(kings_position+down_square*8) as usize] == BLACK_QUEEN) {
             pieces_checking_the_king.insert(0, kings_position+down_square*8);
             break;
-        }else if rook_down(kings_position, down_square)
+        }else if kings_position+down_square*8 > 63
         || match board[(kings_position+down_square*8) as usize] {
             'Q'|'R'|'B'|'N'|'i' => true,
             _ => false
@@ -8534,12 +9301,12 @@ fn get_pieces_checking_the_white_king(kings_position: i8, board: &[char;64]) -> 
     }
 
     for up_square in 1..8 {
-        if !rook_up(kings_position, up_square)
+        if kings_position-up_square*8 >= 0
         && (board[(kings_position-up_square*8) as usize] == BLACK_ROOK 
         || board[(kings_position-up_square*8) as usize] == BLACK_QUEEN) {
             pieces_checking_the_king.insert(0, kings_position-up_square*8);
             break;
-        }else if rook_up(kings_position, up_square)
+        }else if kings_position-up_square*8 < 0
         || match board[(kings_position-up_square*8) as usize] {
             'Q'|'R'|'B'|'N'|'i' => true,
             _ => false
@@ -8617,43 +9384,59 @@ fn get_pieces_checking_the_white_king(kings_position: i8, board: &[char;64]) -> 
     }
     
     if (kings_position + 17) <= 63 {
-        if board[(kings_position+17) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+17);
+        if get_line(kings_position+15)-get_line(kings_position) == -2 {
+            if board[(kings_position+17) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+17);
+            }
         }
     }
     if (kings_position + 15) <= 63 {
-        if board[(kings_position+15) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+15);
+        if get_line(kings_position+15)-get_line(kings_position) == -2 {
+            if board[(kings_position+15) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+15);
+            }
         }
     }
     if (kings_position + 10) <= 63 {
-        if board[(kings_position+10) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+10);
+        if get_line(kings_position+10)-get_line(kings_position) == -1 {
+            if board[(kings_position+10) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+10);
+            }
         }
     }
     if (kings_position + 6) <= 63 {
-        if board[(kings_position+6) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+6);
+        if get_line(kings_position+6)-get_line(kings_position) == -1 {
+            if board[(kings_position+6) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+6);
+            }
         }
     }
     if (kings_position - 6) >= 0 {
-        if board[(kings_position-6) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-6);
+        if get_line(kings_position-6)-get_line(kings_position) == 1 {
+            if board[(kings_position-6) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-6);
+            }
         }
     }
     if (kings_position - 10) >= 0 {
-        if board[(kings_position-10) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-10);
+        if get_line(kings_position-10)-get_line(kings_position) == 1 {
+            if board[(kings_position-10) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-10);
+            }
         }
     }
     if (kings_position - 15) >= 0 {
-        if board[(kings_position-15) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-15);
-        }
+        if get_line(kings_position-15)-get_line(kings_position) == 2 {
+            if board[(kings_position-15) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-15);
+            }
+        }  
     }
     if (kings_position - 17) >= 0 {
-        if board[(kings_position-17) as usize] == BLACK_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-17);
+        if get_line(kings_position-17)-get_line(kings_position) == 2 {
+            if board[(kings_position-17) as usize] == BLACK_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-17);
+            }
         }
     }
 
@@ -8702,12 +9485,12 @@ fn get_pieces_checking_the_black_king(kings_position: i8, board: &[char;64]) -> 
     }
 
     for down_square in 1..8 {
-        if !rook_down(kings_position, down_square)
+        if kings_position+down_square*8 <= 63
         && (board[(kings_position+down_square*8) as usize] == WHITE_ROOK 
         || board[(kings_position+down_square*8) as usize] == WHITE_QUEEN) {
             pieces_checking_the_king.insert(0, kings_position+down_square*8);
             break;
-        }else if rook_down(kings_position, down_square)
+        }else if kings_position+down_square*8 > 63
         || is_white(board[(kings_position+down_square*8) as usize]) 
         || match board[(kings_position+down_square*8) as usize] {
             'q'|'r'|'b'|'n'|'j' => true,
@@ -8718,12 +9501,12 @@ fn get_pieces_checking_the_black_king(kings_position: i8, board: &[char;64]) -> 
     }
 
     for up_square in 1..8 {
-        if !rook_up(kings_position, up_square)
+        if kings_position-up_square*8 >= 0
         && (board[(kings_position-up_square*8) as usize] == WHITE_ROOK 
         || board[(kings_position-up_square*8) as usize] == WHITE_QUEEN) {
             pieces_checking_the_king.insert(0, kings_position-up_square*8);
             break;
-        }else if rook_up(kings_position, up_square)
+        }else if kings_position-up_square*8 < 0
         || is_white(board[(kings_position-up_square*8) as usize]) 
         || match board[(kings_position-up_square*8) as usize] {
             'q'|'r'|'b'|'n'|'j' => true,
@@ -8802,43 +9585,59 @@ fn get_pieces_checking_the_black_king(kings_position: i8, board: &[char;64]) -> 
     
 
     if (kings_position + 17) <= 63 {
-        if board[(kings_position+17) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+17);
+        if get_line(kings_position+15)-get_line(kings_position) == -2 {
+            if board[(kings_position+17) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+17);
+            }
         }
     }
     if (kings_position + 15) <= 63 {
-        if board[(kings_position+15) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+15);
+        if get_line(kings_position+15)-get_line(kings_position) == -2 {
+            if board[(kings_position+15) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+15);
+            }
         }
     }
     if (kings_position + 10) <= 63 {
-        if board[(kings_position+10) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+10);
+        if get_line(kings_position+10)-get_line(kings_position) == -1 {
+            if board[(kings_position+10) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+10);
+            }
         }
     }
     if (kings_position + 6) <= 63 {
-        if board[(kings_position+6) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position+6);
+        if get_line(kings_position+6)-get_line(kings_position) == -1 {
+            if board[(kings_position+6) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position+6);
+            }
         }
     }
     if (kings_position - 6) >= 0 {
-        if board[(kings_position-6) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-6);
+        if get_line(kings_position-6)-get_line(kings_position) == 1 {
+            if board[(kings_position-6) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-6);
+            }
         }
     }
     if (kings_position - 10) >= 0 {
-        if board[(kings_position-10) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-10);
+        if get_line(kings_position-10)-get_line(kings_position) == 1 {
+            if board[(kings_position-10) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-10);
+            }
         }
     }
     if (kings_position - 15) >= 0 {
-        if board[(kings_position-15) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-15);
-        }
+        if get_line(kings_position-15)-get_line(kings_position) == 2 {
+            if board[(kings_position-15) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-15);
+            }
+        }  
     }
     if (kings_position - 17) >= 0 {
-        if board[(kings_position-17) as usize] == WHITE_KNIGHT {
-            pieces_checking_the_king.insert(0, kings_position-17);
+        if get_line(kings_position-17)-get_line(kings_position) == 2 {
+            if board[(kings_position-17) as usize] == WHITE_KNIGHT {
+                pieces_checking_the_king.insert(0, kings_position-17);
+            }
         }
     }
 
@@ -8864,7 +9663,7 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_white(board[(kings_position-left_square) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-left_square)
@@ -8876,11 +9675,11 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
         // if there is a "pinning piece" but no "pinned piece", 
         // either the king is in check or there are multiple white pieces on the way
         // (in which case they are all free to move)
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
         // if there is a "pinned piece" but no "pinning piece",
         // the pinned piece is not actually being pinned by anything
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -8898,7 +9697,7 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_white(board[(kings_position+right_square) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+right_square)
@@ -8907,9 +9706,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -8917,17 +9716,17 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     for down_square in 1..8 {
-        if !rook_down(kings_position, down_square)
+        if kings_position+down_square*8 <= 63
         && (board[(kings_position+down_square*8) as usize] == BLACK_ROOK 
         || board[(kings_position+down_square*8) as usize] == BLACK_QUEEN) {
             pinning_pieces.insert(0, kings_position+down_square*8);
             break;
-        }else if rook_down(kings_position, down_square)
+        }else if kings_position+down_square*8 > 63
         || is_black(board[(kings_position+down_square*8) as usize]) {
             break;
         }else if is_white(board[(kings_position+down_square*8) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+down_square*8)
@@ -8936,9 +9735,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -8946,17 +9745,17 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     for up_square in 1..8 {
-        if !rook_up(kings_position, up_square)
+        if kings_position-up_square*8 >= 0
         && (board[(kings_position-up_square*8) as usize] == BLACK_ROOK 
         || board[(kings_position-up_square*8) as usize] == BLACK_QUEEN) {
             pinning_pieces.insert(0, kings_position-up_square*8);
             break;
-        }else if rook_up(kings_position, up_square)
+        }else if kings_position-up_square*8 < 0
         || is_black(board[(kings_position-up_square*8) as usize]) {
             break;
         }else if is_white(board[(kings_position-up_square*8) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-up_square*8)
@@ -8965,9 +9764,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -8985,7 +9784,7 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_white(board[(kings_position-diagonal*9) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*9)
@@ -8994,9 +9793,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9014,7 +9813,7 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_white(board[(kings_position-diagonal*7) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*7)
@@ -9023,9 +9822,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9043,7 +9842,7 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_white(board[(kings_position+diagonal*7) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*7)
@@ -9052,9 +9851,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9072,7 +9871,7 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_white(board[(kings_position+diagonal*9) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*9)
@@ -9081,9 +9880,9 @@ fn get_pinned_white_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     return pinned_pieces
@@ -9108,7 +9907,7 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_black(board[(kings_position-left_square) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-left_square)
@@ -9117,9 +9916,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9137,7 +9936,7 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_black(board[(kings_position+right_square) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+right_square)
@@ -9146,9 +9945,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9156,17 +9955,17 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     for down_square in 1..8 {
-        if !rook_down(kings_position, down_square)
+        if kings_position+down_square*8 <= 63
         && (board[(kings_position+down_square*8) as usize] == WHITE_ROOK 
         || board[(kings_position+down_square*8) as usize] == WHITE_QUEEN) {
             pinning_pieces.insert(0, kings_position+down_square*8);
             break;
-        }else if rook_down(kings_position, down_square)
+        }else if kings_position+down_square*8 > 63
         || is_white(board[(kings_position+down_square*8) as usize]) {
             break;
         }else if is_black(board[(kings_position+down_square*8) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+down_square*8)
@@ -9175,9 +9974,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9185,17 +9984,17 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     for up_square in 1..8 {
-        if !rook_up(kings_position, up_square)
+        if kings_position-up_square*8 >= 0
         && (board[(kings_position-up_square*8) as usize] == WHITE_ROOK 
         || board[(kings_position-up_square*8) as usize] == WHITE_QUEEN) {
             pinning_pieces.insert(0, kings_position-up_square*8);
             break;
-        }else if rook_up(kings_position, up_square)
+        }else if kings_position-up_square*8 < 0
         || is_white(board[(kings_position-up_square*8) as usize]) {
             break;
         }else if is_black(board[(kings_position-up_square*8) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-up_square*8)
@@ -9204,9 +10003,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9224,7 +10023,7 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_black(board[(kings_position-diagonal*9) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*9)
@@ -9233,9 +10032,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9253,7 +10052,7 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_black(board[(kings_position-diagonal*7) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position-diagonal*7)
@@ -9262,9 +10061,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9282,7 +10081,7 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_black(board[(kings_position+diagonal*7) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*7)
@@ -9291,9 +10090,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     if pinned_pieces.len() == pinned_pieces_index+1 {
@@ -9311,7 +10110,7 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
             break;
         }else if is_black(board[(kings_position+diagonal*9) as usize]) {
             if pinned_pieces.len() >= pinned_pieces_index+1 { // if there are more white pieces on the way, none are pinned
-                pinned_pieces.swap_remove(pinned_pieces_index);
+                pinned_pieces.remove(pinned_pieces_index);
                 break;
             }else{
                 pinned_pieces.insert(pinned_pieces_index, kings_position+diagonal*9)
@@ -9320,9 +10119,9 @@ fn get_pinned_black_pieces(kings_position: i8, board: &[char;64]) -> Vec<i8> {
     }
 
     if pinning_pieces.len() > pinned_pieces.len() { 
-        pinning_pieces.swap_remove(pinned_pieces_index);
+        pinning_pieces.remove(pinned_pieces_index);
     }else if pinning_pieces.len() < pinned_pieces.len() {
-        pinned_pieces.swap_remove(pinned_pieces_index);
+        pinned_pieces.remove(pinned_pieces_index);
     }
 
     return pinned_pieces
@@ -9360,98 +10159,1310 @@ fn get_safe_squares_for_king(kings_position: i8, board: &[char;64]) -> Vec<i8> {
         && !is_white(board[(kings_position-9) as usize])
         && !upper_left_diagonal(kings_position, 1) 
         && get_pieces_checking_the_white_king(kings_position-9, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-9);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-9+square >= 0 && kings_position-9+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-9);
+            }
         }
         if kings_position - 8 >= 0 
         && !is_white(board[(kings_position-8) as usize])
-        && !rook_up(kings_position, 1) 
         && get_pieces_checking_the_white_king(kings_position-8, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-8);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-8+square >= 0 && kings_position-8+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-8);
+            }
         }
         if kings_position - 7 >= 0 
         && !is_white(board[(kings_position-7) as usize])
         && !upper_right_diagonal(kings_position, 1) 
         && get_pieces_checking_the_white_king(kings_position-7, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-7);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-7+square >= 0 && kings_position-7+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-7);
+            }
         }
         if kings_position - 1 >= 0 
         && !is_white(board[(kings_position-1) as usize])
         && !rook_left(kings_position, 1)
         && get_pieces_checking_the_white_king(kings_position-1, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-1);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-1+square >= 0 && kings_position-1+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-1);
+            }
         }
         if kings_position + 1 <= 63 
         && !is_white(board[(kings_position+1) as usize])
         && !rook_right(kings_position, 1)
         && get_pieces_checking_the_white_king(kings_position+1, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+1);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+1+square >= 0 && kings_position+1+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+1);
+            }
         }
         if kings_position + 7 <= 63 
         && !is_white(board[(kings_position+7) as usize])
         && !inferior_left_diagonal(kings_position, 1)
         && get_pieces_checking_the_white_king(kings_position+7, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+7);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+7+square >= 0 && kings_position+7+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+7);
+            }
         }
         if kings_position + 8 <= 63 
         && !is_white(board[(kings_position+8) as usize])
-        && !rook_down(kings_position, 1)
         && get_pieces_checking_the_white_king(kings_position+8, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+8);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+8+square >= 0 && kings_position+8+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+8);
+            }
         }
         if kings_position + 9 <= 63 
         && !is_white(board[(kings_position+9) as usize])
         && !inferior_right_diagonal(kings_position, 1)
         && get_pieces_checking_the_white_king(kings_position+9, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+9);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+9+square >= 0 && kings_position+9+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != BLACK_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+9);
+            }
         }
     }else if board[kings_position as usize] == BLACK_KING {
         if kings_position - 9 >= 0 
         && !is_black(board[(kings_position-9) as usize])
         && !upper_left_diagonal(kings_position, 1) 
         && get_pieces_checking_the_black_king(kings_position-9, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-9);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-9+square >= 0 && kings_position-9+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-9, 1) {
+                                if board[(kings_position-9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-9);
+            }
         }
         if kings_position - 8 >= 0 
         && !is_black(board[(kings_position-8) as usize])
-        && !rook_up(kings_position, 1) 
         && get_pieces_checking_the_black_king(kings_position-8, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-8);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-8+square >= 0 && kings_position-8+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-8, 1) {
+                                if board[(kings_position-8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-8);
+            }
         }
         if kings_position - 7 >= 0 
         && !is_black(board[(kings_position-7) as usize])
         && !upper_right_diagonal(kings_position, 1) 
         && get_pieces_checking_the_black_king(kings_position-7, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-7);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-7+square >= 0 && kings_position-7+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-7, 1) {
+                                if board[(kings_position-7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-7);
+            }
         }
         if kings_position - 1 >= 0 
         && !is_black(board[(kings_position-1) as usize])
         && !rook_left(kings_position, 1)
         && get_pieces_checking_the_black_king(kings_position-1, &board).len() == 0 {
-            safe_squares.insert(0, kings_position-1);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position-1+square >= 0 && kings_position-1+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position-1, 1) {
+                                if board[(kings_position-1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position-1);
+            }
         }
         if kings_position + 1 <= 63 
         && !is_black(board[(kings_position+1) as usize])
         && !rook_right(kings_position, 1)
         && get_pieces_checking_the_black_king(kings_position+1, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+1);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+1+square >= 0 && kings_position+1+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+1, 1) {
+                                if board[(kings_position+1+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+1);
+            }
         }
         if kings_position + 7 <= 63 
         && !is_black(board[(kings_position+7) as usize])
         && !inferior_left_diagonal(kings_position, 1)
         && get_pieces_checking_the_black_king(kings_position+7, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+7);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+7+square >= 0 && kings_position+7+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+7, 1) {
+                                if board[(kings_position+7+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+7);
+            }
         }
         if kings_position + 8 <= 63 
         && !is_black(board[(kings_position+8) as usize])
-        && !rook_down(kings_position, 1)
         && get_pieces_checking_the_black_king(kings_position+8, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+8);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+8+square >= 0 && kings_position+8+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+8, 1) {
+                                if board[(kings_position+8+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+8);
+            }
         }
         if kings_position + 9 <= 63 
         && !is_black(board[(kings_position+9) as usize])
         && !inferior_right_diagonal(kings_position, 1)
         && get_pieces_checking_the_black_king(kings_position+9, &board).len() == 0 {
-            safe_squares.insert(0, kings_position+9);
+            let mut safety_counter: u8 = 0;
+            for square in [-9, -8, -7, -1, 1, 7, 8, 9].iter() {
+                if kings_position+9+square >= 0 && kings_position+9+square <= 63 {
+                    match square {
+                        -9 => {
+                            if !upper_left_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -8 => {
+                            if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        -7 => {
+                            if !upper_right_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        -1 => {
+                            if !rook_left(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        1 => {
+                            if !rook_right(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        7 => {
+                            if !inferior_left_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        8 => {
+                            if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                safety_counter += 1;
+                            }
+                        },
+                        9 => {
+                            if !inferior_right_diagonal(kings_position+9, 1) {
+                                if board[(kings_position+9+square) as usize] != WHITE_KING {
+                                    safety_counter += 1;
+                                }
+                            }else{
+                                safety_counter += 1;
+                            }
+                        },
+                        _ => ()
+                    }
+                }else{
+                    safety_counter += 1;
+                }
+            }
+            if safety_counter == 8 {
+                safe_squares.insert(0, kings_position+9);
+            }
         }
     }
 
