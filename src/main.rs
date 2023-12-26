@@ -3070,8 +3070,7 @@ fn main() {
                     if board[59] == NOTHING && board[58] == NOTHING && board[57] == NOTHING { // squares between the rook and king must be empty
                         if wking_checks.len() < 1 {
                             if get_pieces_checking_the_white_king(59, &board).len() == 0 
-                            && get_pieces_checking_the_white_king(58, &board).len() == 0
-                            && get_pieces_checking_the_white_king(57, &board).len() == 0 {
+                            && get_pieces_checking_the_white_king(58, &board).len() == 0 {
                                 board[white_king as usize] = NOTHING;
                                 board[56] = NOTHING; // kingside rook
 
@@ -7456,8 +7455,7 @@ fn main() {
                     if board[3] == NOTHING && board[2] == NOTHING && board[1] == NOTHING { // squares between the rook and king must be empty
                         if bking_checks.len() < 1 {
                             if get_pieces_checking_the_black_king(3, &board).len() == 0
-                            && get_pieces_checking_the_black_king(2, &board).len() == 0
-                            && get_pieces_checking_the_black_king(1, &board).len() == 0 {
+                            && get_pieces_checking_the_black_king(2, &board).len() == 0 {
                                 board[black_king as usize] = NOTHING;
                                 board[0] = NOTHING; // kingside rook
 
