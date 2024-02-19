@@ -8,6 +8,7 @@ pub enum MoveType {
     Promotion
 }
 
+#[derive(PartialEq)]
 pub enum PieceType {
     Pawn,
     Knight,
@@ -16,138 +17,11 @@ pub enum PieceType {
     Queen,
     King
 }
-
-pub struct PlayerMovement {
-    pub movement_type: MoveType,
-    pub is_capture: bool,
-    pub target_position: (i8, i8),
-    pub p_type: PieceType,
-    pub unambiguous_move_partial_position: (i8, i8)
-}
-
 pub struct Piece {
     pub positions: Vec<(i8, i8)>, // (column, row) <- position of the piece
     pub color: bool, // true = white / false = black
     pub piece_type: PieceType,
     pub symbol: char
-}
-
-impl PlayerMovement {
-    pub fn verify_if_move_is_possible(&self, piece: Piece) -> Vec<bool> {
-        let target_column = self.target_position.0;
-        let target_row = self.target_position.1;
-
-        let mut movable_pieces: Vec<bool> = vec![];
-        
-        if let MoveType::Castle = self.movement_type {
-
-        }else {
-            match self.p_type {
-                PieceType::Pawn => {
-                    match self.movement_type {
-                        MoveType::Normal => {
-                            for pawn_position in piece.positions.iter() {
-                                let current_column = pawn_position.0;
-                                let current_row = pawn_position.1;
-                                
-                                if (current_row - target_row).abs() == 1 {
-                                    if self.is_capture {
-                                        if (current_column - target_column).abs() == 1 {
-                                            movable_pieces.push(true);
-                                            continue;
-                                        }
-                                    }else {
-                                        if current_column == target_column {
-                                            movable_pieces.push(true);
-                                            continue;
-                                        }
-                                    }
-                                }else if (current_row - target_row).abs() == 2 {
-                                    if !self.is_capture {
-                                        if current_column == target_column {
-                                            if piece.color {
-                                                if current_row == 1 {
-                                                    movable_pieces.push(true);
-                                                    continue;
-                                                }
-                                            }else {
-                                                if current_row == BOARD_SIZE as i8 - 2 {
-                                                    movable_pieces.push(true);
-                                                    continue;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-        
-                                movable_pieces.push(false);
-                            }
-                        },
-                        MoveType::Promotion => {
-                            for pawn_position in piece.positions.iter() {
-                                let current_column = pawn_position.0;
-                                let current_row = pawn_position.1;
-
-                                if (current_row - target_row).abs() == 1 {
-                                    if self.is_capture {
-                                        if (current_column - target_column).abs() == 1 {
-                                            if piece.color {
-                                                if target_row == BOARD_SIZE as i8 - 1 {
-                                                    movable_pieces.push(true);
-                                                    continue;
-                                                }
-                                            }else {
-                                                if target_row == 0 {
-                                                    movable_pieces.push(true);
-                                                    continue;
-                                                }
-                                            }
-                                        }
-                                    }else {
-                                        if current_column == target_column {
-                                            movable_pieces.push(true);
-                                            continue;
-                                        }
-                                    }
-                                }else if (current_row - target_row).abs() == 2 {
-                                    if !self.is_capture {
-                                        if current_column == target_column {
-                                            if piece.color {
-                                                if current_row == 1 {
-                                                    if target_row == BOARD_SIZE as i8 - 1 {
-                                                        movable_pieces.push(true);
-                                                        continue;
-                                                    }
-                                                }
-                                            }else {
-                                                if current_row == BOARD_SIZE as i8 - 2 {
-                                                    if target_row == 0 {
-                                                        movable_pieces.push(true);
-                                                        continue;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-        
-                                movable_pieces.push(false);
-                            }
-                        },
-                        _ => movable_pieces.push(false)
-                    }
-                },
-                PieceType::Knight => movable_pieces.push(false),
-                PieceType::Bishop => movable_pieces.push(false),
-                PieceType::Rook => movable_pieces.push(false),
-                PieceType::Queen => movable_pieces.push(false),
-                PieceType::King => movable_pieces.push(false)
-            }
-        }
-
-        movable_pieces
-
-    }
 }
 
 impl Piece {
@@ -257,15 +131,194 @@ impl Piece {
 pub fn setup_default_board(color: bool) -> Vec<Piece> {
     let mut pieces_vector: Vec<Piece> = vec![];
 
-    pieces_vector.push(Piece::new(None, color, PieceType::Pawn, None));
-    pieces_vector.push(Piece::new(None, color, PieceType::Knight, None));
-    pieces_vector.push(Piece::new(None, color, PieceType::Bishop, None));
-    pieces_vector.push(Piece::new(None, color, PieceType::Rook, None));
-    pieces_vector.push(Piece::new(None, color, PieceType::Queen, None));
-    pieces_vector.push(Piece::new(None, color, PieceType::King, None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Pawn,     None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Knight,   None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Bishop,   None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Rook,     None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Queen,    None));
+    pieces_vector.push(Piece::new(None, color, PieceType::King,     None));
 
     pieces_vector
 
+}
+
+pub struct PlayerMovement {
+    pub movement_type: MoveType,
+    pub is_capture: bool,
+    pub target_position: (i8, i8),
+    pub p_type: PieceType,
+    pub unambiguous_move_partial_position: (i8, i8)
+}
+
+pub struct VerifiedPlayerMovement {
+    pub is_possible: bool,
+    pub is_ambiguous: bool,
+    pub position_to_move_from: (i8, i8)
+}
+
+impl PlayerMovement {
+    pub fn verify_if_move_is_possible(&self, piece: &Piece) -> VerifiedPlayerMovement {
+        let target_column = self.target_position.0;
+        let target_row = self.target_position.1;
+
+        let mut position_to_move_from = (27, 27);
+        let mut is_possible = false;
+        let mut is_ambiguous = false;
+        
+        if let MoveType::Castle = self.movement_type {
+
+        }else {
+            match self.p_type {
+                PieceType::Pawn => {
+                    match self.movement_type {
+                        MoveType::Normal => {
+                            for pawn_position in piece.positions.iter() {
+                                let current_column = pawn_position.0;
+                                let current_row = pawn_position.1;
+                                
+                                if (current_row - target_row).abs() == 1 {
+                                    if self.is_capture {
+                                        if (current_column - target_column).abs() == 1 {
+                                            if !is_possible {
+                                                is_possible = true;
+                                                position_to_move_from = (current_column, current_row);
+                                            }else {
+                                                is_ambiguous = true;
+                                                break;
+                                            }
+                                        }
+                                    }else {
+                                        if current_column == target_column {
+                                            if !is_possible {
+                                                is_possible = true;
+                                                position_to_move_from = (current_column, current_row);
+                                            }else {
+                                                is_ambiguous = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }else if (current_row - target_row).abs() == 2 {
+                                    if !self.is_capture {
+                                        if current_column == target_column {
+                                            if piece.color {
+                                                if current_row == 1 {
+                                                    if !is_possible {
+                                                        is_possible = true;
+                                                        position_to_move_from = (current_column, current_row);
+                                                    }else {
+                                                        is_ambiguous = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }else {
+                                                if current_row == BOARD_SIZE as i8 - 2 {
+                                                    if !is_possible {
+                                                        is_possible = true;
+                                                        position_to_move_from = (current_column, current_row);
+                                                    }else {
+                                                        is_ambiguous = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        MoveType::Promotion => {
+                            for pawn_position in piece.positions.iter() {
+                                let current_column = pawn_position.0;
+                                let current_row = pawn_position.1;
+
+                                if (current_row - target_row).abs() == 1 {
+                                    if self.is_capture {
+                                        if (current_column - target_column).abs() == 1 {
+                                            if piece.color {
+                                                if target_row == BOARD_SIZE as i8 - 1 {
+                                                    if !is_possible {
+                                                        is_possible = true;
+                                                        position_to_move_from = (current_column, current_row);
+                                                    }else {
+                                                        is_ambiguous = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }else {
+                                                if target_row == 0 {
+                                                    if !is_possible {
+                                                        is_possible = true;
+                                                        position_to_move_from = (current_column, current_row);
+                                                    }else {
+                                                        is_ambiguous = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }else {
+                                        if current_column == target_column {
+                                            if !is_possible {
+                                                is_possible = true;
+                                                position_to_move_from = (current_column, current_row);
+                                            }else {
+                                                is_ambiguous = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }else if (current_row - target_row).abs() == 2 {
+                                    if !self.is_capture {
+                                        if current_column == target_column {
+                                            if piece.color {
+                                                if current_row == 1 {
+                                                    if target_row == BOARD_SIZE as i8 - 1 {
+                                                        if !is_possible {
+                                                            is_possible = true;
+                                                            position_to_move_from = (current_column, current_row);
+                                                        }else {
+                                                            is_ambiguous = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }else {
+                                                if current_row == BOARD_SIZE as i8 - 2 {
+                                                    if target_row == 0 {
+                                                        if !is_possible {
+                                                            is_possible = true;
+                                                            position_to_move_from = (current_column, current_row);
+                                                        }else {
+                                                            is_ambiguous = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        _ => ()
+                    }
+                },
+                PieceType::Knight => (),
+                PieceType::Bishop => (),
+                PieceType::Rook => (),
+                PieceType::Queen => (),
+                PieceType::King => ()
+            }
+        }
+
+        VerifiedPlayerMovement {
+            is_possible,
+            is_ambiguous,
+            position_to_move_from
+        }
+
+    }
 }
 
 fn translate_san_into_position(san_move: &Vec<char>, index_offset: &usize) -> (i8, i8) {
@@ -314,7 +367,7 @@ fn translate_san_into_position(san_move: &Vec<char>, index_offset: &usize) -> (i
 
 pub fn get_player_move() -> PlayerMovement {
     let mut target_position: (i8, i8) = (27, 27);
-    let mut unambiguous_move_partial_position: (i8, i8) = (0b0, 0b0);
+    let mut unambiguous_move_partial_position: (i8, i8) = (27, 27);
     
     let mut movement_type: MoveType = MoveType::Normal;
     let mut is_capture: bool = false;
