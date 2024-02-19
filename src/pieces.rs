@@ -292,7 +292,7 @@ fn translate_san_into_position(san_move: &Vec<char>, index_offset: &usize) -> (i
     };
 
     if san_move.len() > 2 + index_offset && row <= 1 {
-        row = row + 10*row + match san_move[2 + index_offset] {
+        row = 10*row + match san_move[2 + index_offset] {
             '0' => 9,
             '1' => 10,
             '2' => 11,
