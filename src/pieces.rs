@@ -150,6 +150,124 @@ impl PlayerMovement {
     }
 }
 
+impl Piece {
+    pub fn new(optional_positions: Option<Vec<(i8, i8)>>, color: bool, piece_type: PieceType, optional_symbol: Option<char>) -> Self {
+        let mut positions: Vec<(i8, i8)> = vec![];
+        let symbol: char;
+
+        match optional_positions {
+            None => {
+                match piece_type {
+                    PieceType::Pawn => {
+                        if color { 
+                            for pawn_position in 0..8 {
+                                positions.push((pawn_position, 1));
+                            }
+                        }else {
+                            for pawn_position in 0..8 {
+                                positions.push((pawn_position, 6));
+                            }
+                        }
+                    },
+                    PieceType::Knight => {
+                        if color {
+                            positions.push((1, 0));
+                            positions.push((6, 0));
+                        }else {
+                            positions.push((6, 7));
+                            positions.push((1, 7));
+                        }
+                    },
+                    PieceType::Bishop => {
+                        if color {
+                            positions.push((2, 0));
+                            positions.push((5, 0));
+                        }else {
+                            positions.push((2, 7));
+                            positions.push((5, 7));
+                        }
+                    },
+                    PieceType::Rook => {
+                        if color {
+                            positions.push((0, 0));
+                            positions.push((7, 0));
+                        }else {
+                            positions.push((0, 7));
+                            positions.push((7, 7));
+                        }
+                    },
+                    PieceType::Queen => {
+                        if color {
+                            positions.push((3, 0));
+                        }else {
+                            positions.push((3, 7));
+                        }
+                    },
+                    PieceType::King => {
+                        if color {
+                            positions.push((4, 0));
+                        }else {
+                            positions.push((4, 7));
+                        }
+                    }
+                }
+            },
+            Some(p) => {
+                positions = p;
+            }
+        }
+
+        match optional_symbol {
+            None => {
+                match piece_type {
+                    PieceType::Pawn => {
+                        if color { symbol = 'i'; } else { symbol = 'j'; }
+                    },
+                    PieceType::Knight => {
+                        if color { symbol = 'N'; } else { symbol = 'n'; }
+                    },
+                    PieceType::Bishop => {
+                        if color { symbol = 'B'; } else { symbol = 'b'; }
+                    },
+                    PieceType::Rook => {
+                        if color { symbol = 'R'; } else { symbol = 'r'; }
+                    },
+                    PieceType::Queen => {
+                        if color { symbol = 'Q'; } else { symbol = 'q'; }
+                    },
+                    PieceType::King => {
+                        if color { symbol = 'K'; } else { symbol = 'k'; }
+                    }
+                }
+            },
+            Some(s) => {
+                symbol = s;
+            }
+        }
+        
+        Self {
+            positions,
+            color,
+            piece_type,
+            symbol
+        }
+    }
+}
+
+pub fn setup_default_board(color: bool) -> Vec<Piece> {
+    let mut pieces_vector: Vec<Piece> = vec![];
+
+    pieces_vector.push(Piece::new(None, color, PieceType::Pawn, None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Knight, None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Bishop, None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Rook, None));
+    pieces_vector.push(Piece::new(None, color, PieceType::Queen, None));
+    pieces_vector.push(Piece::new(None, color, PieceType::King, None));
+
+    pieces_vector
+
+}
+
 fn translate_san_into_position(san_move: &Vec<char>, index_offset: &usize) -> (i8, i8) {
     let mut column = 27;
     let mut row: i8;
