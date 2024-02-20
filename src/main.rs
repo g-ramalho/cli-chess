@@ -1,5 +1,4 @@
 mod pieces;
-use std::vec;
 use pieces::*;
 
 const BOARD_SIZE: usize = 8; // max board size: 26x26
@@ -24,53 +23,64 @@ fn main() {
     }
 
     loop {
+        let mut turn_ongoing = true;
+
         show_board(&board);
         println!("White moves:");
-        let player_move = get_player_move();
-        let player_move_piece_type: &Piece = white_pieces.iter_mut().find(|piece| piece.piece_type == player_move.p_type).unwrap();
-        let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
-
-        if player_move_verified.is_possible {
-            if !player_move_verified.is_ambiguous {
-                for piece in white_pieces.iter_mut() {
-                    if piece.piece_type == player_move.p_type {
-                        for position in piece.positions.iter_mut() {
-                            if *position == player_move_verified.position_to_move_from {
-                                board[position.0 as usize][position.1 as usize] = FREE_SQUARE_SYMBOL;
-                                board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = piece.symbol;
+        while turn_ongoing {
+            let player_move = get_player_move();
+            let player_move_piece_type: &mut Piece = white_pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
+            let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
     
-                                position.0 = player_move.target_position.0;
-                                position.1 = player_move.target_position.1;
-                                break;
-                            }
-                        }
+            if player_move_verified.is_possible {
+                let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
+                
+                if !player_move_verified.is_ambiguous {
+                    if (player_move.is_capture && is_black(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL) {
+                        let position_to_move_from = player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
+    
+                        board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
+                        board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
+    
+                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 = player_move.target_position.0;
+                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].1 = player_move.target_position.1;
+                        
+                        turn_ongoing = false;
                     }
                 }
             }
+            if turn_ongoing {
+                println!("Invalid move, try again!");
+            }
         }
 
+        turn_ongoing = true;
         show_board(&board);
         println!("Black moves:");
-        let player_move = get_player_move();
-        let player_move_piece_type: &Piece = black_pieces.iter_mut().find(|piece| piece.piece_type == player_move.p_type).unwrap();
-        let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
-
-        if player_move_verified.is_possible {
-            if !player_move_verified.is_ambiguous {
-                for piece in black_pieces.iter_mut() {
-                    if piece.piece_type == player_move.p_type {
-                        for position in piece.positions.iter_mut() {
-                            if *position == player_move_verified.position_to_move_from {
-                                board[position.0 as usize][position.1 as usize] = FREE_SQUARE_SYMBOL;
-                                board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = piece.symbol;
+        while turn_ongoing {
+            let player_move = get_player_move();
+            let player_move_piece_type: &mut Piece = black_pieces.iter_mut().find(|piece| piece.piece_type == player_move.p_type).unwrap();
+            let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
     
-                                position.0 = player_move.target_position.0;
-                                position.1 = player_move.target_position.1;
-                                break;
-                            }
-                        }
+            if player_move_verified.is_possible {
+                let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
+                
+                if !player_move_verified.is_ambiguous {
+                    if (player_move.is_capture && is_white(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL) {
+                        let position_to_move_from = player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
+    
+                        board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
+                        board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
+    
+                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 = player_move.target_position.0;
+                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].1 = player_move.target_position.1;
+
+                        turn_ongoing = false;
                     }
                 }
+            }
+            if turn_ongoing {
+                println!("Invalid move, try again!");
             }
         }
     }
@@ -102,6 +112,20 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
         }else {
             print!("[{}]", BOARD_LETTERS[letter]);
         }
+    }
+}
+
+fn is_white(piece: char) -> bool {
+    match piece {
+        'i'|'N'|'B'|'R'|'Q'|'K' => true,
+        _ => false
+    }
+}
+
+fn is_black(piece: char) -> bool {
+    match piece {
+        'j'|'n'|'b'|'r'|'q'|'k' => true,
+        _ => false
     }
 }
 

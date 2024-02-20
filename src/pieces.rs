@@ -2,10 +2,10 @@ use std::io;
 
 use crate::{BOARD_LETTERS, BOARD_SIZE};
 
+#[derive(PartialEq)]
 pub enum MoveType {
     Normal,
-    Castle,
-    Promotion
+    Castle
 }
 
 #[derive(PartialEq)]
@@ -153,7 +153,7 @@ pub struct PlayerMovement {
 pub struct VerifiedPlayerMovement {
     pub is_possible: bool,
     pub is_ambiguous: bool,
-    pub position_to_move_from: (i8, i8)
+    pub index_position_to_move_from: usize
 }
 
 impl PlayerMovement {
@@ -161,7 +161,7 @@ impl PlayerMovement {
         let target_column = self.target_position.0;
         let target_row = self.target_position.1;
 
-        let mut position_to_move_from = (27, 27);
+        let mut index_position_to_move_from = 27;
         let mut is_possible = false;
         let mut is_ambiguous = false;
         
@@ -170,138 +170,59 @@ impl PlayerMovement {
         }else {
             match self.p_type {
                 PieceType::Pawn => {
-                    match self.movement_type {
-                        MoveType::Normal => {
-                            for pawn_position in piece.positions.iter() {
-                                let current_column = pawn_position.0;
-                                let current_row = pawn_position.1;
-                                
-                                if (current_row - target_row).abs() == 1 {
-                                    if self.is_capture {
-                                        if (current_column - target_column).abs() == 1 {
+                    for pawn_position_index in 0..piece.positions.len() {
+                        let current_column = piece.positions[pawn_position_index].0;
+                        let current_row = piece.positions[pawn_position_index].1;
+                        
+                        if (current_row - target_row).abs() == 1 {
+                            if self.is_capture {
+                                if (current_column - target_column).abs() == 1 {
+                                    if !is_possible {
+                                        is_possible = true;
+                                        index_position_to_move_from = pawn_position_index;
+                                    }else {
+                                        is_ambiguous = true;
+                                        break;
+                                    }
+                                }
+                            }else {
+                                if current_column == target_column {
+                                    if !is_possible {
+                                        is_possible = true;
+                                        index_position_to_move_from = pawn_position_index;
+                                    }else {
+                                        is_ambiguous = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }else if (current_row - target_row).abs() == 2 {
+                            if !self.is_capture {
+                                if current_column == target_column {
+                                    if piece.color {
+                                        if current_row == 1 {
                                             if !is_possible {
                                                 is_possible = true;
-                                                position_to_move_from = (current_column, current_row);
+                                                index_position_to_move_from = pawn_position_index;
                                             }else {
                                                 is_ambiguous = true;
                                                 break;
                                             }
                                         }
                                     }else {
-                                        if current_column == target_column {
+                                        if current_row == BOARD_SIZE as i8 - 2 {
                                             if !is_possible {
                                                 is_possible = true;
-                                                position_to_move_from = (current_column, current_row);
+                                                index_position_to_move_from = pawn_position_index;
                                             }else {
                                                 is_ambiguous = true;
                                                 break;
                                             }
                                         }
                                     }
-                                }else if (current_row - target_row).abs() == 2 {
-                                    if !self.is_capture {
-                                        if current_column == target_column {
-                                            if piece.color {
-                                                if current_row == 1 {
-                                                    if !is_possible {
-                                                        is_possible = true;
-                                                        position_to_move_from = (current_column, current_row);
-                                                    }else {
-                                                        is_ambiguous = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }else {
-                                                if current_row == BOARD_SIZE as i8 - 2 {
-                                                    if !is_possible {
-                                                        is_possible = true;
-                                                        position_to_move_from = (current_column, current_row);
-                                                    }else {
-                                                        is_ambiguous = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
                             }
-                        },
-                        MoveType::Promotion => {
-                            for pawn_position in piece.positions.iter() {
-                                let current_column = pawn_position.0;
-                                let current_row = pawn_position.1;
-
-                                if (current_row - target_row).abs() == 1 {
-                                    if self.is_capture {
-                                        if (current_column - target_column).abs() == 1 {
-                                            if piece.color {
-                                                if target_row == BOARD_SIZE as i8 - 1 {
-                                                    if !is_possible {
-                                                        is_possible = true;
-                                                        position_to_move_from = (current_column, current_row);
-                                                    }else {
-                                                        is_ambiguous = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }else {
-                                                if target_row == 0 {
-                                                    if !is_possible {
-                                                        is_possible = true;
-                                                        position_to_move_from = (current_column, current_row);
-                                                    }else {
-                                                        is_ambiguous = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }else {
-                                        if current_column == target_column {
-                                            if !is_possible {
-                                                is_possible = true;
-                                                position_to_move_from = (current_column, current_row);
-                                            }else {
-                                                is_ambiguous = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }else if (current_row - target_row).abs() == 2 {
-                                    if !self.is_capture {
-                                        if current_column == target_column {
-                                            if piece.color {
-                                                if current_row == 1 {
-                                                    if target_row == BOARD_SIZE as i8 - 1 {
-                                                        if !is_possible {
-                                                            is_possible = true;
-                                                            position_to_move_from = (current_column, current_row);
-                                                        }else {
-                                                            is_ambiguous = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }else {
-                                                if current_row == BOARD_SIZE as i8 - 2 {
-                                                    if target_row == 0 {
-                                                        if !is_possible {
-                                                            is_possible = true;
-                                                            position_to_move_from = (current_column, current_row);
-                                                        }else {
-                                                            is_ambiguous = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        _ => ()
+                        }
                     }
                 },
                 PieceType::Knight => (),
@@ -315,7 +236,7 @@ impl PlayerMovement {
         VerifiedPlayerMovement {
             is_possible,
             is_ambiguous,
-            position_to_move_from
+            index_position_to_move_from
         }
 
     }
@@ -403,13 +324,6 @@ pub fn get_player_move() -> PlayerMovement {
 
         target_position.0 = translate_san_into_position(&san_move, &index_offset).0;
         target_position.1 = translate_san_into_position(&san_move, &index_offset).1;
-
-
-        if target_position.1 == (BOARD_SIZE as i8) - 1 || target_position.1 == 0{ // if the inputted move takes a piece to the other side of the board
-            if let PieceType::Pawn = &p_type { // and it is a pawn move
-                movement_type = MoveType::Promotion;
-            }
-        }
 
         if target_position.0 > BOARD_SIZE as i8 - 1 || target_position.1 > BOARD_SIZE as i8 - 1 {
             println!("Invalid move. Try again!");
