@@ -35,8 +35,10 @@ fn main() {
             if player_move_verified.is_possible {
                 let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
                 
-                if !player_move_verified.is_ambiguous {
-                    if (player_move.is_capture && is_black(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL) {
+                let is_playable: bool = (player_move.is_capture && is_black(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL);
+
+                if is_playable {
+                    if !player_move_verified.is_ambiguous {
 
                         let mut position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
     
@@ -61,10 +63,32 @@ fn main() {
                         board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
                         
                         turn_ongoing = false;
+                    }else {
+                        if player_move.unambiguous_move_partial_position.0 != 27 || player_move.unambiguous_move_partial_position.1 != 27 {
+                            let position_to_move_from: &mut (i8, i8);
+                            
+                            if player_move.unambiguous_move_partial_position.0 != 27 {
+                                position_to_move_from = player_move_piece_type.positions.iter_mut().find(|position| position.0 == player_move.unambiguous_move_partial_position.0).unwrap();
+                            }else {
+                                position_to_move_from = player_move_piece_type.positions.iter_mut().find(|position| position.1 == player_move.unambiguous_move_partial_position.1).unwrap();
+                            }
+
+                            board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
+
+                            position_to_move_from.0 = player_move.target_position.0;
+                            position_to_move_from.1 = player_move.target_position.1;
+
+                            board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
+                    
+                            turn_ongoing = false;
+                        }
                     }
                 }
             }
-            println!("Invalid move, try again!");
+            
+            if turn_ongoing {
+                println!("Invalid move, try again!");
+            }
         }
 
         turn_ongoing = true;
@@ -74,22 +98,24 @@ fn main() {
             let player_move = get_player_move();
             let mut player_move_piece_type: &mut Piece = black_pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
             let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
-    
+
             if player_move_verified.is_possible {
                 let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
                 
-                if !player_move_verified.is_ambiguous {
-                    if (player_move.is_capture && is_white(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL) {
+                let is_playable: bool = (player_move.is_capture && is_white(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL);
 
-                        let position_to_move_from = player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
+                if is_playable {
+                    if !player_move_verified.is_ambiguous {
+
+                        let mut position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
     
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
-    
-                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 = player_move.target_position.0;
-                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].1 = player_move.target_position.1;
+
+                        position_to_move_from.0 = player_move.target_position.0;
+                        position_to_move_from.1 = player_move.target_position.1;
 
                         // pawn promotion:
-                        if player_move_piece_type.piece_type == PieceType::Pawn && player_move.target_position.1 == 0 {
+                        if player_move_piece_type.piece_type == PieceType::Pawn && player_move.target_position.1 == BOARD_SIZE as i8 - 1 {
 
                             player_move_piece_type.positions.swap_remove(player_move_verified.index_position_to_move_from);
 
@@ -104,10 +130,36 @@ fn main() {
                         board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
                         
                         turn_ongoing = false;
+                    }else {
+                        if player_move.unambiguous_move_partial_position.0 == 27 && player_move.unambiguous_move_partial_position.1 == 27 {
+
+                            //ask for user input
+
+                        }else {
+                            let position_to_move_from: &mut (i8, i8);
+                            
+                            if player_move.unambiguous_move_partial_position.0 != 27 {
+                                position_to_move_from = player_move_piece_type.positions.iter_mut().find(|position| position.0 == player_move.unambiguous_move_partial_position.0).unwrap();
+                            }else {
+                                position_to_move_from = player_move_piece_type.positions.iter_mut().find(|position| position.1 == player_move.unambiguous_move_partial_position.1).unwrap();
+                            }
+
+                            board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
+
+                            position_to_move_from.0 = player_move.target_position.0;
+                            position_to_move_from.1 = player_move.target_position.1;
+
+                            board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
+                    
+                            turn_ongoing = false;
+                        }
                     }
                 }
             }
-            println!("Invalid move, try again!");
+            
+            if turn_ongoing {
+                println!("Invalid move, try again!");
+            }
         }
     }
 }
