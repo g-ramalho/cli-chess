@@ -126,6 +126,45 @@ impl Piece {
             symbol
         }
     }
+
+}
+
+pub fn get_piece_to_promote_to(pieces_vec: &mut Vec<Piece>) -> &mut Piece {
+
+    println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
+    println!("'N'=Knight,'R'=Rook,'B'=Bishop");
+
+    let piece_to_promote_to: &mut Piece;
+
+    loop {
+        let mut promotion_input = String::new();
+        io::stdin().read_line(&mut promotion_input).unwrap();
+        let promotion_characters: Vec<char> = promotion_input.trim().chars().collect();
+
+        if promotion_characters.len() > 0 {
+            match promotion_characters[0] {
+                'N' => {
+                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Knight).unwrap();
+                    break;
+                },
+                'R' => {
+                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Rook).unwrap();
+                    break;
+                },
+                'B' => {
+                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Bishop).unwrap();
+                    break;
+                }
+                _ => ()
+            }
+        }else { // only Enter key was pressed
+            piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Queen).unwrap();
+            break;
+        }
+    }
+
+    piece_to_promote_to
+
 }
 
 pub fn setup_default_board(color: bool) -> Vec<Piece> {
