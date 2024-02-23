@@ -131,11 +131,7 @@ fn main() {
                         
                         turn_ongoing = false;
                     }else {
-                        if player_move.unambiguous_move_partial_position.0 == 27 && player_move.unambiguous_move_partial_position.1 == 27 {
-
-                            //ask for user input
-
-                        }else {
+                        if player_move.unambiguous_move_partial_position.0 != 27 || player_move.unambiguous_move_partial_position.1 != 27 {
                             let position_to_move_from: &mut (i8, i8);
                             
                             if player_move.unambiguous_move_partial_position.0 != 27 {
