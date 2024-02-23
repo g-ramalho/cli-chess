@@ -264,7 +264,25 @@ impl PlayerMovement {
                         }
                     }
                 },
-                PieceType::Knight => (),
+                PieceType::Knight => {
+                    for knight_position_index in 0..piece.positions.len() {
+                        let current_column = piece.positions[knight_position_index].0;
+                        let current_row = piece.positions[knight_position_index].1;
+
+                        let is_valid_horizontal_movement: bool = (target_column - current_column).abs() == 2 && (target_row - current_row).abs() == 1;
+                        let is_valid_vertical_movement: bool = (target_column - current_column).abs() == 1 && (target_row - current_row).abs() == 2;
+
+                        if is_valid_horizontal_movement || is_valid_vertical_movement {
+                            if !is_possible {
+                                is_possible = true;
+                                index_position_to_move_from = knight_position_index;
+                            }else {
+                                is_ambiguous = true;
+                                break;
+                            }
+                        }
+                    }
+                },
                 PieceType::Bishop => (),
                 PieceType::Rook => (),
                 PieceType::Queen => (),

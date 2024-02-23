@@ -31,19 +31,19 @@ fn main() {
             let player_move = get_player_move();
             let mut player_move_piece_type: &mut Piece = white_pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
             let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
-    
+
             if player_move_verified.is_possible {
                 let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
                 
                 if !player_move_verified.is_ambiguous {
                     if (player_move.is_capture && is_black(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL) {
 
-                        let position_to_move_from = player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
+                        let mut position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
     
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
-    
-                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 = player_move.target_position.0;
-                        player_move_piece_type.positions[player_move_verified.index_position_to_move_from].1 = player_move.target_position.1;
+
+                        position_to_move_from.0 = player_move.target_position.0;
+                        position_to_move_from.1 = player_move.target_position.1;
 
                         // pawn promotion:
                         if player_move_piece_type.piece_type == PieceType::Pawn && player_move.target_position.1 == BOARD_SIZE as i8 - 1 {
