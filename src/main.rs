@@ -103,7 +103,7 @@ fn main() {
 
                         board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
                         
-                        break;
+                        turn_ongoing = false;
                     }
                 }
             }
