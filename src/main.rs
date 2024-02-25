@@ -40,7 +40,7 @@ fn main() {
                 if is_playable {
                     if !player_move_verified.is_ambiguous {
 
-                        let mut position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
+                        let position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
     
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
 
@@ -107,7 +107,7 @@ fn main() {
                 if is_playable {
                     if !player_move_verified.is_ambiguous {
 
-                        let mut position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
+                        let position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
     
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
 
