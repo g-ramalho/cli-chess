@@ -391,17 +391,13 @@ pub fn get_player_move() -> PlayerMovement {
             'R' => PieceType::Rook,
             'Q' => PieceType::Queen,
             'K' => PieceType::King,
-            _ => { index_offset -= 1; PieceType::Pawn }
+            _ => { if san_move.len() < 4 { index_offset -= 1; }; PieceType::Pawn }
         };
 
         if player_move == "O-O-O" || player_move == "0-0-0" || player_move == "O-O" || player_move == "0-0" {
             movement_type = MoveType::Castle;
         }else {
             if san_move.len() >= 4 {
-                if p_type == PieceType::Pawn {
-                    index_offset += 1;
-                }
-                
                 // only one character is used to make a move unambiguous, so it can be both a row number or a column letter
                 // because of that, the same character is passed twice to check for either a column or a row value
                 let unambiguous_san = vec![san_move[1], san_move[1]];
