@@ -374,7 +374,7 @@ pub fn get_player_move() -> PlayerMovement {
         if san_move.len() >= 4 {
             // only one character is used to make a move unambiguous, so it can be both a row number or a column letter
             // because of that, the same character is passed twice to check for either a column or a row value
-            let unambiguous_san = vec![san_move[1], san_move[1]]; 
+            let unambiguous_san = vec![san_move[1], san_move[1]];
             unambiguous_move_partial_position = translate_san_into_position(&unambiguous_san, &0);
             index_offset += 1;
         }
@@ -384,7 +384,7 @@ pub fn get_player_move() -> PlayerMovement {
 
         if target_position.0 > BOARD_SIZE as i8 - 1 || target_position.1 > BOARD_SIZE as i8 - 1 {
             println!("Invalid move. Try again!");
-            get_player_move();
+            return get_player_move();
         }
     }
     
