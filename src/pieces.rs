@@ -375,44 +375,52 @@ pub fn get_player_move() -> PlayerMovement {
     let mut target_position: (i8, i8) = (27, 27);
     let mut unambiguous_move_partial_position: (i8, i8) = (27, 27);
     
+    let mut p_type: PieceType;
     let mut movement_type: MoveType = MoveType::Normal;
     let mut is_capture: bool = false;
 
-    let mut player_move = String::new();
-    io::stdin().read_line(&mut player_move).unwrap();
-    let san_move: Vec<char> = player_move.trim().chars().collect();
+    loop {
+        let mut player_move = String::new();
+        io::stdin().read_line(&mut player_move).unwrap();
+        let san_move: Vec<char> = player_move.trim().chars().collect();
 
-    let mut index_offset = 0;
-    let p_type = match san_move[0] {
-        'N' => { index_offset += 1; PieceType::Knight },
-        'B' => { index_offset += 1; PieceType::Bishop },
-        'R' => { index_offset += 1; PieceType::Rook },
-        'Q' => { index_offset += 1; PieceType::Queen },
-        'K' => { index_offset += 1; PieceType::King },
-        _ => PieceType::Pawn
-    };
+        let mut index_offset = 1;
+        p_type = match san_move[0] {
+            'N' => PieceType::Knight,
+            'B' => PieceType::Bishop,
+            'R' => PieceType::Rook,
+            'Q' => PieceType::Queen,
+            'K' => PieceType::King,
+            _ => { index_offset -= 1; PieceType::Pawn }
+        };
 
-    if player_move == "O-O-O" || player_move == "0-0-0" || player_move == "O-O" || player_move == "0-0" {
-        movement_type = MoveType::Castle;
-    }else {
-        if san_move[1 + index_offset] == 'x' && san_move.len() > 3 {
-            is_capture = true;
-            index_offset += 1;
-        }
-        if san_move.len() >= 4 {
-            // only one character is used to make a move unambiguous, so it can be both a row number or a column letter
-            // because of that, the same character is passed twice to check for either a column or a row value
-            let unambiguous_san = vec![san_move[1], san_move[1]];
-            unambiguous_move_partial_position = translate_san_into_position(&unambiguous_san, &0);
-            index_offset += 1;
-        }
+        if player_move == "O-O-O" || player_move == "0-0-0" || player_move == "O-O" || player_move == "0-0" {
+            movement_type = MoveType::Castle;
+        }else {
+            if san_move.len() >= 4 {
+                if p_type == PieceType::Pawn {
+                    index_offset += 1;
+                }
+                
+                // only one character is used to make a move unambiguous, so it can be both a row number or a column letter
+                // because of that, the same character is passed twice to check for either a column or a row value
+                let unambiguous_san = vec![san_move[1], san_move[1]];
+                unambiguous_move_partial_position = translate_san_into_position(&unambiguous_san, &0);
 
-        target_position.0 = translate_san_into_position(&san_move, &index_offset).0;
-        target_position.1 = translate_san_into_position(&san_move, &index_offset).1;
+                if san_move[index_offset] == 'x' {
+                    is_capture = true;
+                }
+                index_offset += 1;
+            }
 
-        if target_position.0 > BOARD_SIZE as i8 - 1 || target_position.1 > BOARD_SIZE as i8 - 1 {
-            println!("Invalid move. Try again!");
-            return get_player_move();
+            target_position.0 = translate_san_into_position(&san_move, &index_offset).0;
+            target_position.1 = translate_san_into_position(&san_move, &index_offset).1;
+
+            if target_position.0 > BOARD_SIZE as i8 - 1 || target_position.1 > BOARD_SIZE as i8 - 1 {
+                println!("Invalid move. Try again!");
+            }else {
+                break;
+            }
         }
     }
     
