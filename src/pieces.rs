@@ -129,44 +129,6 @@ impl Piece {
 
 }
 
-pub fn get_piece_to_promote_to(pieces_vec: &mut Vec<Piece>) -> &mut Piece {
-
-    println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
-    println!("'N'=Knight,'R'=Rook,'B'=Bishop");
-
-    let piece_to_promote_to: &mut Piece;
-
-    loop {
-        let mut promotion_input = String::new();
-        io::stdin().read_line(&mut promotion_input).unwrap();
-        let promotion_characters: Vec<char> = promotion_input.trim().chars().collect();
-
-        if promotion_characters.len() > 0 {
-            match promotion_characters[0] {
-                'N' => {
-                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Knight).unwrap();
-                    break;
-                },
-                'R' => {
-                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Rook).unwrap();
-                    break;
-                },
-                'B' => {
-                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Bishop).unwrap();
-                    break;
-                }
-                _ => ()
-            }
-        }else { // only Enter key was pressed
-            piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Queen).unwrap();
-            break;
-        }
-    }
-
-    piece_to_promote_to
-
-}
-
 pub fn setup_default_board(color: bool) -> Vec<Piece> {
     let mut pieces_vector: Vec<Piece> = vec![];
 
@@ -196,7 +158,7 @@ pub struct VerifiedPlayerMovement {
 }
 
 impl PlayerMovement {
-    pub fn verify_if_move_is_possible(&self, piece: &Piece) -> VerifiedPlayerMovement {
+    pub fn verify_if_move_is_possible(&self, piece: &Piece, board: &[[char; BOARD_SIZE]; BOARD_SIZE]) -> VerifiedPlayerMovement {
         let target_column = self.target_position.0;
         let target_row = self.target_position.1;
 
@@ -283,7 +245,35 @@ impl PlayerMovement {
                         }
                     }
                 },
-                PieceType::Bishop => (),
+                PieceType::Bishop => {
+                    for bishop_position_index in 0..piece.positions.len() {
+                        let current_column = piece.positions[bishop_position_index].0;
+                        let current_row = piece.positions[bishop_position_index].1;
+
+                        if (target_column - current_column).abs() == (target_row - current_row).abs() {
+                            for diagonal in (1..=(target_row - current_row).abs()).rev() {
+                                let row_index_in_diagonal = (target_row - current_row)/diagonal;
+                                let column_index_in_diagonal = (target_column - current_column)/diagonal;
+
+                                let square_character = board[(column_index_in_diagonal + current_column) as usize][(row_index_in_diagonal + current_row) as usize];
+
+                                if row_index_in_diagonal + current_row != target_row || column_index_in_diagonal + current_column != target_column {
+                                    if is_white(square_character) || is_black(square_character) {
+                                        break;
+                                    }
+                                }else {
+                                    if !is_possible {
+                                        is_possible = true;
+                                        index_position_to_move_from = bishop_position_index;
+                                    }else {
+                                        is_ambiguous = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 PieceType::Rook => (),
                 PieceType::Queen => (),
                 PieceType::King => ()
@@ -297,6 +287,44 @@ impl PlayerMovement {
         }
 
     }
+}
+
+pub fn get_piece_to_promote_to(pieces_vec: &mut Vec<Piece>) -> &mut Piece {
+
+    println!("Indicate the pawn promotion: (Press Enter to promote it to a Queen)");
+    println!("'N'=Knight,'R'=Rook,'B'=Bishop");
+
+    let piece_to_promote_to: &mut Piece;
+
+    loop {
+        let mut promotion_input = String::new();
+        io::stdin().read_line(&mut promotion_input).unwrap();
+        let promotion_characters: Vec<char> = promotion_input.trim().chars().collect();
+
+        if promotion_characters.len() > 0 {
+            match promotion_characters[0] {
+                'N' => {
+                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Knight).unwrap();
+                    break;
+                },
+                'R' => {
+                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Rook).unwrap();
+                    break;
+                },
+                'B' => {
+                    piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Bishop).unwrap();
+                    break;
+                }
+                _ => ()
+            }
+        }else { // only Enter key was pressed
+            piece_to_promote_to = pieces_vec.iter_mut().find(|piece| piece.piece_type == PieceType::Queen).unwrap();
+            break;
+        }
+    }
+
+    piece_to_promote_to
+
 }
 
 fn translate_san_into_position(san_move: &Vec<char>, index_offset: &usize) -> (i8, i8) {
@@ -397,3 +425,18 @@ pub fn get_player_move() -> PlayerMovement {
     }
 
 }
+
+pub fn is_white(piece: char) -> bool {
+    match piece {
+        'i'|'N'|'B'|'R'|'Q'|'K' => true,
+        _ => false
+    }
+}
+
+pub fn is_black(piece: char) -> bool {
+    match piece {
+        'j'|'n'|'b'|'r'|'q'|'k' => true,
+        _ => false
+    }
+}
+

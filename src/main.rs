@@ -30,7 +30,7 @@ fn main() {
         while turn_ongoing {
             let player_move = get_player_move();
             let mut player_move_piece_type: &mut Piece = white_pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
-            let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
+            let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type, &board);
 
             if player_move_verified.is_possible {
                 let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
@@ -97,7 +97,7 @@ fn main() {
         while turn_ongoing {
             let player_move = get_player_move();
             let mut player_move_piece_type: &mut Piece = black_pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
-            let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type);
+            let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type, &board);
 
             if player_move_verified.is_possible {
                 let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
@@ -186,20 +186,6 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
         }else {
             print!("[{}]", BOARD_LETTERS[letter]);
         }
-    }
-}
-
-fn is_white(piece: char) -> bool {
-    match piece {
-        'i'|'N'|'B'|'R'|'Q'|'K' => true,
-        _ => false
-    }
-}
-
-fn is_black(piece: char) -> bool {
-    match piece {
-        'j'|'n'|'b'|'r'|'q'|'k' => true,
-        _ => false
     }
 }
 
