@@ -228,14 +228,17 @@ impl PlayerMovement {
                         let current_column = piece.positions[bishop_position_index].0;
                         let current_row = piece.positions[bishop_position_index].1;
 
-                        if (target_column - current_column).abs() == (target_row - current_row).abs() {
-                            for diagonal in (1..=(target_row - current_row).abs()).rev() {
-                                let row_index_in_diagonal = (target_row - current_row)/diagonal;
-                                let column_index_in_diagonal = (target_column - current_column)/diagonal;
+                        let is_diagonal_movement = (target_column - current_column).abs() == (target_row - current_row).abs();
+                        if is_diagonal_movement {
 
+                            for diagonal in 1..=(target_row - current_row).abs() {
+                                let row_index_in_diagonal = (target_row - current_row).signum() * diagonal;
+                                let column_index_in_diagonal = (target_column - current_column).signum() * diagonal;
                                 let square_character = board[(column_index_in_diagonal + current_column) as usize][(row_index_in_diagonal + current_row) as usize];
 
-                                if row_index_in_diagonal + current_row != target_row || column_index_in_diagonal + current_column != target_column {
+                                let square_is_not_target = row_index_in_diagonal + current_row != target_row || column_index_in_diagonal + current_column != target_column;
+
+                                if square_is_not_target {
                                     if is_white(square_character) || is_black(square_character) {
                                         break;
                                     }
@@ -249,10 +252,47 @@ impl PlayerMovement {
                                     }
                                 }
                             }
+
                         }
                     }
                 },
-                PieceType::Rook => (),
+                PieceType::Rook => {
+                    for rook_position_index in 0..piece.positions.len() {
+                        let current_column = piece.positions[rook_position_index].0;
+                        let current_row = piece.positions[rook_position_index].1;
+
+                        let iterator: i8;
+                        if current_column == target_column {
+                            iterator = (target_row - current_row).abs();
+                        }else if current_row == target_row {
+                            iterator = (target_column - current_column).abs();
+                        }else {
+                            continue;
+                        }
+
+                        for square in 1..=iterator {
+                            let row_index_in_square = (target_row - current_row).signum() * square;
+                            let column_index_in_square = (target_column - current_column).signum() * square;
+                            let square_character = board[(column_index_in_square + current_column) as usize][(row_index_in_square + current_row) as usize];
+                        
+                            let square_is_not_target = row_index_in_square + current_row != target_row || column_index_in_square + current_column != target_column;
+
+                            if square_is_not_target {
+                                if is_white(square_character) || is_black(square_character) {
+                                    break;
+                                }
+                            }else {
+                                if !is_possible {
+                                    is_possible = true;
+                                    index_position_to_move_from = rook_position_index;
+                                }else {
+                                    is_ambiguous = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                },
                 PieceType::Queen => (),
                 PieceType::King => ()
             }

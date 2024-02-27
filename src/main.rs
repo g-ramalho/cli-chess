@@ -123,6 +123,9 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                         board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
                 
                         turn_ongoing = false;
+                    }else{
+                        println!("Your move is ambiguous! Indicate the piece you choose to move using Short Algebraic Notation!");
+                        continue;
                     }
                 }
             }
