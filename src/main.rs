@@ -3,11 +3,12 @@ use pieces::*;
 
 const BOARD_SIZE: usize = 8; // max board size: 26x26
 const FREE_SQUARE_SYMBOL: char = '.';
+
 fn main() {
     let mut board = [[FREE_SQUARE_SYMBOL; BOARD_SIZE]; BOARD_SIZE];
 
-    let mut white_pieces = setup_default_board(true);
-    let mut black_pieces = setup_default_board(false);
+    let mut white_pieces = setup_default_board_positions(true);
+    let mut black_pieces = setup_default_board_positions(false);
 
     for pieces in white_pieces.iter() {
         for piece_position in pieces.positions.iter() {
