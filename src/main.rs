@@ -90,16 +90,17 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                     position_to_move_from.1 = player_move.target_position.1;
 
                     // pawn promotion:
-                    if player_move_piece_type.piece_type == PieceType::Pawn && player_move.target_position.1 == BOARD_SIZE as i8 - 1 {
-
+                    let is_promotion: bool;
+                    if player_move_piece_type.color {
+                        is_promotion = player_move_piece_type.piece_type == PieceType::Pawn && player_move.target_position.1 == BOARD_SIZE as i8 - 1;
+                    }else {
+                        is_promotion = player_move_piece_type.piece_type == PieceType::Pawn && player_move.target_position.1 == 0;
+                    }
+                    if is_promotion {
                         player_move_piece_type.positions.swap_remove(player_move_verified.index_position_to_move_from);
-
                         let piece_to_promote_to = get_piece_to_promote_to(pieces);
-
                         piece_to_promote_to.positions.push((player_move.target_position.0, player_move.target_position.1));
-
                         player_move_piece_type = piece_to_promote_to;
-                        
                     }
 
                     board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
