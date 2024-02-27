@@ -293,7 +293,45 @@ impl PlayerMovement {
                         }
                     }
                 },
-                PieceType::Queen => (),
+                PieceType::Queen => {
+                    for queen_position_index in 0..piece.positions.len() {
+                        let current_column = piece.positions[queen_position_index].0;
+                        let current_row = piece.positions[queen_position_index].1;
+
+                        let iterator: i8;
+                        let is_diagonal_movement = (target_column - current_column).abs() == (target_row - current_row).abs();
+
+                        if current_column == target_column || is_diagonal_movement {
+                            iterator = (target_row - current_row).abs();
+                        }else if current_row == target_row {
+                            iterator = (target_column - current_column).abs();
+                        }else {
+                            continue;
+                        }
+
+                        for square in 1..=iterator {
+                            let row_index_in_square = (target_row - current_row).signum() * square;
+                            let column_index_in_square = (target_column - current_column).signum() * square;
+                            let square_character = board[(column_index_in_square + current_column) as usize][(row_index_in_square + current_row) as usize];
+                        
+                            let square_is_not_target = row_index_in_square + current_row != target_row || column_index_in_square + current_column != target_column;
+
+                            if square_is_not_target {
+                                if is_white(square_character) || is_black(square_character) {
+                                    break;
+                                }
+                            }else {
+                                if !is_possible {
+                                    is_possible = true;
+                                    index_position_to_move_from = queen_position_index;
+                                }else {
+                                    is_ambiguous = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                },
                 PieceType::King => ()
             }
         }
