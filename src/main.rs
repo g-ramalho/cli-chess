@@ -1,4 +1,5 @@
 mod pieces;
+mod endgame;
 use pieces::*;
 
 const BOARD_SIZE: usize = 8; // max board size: 26x26

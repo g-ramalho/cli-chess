@@ -1,6 +1,5 @@
 use std::io;
-
-use crate::{BOARD_LETTERS, BOARD_SIZE};
+use crate::{endgame::get_pieces_attacking_the_king, BOARD_LETTERS, BOARD_SIZE};
 
 #[derive(PartialEq)]
 pub enum MoveType {
