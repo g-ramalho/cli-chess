@@ -331,7 +331,31 @@ impl PlayerMovement {
                         }
                     }
                 },
-                PieceType::King => ()
+                PieceType::King => {
+                    for king_position_index in 0..piece.positions.len() {
+                        let current_column = piece.positions[king_position_index].0;
+                        let current_row = piece.positions[king_position_index].1;
+
+                        if (1..=2).contains(&(&(target_column - current_column).abs() + (target_row - current_row).abs())) {
+                            
+                            // the difference between the target column and the current column must be either 1 or 0
+                            // the difference between the target row and the current row must also be either 1 or 0
+
+                            // both cannot be 0, because that would mean the target position is the same as the current one
+                            // and so the sum of the differences in column and row must be either 2 or 1
+
+                            if get_pieces_attacking_the_king(true, (target_column, target_row), &board).len() == 0 {
+                                if !is_possible {
+                                    is_possible = true;
+                                    index_position_to_move_from = king_position_index;
+                                }else {
+                                    is_ambiguous = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

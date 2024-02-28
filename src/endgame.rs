@@ -9,9 +9,9 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
 
     for right_side_square in 1..BOARD_SIZE as i8 {
         let column_index_in_square = current_column + right_side_square;
-        let square_character = board[column_index_in_square as usize][current_row as usize];
-
+        
         if column_index_in_square < BOARD_SIZE as i8 {
+            let square_character = board[column_index_in_square as usize][current_row as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
                     pieces_attacking_the_king.push((column_index_in_square, current_row));
@@ -32,9 +32,9 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
 
     for left_side_square in 1..BOARD_SIZE as i8 {
         let column_index_in_square = current_column - left_side_square;
-        let square_character = board[column_index_in_square as usize][current_row as usize];
-
+        
         if column_index_in_square >= 0 {
+            let square_character = board[column_index_in_square as usize][current_row as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
                     pieces_attacking_the_king.push((column_index_in_square, current_row));
@@ -55,9 +55,9 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
 
     for below_square in 1..BOARD_SIZE as i8 {
         let row_index_in_square = current_row + below_square;
-        let square_character = board[current_column as usize][row_index_in_square as usize];
-
+        
         if row_index_in_square < BOARD_SIZE as i8 {
+            let square_character = board[current_column as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
                     pieces_attacking_the_king.push((current_column, current_row));
@@ -78,9 +78,9 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
 
     for above_square in 1..BOARD_SIZE as i8 {
         let row_index_in_square = current_row - above_square;
-        let square_character = board[current_column as usize][row_index_in_square as usize];
-
+        
         if row_index_in_square >= 0 {
+            let square_character = board[current_column as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
                     pieces_attacking_the_king.push((current_column, current_row));
@@ -102,9 +102,9 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
     for upper_right_diagonal in 1..BOARD_SIZE as i8 {
         let column_index_in_square = current_column + upper_right_diagonal;
         let row_index_in_square = current_row - upper_right_diagonal;
-        let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
-
+        
         if column_index_in_square < BOARD_SIZE as i8 && row_index_in_square >= 0 {
+            let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'b' || square_character == 'j' {
                     pieces_attacking_the_king.push((current_column, current_row));
@@ -118,15 +118,17 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
                     break;
                 }
             }
+        }else {
+            break;
         }
     }
 
     for upper_left_diagonal in 1..BOARD_SIZE as i8 {
         let column_index_in_square = current_column - upper_left_diagonal;
         let row_index_in_square = current_row - upper_left_diagonal;
-        let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
-
+        
         if column_index_in_square >= 0 && row_index_in_square >= 0 {
+            let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'b' || square_character == 'j' {
                     pieces_attacking_the_king.push((current_column, current_row));
@@ -140,15 +142,17 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
                     break;
                 }
             }
+        }else {
+            break;
         }
     }
 
     for lower_left_diagonal in 1..BOARD_SIZE as i8 {
         let column_index_in_square = current_column - lower_left_diagonal;
         let row_index_in_square = current_row + lower_left_diagonal;
-        let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
-
+        
         if column_index_in_square >= 0 && row_index_in_square < BOARD_SIZE as i8 {
+            let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'b' {
                     pieces_attacking_the_king.push((current_column, current_row));
@@ -162,15 +166,17 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
                     break;
                 }
             }
+        }else {
+            break;
         }
     }
 
     for lower_right_diagonal in 1..BOARD_SIZE as i8 {
         let column_index_in_square = current_column + lower_right_diagonal;
         let row_index_in_square = current_row + lower_right_diagonal;
-        let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
-
+        
         if column_index_in_square < BOARD_SIZE as i8 && row_index_in_square < BOARD_SIZE as i8 {
+            let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'b' {
                     pieces_attacking_the_king.push((current_column, current_row));
@@ -184,6 +190,8 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
                     break;
                 }
             }
+        }else {
+            break;
         }
     }
 
