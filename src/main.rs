@@ -26,11 +26,11 @@ fn main() {
     loop {
         show_board(&board);
         println!("White moves:");
-        play_turn(&mut white_pieces, &mut board);
+        play_turn(&mut white_pieces, &mut board, &mut black_pieces);
 
         show_board(&board);
         println!("Black moves:");
-        play_turn(&mut black_pieces, &mut board);
+        play_turn(&mut black_pieces, &mut board, &mut white_pieces);
     }
 }
 
@@ -63,7 +63,7 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
     }
 }
 
-fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]) {
+fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>) {
     let mut turn_ongoing = true;
     while turn_ongoing {
         let player_move = get_player_move();
@@ -81,6 +81,8 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
             }
 
             if is_playable {
+                let target_piece_opt = get_piece_type(target_square_character);
+
                 if !player_move_verified.is_ambiguous {
 
                     let position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
@@ -129,6 +131,14 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                         println!("Your move is ambiguous! Indicate the piece you choose to move using Short Algebraic Notation!");
                         continue;
                     }
+                }
+
+                if player_move.is_capture && !turn_ongoing {
+                    let target_piece_type = target_piece_opt.unwrap();
+                    let target_piece = opposite_side_pieces.iter_mut().find(|piece| piece.piece_type == target_piece_type).unwrap();
+                    let captured_piece_position_index = target_piece.positions.iter().position(|position| position == &player_move.target_position).unwrap();
+    
+                    target_piece.positions.swap_remove(captured_piece_position_index);
                 }
             }
         }

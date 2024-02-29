@@ -337,7 +337,7 @@ impl PlayerMovement {
                         let current_row = piece.positions[king_position_index].1;
 
                         if (1..=2).contains(&(&(target_column - current_column).abs() + (target_row - current_row).abs())) {
-                            
+
                             // the difference between the target column and the current column must be either 1 or 0
                             // the difference between the target row and the current row must also be either 1 or 0
 
@@ -523,3 +523,14 @@ pub fn is_black(piece: char) -> bool {
     }
 }
 
+pub fn get_piece_type(piece: char) -> Option<PieceType> {
+    match piece {
+        'i'|'j' => Some(PieceType::Pawn),
+        'N'|'n' => Some(PieceType::Knight),
+        'B'|'b' => Some(PieceType::Bishop),
+        'R'|'r' => Some(PieceType::Rook),
+        'Q'|'q' => Some(PieceType::Queen),
+        'K'|'k' => Some(PieceType::King),
+        _ => None
+    }
+}
