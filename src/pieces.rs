@@ -1,5 +1,5 @@
 use std::io;
-use crate::{endgame::get_pieces_attacking_the_king, BOARD_LETTERS, BOARD_SIZE};
+use crate::{endgame::get_pieces_attacking_king, BOARD_LETTERS, BOARD_SIZE};
 
 #[derive(PartialEq)]
 pub enum MoveType {
@@ -143,8 +143,36 @@ impl PlayerMovement {
         let mut is_possible = false;
         let mut is_ambiguous = false;
         
-        if let MoveType::Castle = self.movement_type {
-
+        if self.movement_type == MoveType::Castle {
+            index_position_to_move_from = 0;
+            let king_row = piece.positions[0].1;
+            if target_column == 0 { // queenside castle
+                for square in 1..=3 {
+                    if (piece.color && is_white(board[square][king_row as usize])) || (!piece.color && is_black(board[square][king_row as usize])) {
+                        break;
+                    }
+                    if get_pieces_attacking_king(piece.color, (square as i8, king_row), &board).len() == 0 {
+                        if square == 3 {
+                            is_possible = true;
+                        }
+                    }else {
+                        break;
+                    }
+                }
+            }else if target_column == 1 { // kingside castle
+                for square in (BOARD_SIZE-3)..(BOARD_SIZE-1) {
+                    if (piece.color && is_white(board[square][king_row as usize])) || (!piece.color && is_black(board[square][king_row as usize])) {
+                        break;
+                    }
+                    if get_pieces_attacking_king(piece.color, (square as i8, king_row), &board).len() == 0 {
+                        if square == BOARD_SIZE-2 {
+                            is_possible = true;
+                        }
+                    }else {
+                        break;
+                    }
+                }
+            }
         }else {
             match self.p_type {
                 PieceType::Pawn => {
@@ -344,7 +372,7 @@ impl PlayerMovement {
                             // both cannot be 0, because that would mean the target position is the same as the current one
                             // and so the sum of the differences in column and row must be either 2 or 1
 
-                            if get_pieces_attacking_the_king(true, (target_column, target_row), &board).len() == 0 {
+                            if get_pieces_attacking_king(true, (target_column, target_row), &board).len() == 0 {
                                 if !is_possible {
                                     is_possible = true;
                                     index_position_to_move_from = king_position_index;
@@ -463,6 +491,11 @@ pub fn get_player_move() -> PlayerMovement {
         io::stdin().read_line(&mut player_move).unwrap();
         let san_move: Vec<char> = player_move.trim().chars().collect();
 
+        if san_move.len() < 2 {
+            println!("Your move must contain atleast a letter and a number ('e4')");
+            continue;
+        }
+
         let mut index_offset = 1;
         p_type = match san_move[0] {
             'N' => PieceType::Knight,
@@ -473,8 +506,16 @@ pub fn get_player_move() -> PlayerMovement {
             _ => { if san_move.len() < 4 { index_offset -= 1; }; PieceType::Pawn }
         };
 
-        if player_move == "O-O-O" || player_move == "0-0-0" || player_move == "O-O" || player_move == "0-0" {
+        if player_move.trim() == "O-O-O" || player_move.trim() == "0-0-0" {
             movement_type = MoveType::Castle;
+            p_type = PieceType::King;
+            target_position.0 = 0;
+            target_position.1 = 0;
+        }else if player_move.trim() == "O-O" || player_move.trim() == "0-0" {
+            movement_type = MoveType::Castle;
+            p_type = PieceType::King;
+            target_position.0 = 1;
+            target_position.1 = 1;
         }else {
             if san_move.len() >= 4 {
                 // only one character is used to make a move unambiguous, so it can be both a row number or a column letter
@@ -491,11 +532,11 @@ pub fn get_player_move() -> PlayerMovement {
             target_position.0 = translate_san_into_position(&san_move, &index_offset).0;
             target_position.1 = translate_san_into_position(&san_move, &index_offset).1;
 
-            if target_position.0 > BOARD_SIZE as i8 - 1 || target_position.1 > BOARD_SIZE as i8 - 1 {
-                println!("Invalid move. Try again!");
-            }else {
-                break;
-            }
+        }
+        if target_position.0 > BOARD_SIZE as i8 - 1 || target_position.1 > BOARD_SIZE as i8 - 1 {
+            println!("Invalid move. Try again!");
+        }else {
+            break;
         }
     }
     

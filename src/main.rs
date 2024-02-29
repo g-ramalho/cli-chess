@@ -73,6 +73,33 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
         if player_move_verified.is_possible {
             let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
             
+            if player_move.movement_type == MoveType::Castle {
+                board[player_move_piece_type.positions[0].0 as usize][player_move_piece_type.positions[0].1 as usize] = FREE_SQUARE_SYMBOL;
+
+                let rook_old_column: i8;
+                let rook_new_column: i8;
+                if player_move.target_position.0 == 0 {
+                    player_move_piece_type.positions[0].0 = 2;
+                    board[player_move_piece_type.positions[0].0 as usize][player_move_piece_type.positions[0].1 as usize] = player_move_piece_type.symbol;
+                    rook_old_column = 0;
+                    rook_new_column = 3;
+                }else {
+                    player_move_piece_type.positions[0].0 = 6;
+                    board[player_move_piece_type.positions[0].0 as usize][player_move_piece_type.positions[0].1 as usize] = player_move_piece_type.symbol;
+                    rook_old_column = 7;
+                    rook_new_column = 5;
+                }
+
+                let rook_to_castle = pieces.iter_mut().find(|piece| piece.piece_type == PieceType::Rook).unwrap();
+                let rook_to_castle_index = rook_to_castle.positions.iter().position(|position| position.0 == rook_old_column).unwrap();
+
+                board[rook_to_castle.positions[rook_to_castle_index].0 as usize][rook_to_castle.positions[rook_to_castle_index].1 as usize] = FREE_SQUARE_SYMBOL;
+                rook_to_castle.positions[rook_to_castle_index].0 = rook_new_column;
+                board[rook_to_castle.positions[rook_to_castle_index].0 as usize][rook_to_castle.positions[rook_to_castle_index].1 as usize] = rook_to_castle.symbol;
+
+                break;
+            }
+
             let is_playable: bool;
             if player_move_piece_type.color {
                 is_playable = (player_move.is_capture && is_black(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL);

@@ -1,8 +1,8 @@
 use crate::{is_black, is_white, BOARD_SIZE};
 
-pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board: &[[char; BOARD_SIZE]; BOARD_SIZE]) -> Vec<(i8, i8)> {
+pub fn get_pieces_attacking_king(color: bool, king_position: (i8, i8), board: &[[char; BOARD_SIZE]; BOARD_SIZE]) -> Vec<(i8, i8)> {
 
-    let mut pieces_attacking_the_king: Vec<(i8, i8)> = vec![];
+    let mut pieces_attacking_king: Vec<(i8, i8)> = vec![];
 
     let current_column: i8 = king_position.0;
     let current_row: i8 = king_position.1;
@@ -14,14 +14,14 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
             let square_character = board[column_index_in_square as usize][current_row as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
-                    pieces_attacking_the_king.push((column_index_in_square, current_row));
-                }else if is_white(square_character) {
+                    pieces_attacking_king.push((column_index_in_square, current_row));
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
                 if square_character == 'Q' || square_character == 'R' {
-                    pieces_attacking_the_king.push((column_index_in_square, current_row));
-                }else if is_black(square_character) {
+                    pieces_attacking_king.push((column_index_in_square, current_row));
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -37,14 +37,14 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
             let square_character = board[column_index_in_square as usize][current_row as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
-                    pieces_attacking_the_king.push((column_index_in_square, current_row));
-                }else if is_white(square_character) {
+                    pieces_attacking_king.push((column_index_in_square, current_row));
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
                 if square_character == 'Q' || square_character == 'R' {
-                    pieces_attacking_the_king.push((column_index_in_square, current_row));
-                }else if is_black(square_character) {
+                    pieces_attacking_king.push((column_index_in_square, current_row));
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -60,14 +60,16 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
             let square_character = board[current_column as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_white(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
                 if square_character == 'Q' || square_character == 'R' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_black(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -83,14 +85,16 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
             let square_character = board[current_column as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'r' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_white(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
                 if square_character == 'Q' || square_character == 'R' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_black(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -106,15 +110,17 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
         if column_index_in_square < BOARD_SIZE as i8 && row_index_in_square >= 0 {
             let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
-                if square_character == 'q' || square_character == 'b' || square_character == 'j' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_white(square_character) {
+                if square_character == 'q' || square_character == 'b' {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
                 if square_character == 'Q' || square_character == 'B' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_black(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -130,15 +136,17 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
         if column_index_in_square >= 0 && row_index_in_square >= 0 {
             let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
-                if square_character == 'q' || square_character == 'b' || square_character == 'j' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_white(square_character) {
+                if square_character == 'q' || square_character == 'b' {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
                 if square_character == 'Q' || square_character == 'B' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_black(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -155,14 +163,16 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
             let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'b' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_white(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
-                if square_character == 'Q' || square_character == 'B' || square_character == 'i' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_black(square_character) {
+                if square_character == 'Q' || square_character == 'B' {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
@@ -179,19 +189,48 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
             let square_character = board[column_index_in_square as usize][row_index_in_square as usize];
             if color {
                 if square_character == 'q' || square_character == 'b' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_white(square_character) {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }else {
-                if square_character == 'Q' || square_character == 'B' || square_character == 'i' {
-                    pieces_attacking_the_king.push((current_column, current_row));
-                }else if is_black(square_character) {
+                if square_character == 'Q' || square_character == 'B' {
+                    pieces_attacking_king.push((current_column, current_row));
+                    break;
+                }else if is_black(square_character) || is_white(square_character) {
                     break;
                 }
             }
         }else {
             break;
+        }
+    }
+
+    // pawn verification:
+    if color {
+        if king_position.1 - 1 >= 0 {
+            if king_position.0 - 1 >= 0 {
+                if board[(king_position.0-1) as usize][(king_position.1-1) as usize] == 'j' {
+                    pieces_attacking_king.push((king_position.0-1, king_position.1-1));
+                }
+            }else if king_position.0 + 1 < BOARD_SIZE as i8 {
+                if board[(king_position.0+1) as usize][(king_position.1-1) as usize] == 'j' {
+                    pieces_attacking_king.push((king_position.0+1, king_position.1-1));
+                }
+            }
+        }
+    }else {
+        if king_position.1 + 1 < BOARD_SIZE as i8 {
+            if king_position.0-1 >= 0 {
+                if board[(king_position.0-1) as usize][(king_position.1+1) as usize] == 'i' {
+                    pieces_attacking_king.push((king_position.0-1, king_position.1+1));
+                }
+            }else if king_position.0+1 < BOARD_SIZE as i8 {
+                if board[(king_position.0+1) as usize][(king_position.1+1) as usize] == 'i' {
+                    pieces_attacking_king.push((king_position.0+1, king_position.1+1));
+                }
+            }
         }
     }
 
@@ -204,44 +243,44 @@ pub fn get_pieces_attacking_the_king(color: bool, king_position: (i8, i8), board
 
     if current_column - 2 >= 0 && current_row - 1 >= 0 {
         if board[(current_column - 2) as usize][(current_row - 1) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column - 2, current_row - 1));
+            pieces_attacking_king.push((current_column - 2, current_row - 1));
         }
     }
     if current_column - 2 >= 0 && current_row + 1 < BOARD_SIZE as i8 {
         if board[(current_column - 2) as usize][(current_row + 1) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column - 2, current_row + 1));
+            pieces_attacking_king.push((current_column - 2, current_row + 1));
         }
     }
     if current_column - 1 >= 0 && current_row - 2 >= 0 {
         if board[(current_column - 1) as usize][(current_row - 2) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column - 1, current_row - 2));
+            pieces_attacking_king.push((current_column - 1, current_row - 2));
         }
     }
     if current_column - 1 >= 0 && current_row + 2 < BOARD_SIZE as i8 {
         if board[(current_column - 1) as usize][(current_row + 2) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column - 1, current_row + 2));
+            pieces_attacking_king.push((current_column - 1, current_row + 2));
         }
     }
     if current_column + 1 < BOARD_SIZE as i8 && current_row + 2 < BOARD_SIZE as i8 {
         if board[(current_column + 1) as usize][(current_row + 2) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column + 1, current_row + 2));
+            pieces_attacking_king.push((current_column + 1, current_row + 2));
         }
     }
     if current_column + 1 < BOARD_SIZE as i8 && current_row - 2 >= 0 {
         if board[(current_column + 1) as usize][(current_row - 2) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column + 1, current_row - 2));
+            pieces_attacking_king.push((current_column + 1, current_row - 2));
         }
     }
     if current_column + 2 < BOARD_SIZE as i8 && current_row + 1 < BOARD_SIZE as i8 {
         if board[(current_column + 2) as usize][(current_row + 1) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column + 2, current_row + 1));
+            pieces_attacking_king.push((current_column + 2, current_row + 1));
         }
     }
     if current_column + 2 < BOARD_SIZE as i8 && current_row - 1 >= 0 {
         if board[(current_column + 2) as usize][(current_row - 1) as usize] == knight_symbol {
-            pieces_attacking_the_king.push((current_column + 2, current_row - 1));
+            pieces_attacking_king.push((current_column + 2, current_row - 1));
         }
     }
 
-    pieces_attacking_the_king
+    pieces_attacking_king
 }
