@@ -1,5 +1,5 @@
 use std::io;
-use crate::{endgame::get_pieces_attacking_king, BOARD_LETTERS, BOARD_SIZE};
+use crate::{endgame::get_pieces_attacking_square, BOARD_LETTERS, BOARD_SIZE};
 
 #[derive(PartialEq)]
 pub enum MoveType {
@@ -151,7 +151,7 @@ impl PlayerMovement {
                     if (piece.color && is_white(board[square][king_row as usize])) || (!piece.color && is_black(board[square][king_row as usize])) {
                         break;
                     }
-                    if get_pieces_attacking_king(piece.color, (square as i8, king_row), &board).len() == 0 {
+                    if get_pieces_attacking_square(piece.color, (square as i8, king_row), &board).len() == 0 {
                         if square == 3 {
                             is_possible = true;
                         }
@@ -164,7 +164,7 @@ impl PlayerMovement {
                     if (piece.color && is_white(board[square][king_row as usize])) || (!piece.color && is_black(board[square][king_row as usize])) {
                         break;
                     }
-                    if get_pieces_attacking_king(piece.color, (square as i8, king_row), &board).len() == 0 {
+                    if get_pieces_attacking_square(piece.color, (square as i8, king_row), &board).len() == 0 {
                         if square == BOARD_SIZE-2 {
                             is_possible = true;
                         }
@@ -372,7 +372,7 @@ impl PlayerMovement {
                             // both cannot be 0, because that would mean the target position is the same as the current one
                             // and so the sum of the differences in column and row must be either 2 or 1
 
-                            if get_pieces_attacking_king(true, (target_column, target_row), &board).len() == 0 {
+                            if get_pieces_attacking_square(true, (target_column, target_row), &board).len() == 0 {
                                 if !is_possible {
                                     is_possible = true;
                                     index_position_to_move_from = king_position_index;
