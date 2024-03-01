@@ -372,7 +372,7 @@ impl PlayerMovement {
                             // both cannot be 0, because that would mean the target position is the same as the current one
                             // and so the sum of the differences in column and row must be either 2 or 1
 
-                            if get_pieces_attacking_square(true, (target_column, target_row), &board).len() == 0 {
+                            if get_pieces_attacking_square(piece.color, (target_column, target_row), &board).len() == 0 {
                                 if !is_possible {
                                     is_possible = true;
                                     index_position_to_move_from = king_position_index;

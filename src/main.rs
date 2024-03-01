@@ -23,14 +23,19 @@ fn main() {
         }
     }
 
+    let mut has_rook_moved = 0b0000;
+    // from left to right, each bit keeps track of an initial rook to verify if it has ever made a move or not
+    // first and second bit are the kingside and queenside's black rooks, respectively
+    // third and fourth are the kingside and queenside's white rooks
+
     loop {
         show_board(&board);
         println!("White moves:");
-        play_turn(&mut white_pieces, &mut board, &mut black_pieces);
+        has_rook_moved = play_turn(&mut white_pieces, &mut board, &mut black_pieces, has_rook_moved);
 
         show_board(&board);
         println!("Black moves:");
-        play_turn(&mut black_pieces, &mut board, &mut white_pieces);
+        has_rook_moved = play_turn(&mut black_pieces, &mut board, &mut white_pieces, has_rook_moved);
     }
 }
 
@@ -63,8 +68,9 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
     }
 }
 
-fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>) {
+fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, has_rook_moved: i8) -> i8 {
     let mut turn_ongoing = true;
+    let mut has_rook_moved_bits = has_rook_moved;
     while turn_ongoing {
         let player_move = get_player_move();
         let mut player_move_piece_type: &mut Piece = pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
@@ -74,6 +80,13 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
             let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
             
             if player_move.movement_type == MoveType::Castle {
+                let has_white_rook_moved = (player_move.target_position.0 == 0 && ((has_rook_moved >> 3) & 1) == 1) || (player_move.target_position.0 == 1 && ((has_rook_moved >> 2) & 1) == 1);
+                let has_black_rook_moved = (player_move.target_position.0 == 0 && ((has_rook_moved >> 1) & 1) == 1) || (player_move.target_position.0 == 1 && ((has_rook_moved >> 0) & 1) == 1);
+                if (player_move_piece_type.color && has_white_rook_moved) || (!player_move_piece_type.color && has_black_rook_moved) {
+                    println!("Either your king or this side's rook has moved and castling is not possible anymore!");
+                    continue;
+                }
+
                 board[player_move_piece_type.positions[0].0 as usize][player_move_piece_type.positions[0].1 as usize] = FREE_SQUARE_SYMBOL;
 
                 let rook_old_column: i8;
@@ -109,6 +122,34 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
 
             if is_playable {
                 let target_piece_opt = get_piece_type(target_square_character);
+
+                match player_move_piece_type.piece_type { // keeps track of king and rook movement for castling
+                    PieceType::King => {
+                        if player_move_piece_type.color {
+                            // set both rooks' bits to 1 (4th and 3rd bits)
+                            has_rook_moved_bits |= 0b1100;
+                        }else {
+                            // set both rooks' bits to 1 (2nd and 1st bits)
+                            has_rook_moved_bits |= 0b0011;
+                        }
+                    },
+                    PieceType::Rook => {
+                        if player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 == 0 {
+                            if player_move_piece_type.color {
+                                has_rook_moved_bits |= 1 << 3;
+                            }else {
+                                has_rook_moved_bits |= 1 << 1;
+                            }
+                        }else if player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 == BOARD_SIZE as i8 - 1 {
+                            if player_move_piece_type.color {
+                                has_rook_moved_bits |= 1 << 2;
+                            }else {
+                                has_rook_moved_bits |= 1 << 0;
+                            }
+                        }
+                    },
+                    _ => ()
+                }
 
                 if !player_move_verified.is_ambiguous {
 
@@ -174,6 +215,7 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
             println!("Invalid move, try again!");
         }
     }
+    has_rook_moved_bits
 }
 
 const BOARD_LETTERS: [char; 26] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', '#', 'y', 'z']; 
