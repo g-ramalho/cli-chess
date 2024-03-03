@@ -2,7 +2,7 @@ mod pieces;
 mod endgame;
 use pieces::*;
 
-const BOARD_SIZE: usize = 8; // max board size: 26x26
+const BOARD_SIZE: usize = 8; // max board size: 26x26 / min board size: 8x8
 const FREE_SQUARE_SYMBOL: char = '.';
 
 fn main() {
@@ -23,20 +23,30 @@ fn main() {
         }
     }
 
-    let mut has_rook_moved = 0b0000;
-    // from left to right, each bit keeps track of an initial rook to verify if it has ever made a move or not
-    // first and second bit are the kingside and queenside's black rooks, respectively
-    // third and fourth are the kingside and queenside's white rooks
+    let mut processed_move = ProcessedMove {
+        // from left to right, each bit keeps track of an initial rook to verify if it has ever made a move or not
+        // first and second bit are the kingside and queenside's black rooks, respectively
+        // third and fourth are the kingside and queenside's white rooks
+        has_rook_moved: 0b0000,
+        en_passant_column: (27, true),
+        captured_piece_symbols: vec![]
+    };
 
     loop {
         show_board(&board);
         println!("White moves:");
-        has_rook_moved = play_turn(&mut white_pieces, &mut board, &mut black_pieces, has_rook_moved);
+        processed_move = play_turn(&mut white_pieces, &mut board, &mut black_pieces, processed_move);
 
         show_board(&board);
         println!("Black moves:");
-        has_rook_moved = play_turn(&mut black_pieces, &mut board, &mut white_pieces, has_rook_moved);
+        processed_move = play_turn(&mut black_pieces, &mut board, &mut white_pieces, processed_move);
     }
+}
+
+struct ProcessedMove {
+    has_rook_moved: i8,
+    en_passant_column: (i8, bool),
+    captured_piece_symbols: Vec<char>
 }
 
 fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
@@ -68,16 +78,26 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
     }
 }
 
-fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, has_rook_moved: i8) -> i8 {
+fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove) -> ProcessedMove {
+
+    let mut has_rook_moved = processed_move.has_rook_moved;
+    let mut en_passant_column = processed_move.en_passant_column;
+    let mut captured_piece_symbols = processed_move.captured_piece_symbols;
+    
     let mut turn_ongoing = true;
-    let mut has_rook_moved_bits = has_rook_moved;
     while turn_ongoing {
-        let player_move = get_player_move();
+        let mut player_move = get_player_move();
         let mut player_move_piece_type: &mut Piece = pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
-        let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type, &board);
+        let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type, &board, processed_move.en_passant_column.0);
+
+        if en_passant_column.1 == player_move_piece_type.color {
+            en_passant_column.0 = 27;
+        }else if en_passant_column.0 != player_move_verified.en_passant_column {
+            en_passant_column.0 = player_move_verified.en_passant_column;
+            en_passant_column.1 = player_move_piece_type.color;
+        }
 
         if player_move_verified.is_possible {
-            let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
             
             if player_move.movement_type == MoveType::Castle {
                 let has_white_rook_moved = (player_move.target_position.0 == 0 && ((has_rook_moved >> 3) & 1) == 1) || (player_move.target_position.0 == 1 && ((has_rook_moved >> 2) & 1) == 1);
@@ -113,38 +133,56 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                 break;
             }
 
-            let is_playable: bool;
-            if player_move_piece_type.color {
-                is_playable = (player_move.is_capture && is_black(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL);
-            }else {
-                is_playable = (player_move.is_capture && is_white(target_square_character)) || (!player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL);
+            let mut is_en_passant: bool = false;
+            let actual_position = player_move.target_position;
+            if player_move.is_capture && player_move_piece_type.piece_type == PieceType::Pawn && en_passant_column.0 == player_move.target_position.0 {
+                if player_move_piece_type.color {
+                    if player_move.target_position.1-1 >= 0 {
+                        let target_char = board[player_move.target_position.0 as usize][(player_move.target_position.1-1) as usize];
+
+                        is_en_passant = player_move_piece_type.color && get_piece_color(target_char).is_some_and(|x|x==false);
+                        player_move.target_position.1 -= 1;
+                    }
+                }else {
+                    if player_move.target_position.1+1 < BOARD_SIZE as i8 {
+                        let target_char = board[player_move.target_position.0 as usize][(player_move.target_position.1+1) as usize];
+
+                        is_en_passant = !player_move_piece_type.color && get_piece_color(target_char).is_some_and(|x|x==true);
+                        player_move.target_position.1 += 1;
+                    }
+                }
             }
 
-            if is_playable {
+            let target_square_character = board[player_move.target_position.0 as usize][player_move.target_position.1 as usize];
+
+            let is_normal_move: bool = !player_move.is_capture && target_square_character == FREE_SQUARE_SYMBOL;
+            let is_valid_capture: bool = player_move.is_capture && get_piece_color(target_square_character).is_some_and(|value| value  == !player_move_piece_type.color);
+
+            if is_normal_move || is_valid_capture || is_en_passant {
                 let target_piece_opt = get_piece_type(target_square_character);
 
                 match player_move_piece_type.piece_type { // keeps track of king and rook movement for castling
                     PieceType::King => {
                         if player_move_piece_type.color {
                             // set both rooks' bits to 1 (4th and 3rd bits)
-                            has_rook_moved_bits |= 0b1100;
+                            has_rook_moved |= 0b1100;
                         }else {
                             // set both rooks' bits to 1 (2nd and 1st bits)
-                            has_rook_moved_bits |= 0b0011;
+                            has_rook_moved |= 0b0011;
                         }
                     },
                     PieceType::Rook => {
                         if player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 == 0 {
                             if player_move_piece_type.color {
-                                has_rook_moved_bits |= 1 << 3;
+                                has_rook_moved |= 1 << 3;
                             }else {
-                                has_rook_moved_bits |= 1 << 1;
+                                has_rook_moved |= 1 << 1;
                             }
                         }else if player_move_piece_type.positions[player_move_verified.index_position_to_move_from].0 == BOARD_SIZE as i8 - 1 {
                             if player_move_piece_type.color {
-                                has_rook_moved_bits |= 1 << 2;
+                                has_rook_moved |= 1 << 2;
                             }else {
-                                has_rook_moved_bits |= 1 << 0;
+                                has_rook_moved |= 1 << 0;
                             }
                         }
                     },
@@ -156,9 +194,10 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                     let position_to_move_from = &mut player_move_piece_type.positions[player_move_verified.index_position_to_move_from];
 
                     board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
+                    board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = FREE_SQUARE_SYMBOL;
 
-                    position_to_move_from.0 = player_move.target_position.0;
-                    position_to_move_from.1 = player_move.target_position.1;
+                    position_to_move_from.0 = actual_position.0;
+                    position_to_move_from.1 = actual_position.1;
 
                     // pawn promotion:
                     let is_promotion: bool;
@@ -174,7 +213,7 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                         player_move_piece_type = piece_to_promote_to;
                     }
 
-                    board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
+                    board[actual_position.0 as usize][actual_position.1 as usize] = player_move_piece_type.symbol;
                     
                     turn_ongoing = false;
                 }else {
@@ -188,11 +227,12 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                         }
 
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
+                        board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = FREE_SQUARE_SYMBOL;
 
-                        position_to_move_from.0 = player_move.target_position.0;
-                        position_to_move_from.1 = player_move.target_position.1;
+                        position_to_move_from.0 = actual_position.0;
+                        position_to_move_from.1 = actual_position.1;
 
-                        board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = player_move_piece_type.symbol;
+                        board[actual_position.0 as usize][actual_position.1 as usize] = player_move_piece_type.symbol;
                 
                         turn_ongoing = false;
                     }else{
@@ -206,6 +246,7 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                     let target_piece = opposite_side_pieces.iter_mut().find(|piece| piece.piece_type == target_piece_type).unwrap();
                     let captured_piece_position_index = target_piece.positions.iter().position(|position| position == &player_move.target_position).unwrap();
     
+                    captured_piece_symbols.push(target_piece.symbol);
                     target_piece.positions.swap_remove(captured_piece_position_index);
                 }
             }
@@ -215,7 +256,13 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
             println!("Invalid move, try again!");
         }
     }
-    has_rook_moved_bits
+    
+    ProcessedMove {
+        has_rook_moved,
+        en_passant_column,
+        captured_piece_symbols
+    }
+
 }
 
 const BOARD_LETTERS: [char; 26] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', '#', 'y', 'z']; 

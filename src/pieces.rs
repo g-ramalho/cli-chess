@@ -131,46 +131,44 @@ pub struct PlayerMovement {
 pub struct VerifiedPlayerMovement {
     pub is_possible: bool,
     pub is_ambiguous: bool,
-    pub index_position_to_move_from: usize
+    pub index_position_to_move_from: usize,
+    pub en_passant_column: i8
 }
 
 impl PlayerMovement {
-    pub fn verify_if_move_is_possible(&self, piece: &Piece, board: &[[char; BOARD_SIZE]; BOARD_SIZE]) -> VerifiedPlayerMovement {
+    pub fn verify_if_move_is_possible(&self, piece: &Piece, board: &[[char; BOARD_SIZE]; BOARD_SIZE], en_passant_column: i8) -> VerifiedPlayerMovement {
         let target_column = self.target_position.0;
         let target_row = self.target_position.1;
 
         let mut index_position_to_move_from = 27;
         let mut is_possible = false;
         let mut is_ambiguous = false;
+        let mut en_passant_column = en_passant_column;
         
         if self.movement_type == MoveType::Castle {
             index_position_to_move_from = 0;
             let king_row = piece.positions[0].1;
+
+            let iterator:std::ops::Range<usize>;
             if target_column == 0 { // queenside castle
-                for square in 1..=3 {
-                    if (piece.color && is_white(board[square][king_row as usize])) || (!piece.color && is_black(board[square][king_row as usize])) {
-                        break;
-                    }
-                    if get_pieces_attacking_square(piece.color, (square as i8, king_row), &board).len() == 0 {
-                        if square == 3 {
-                            is_possible = true;
-                        }
-                    }else {
-                        break;
-                    }
+                iterator = 2..4; // 2 to 3
+            }else { // kingside castle
+                iterator = (BOARD_SIZE-3)..(BOARD_SIZE-1); // BOARD_SIZE-3 to BOARD_SIZE-2
+            }
+
+            let last_item_of_iterator = iterator.clone().last().unwrap();
+
+            for square in iterator {
+                let is_piece = get_piece_color(board[square][king_row as usize]).is_some();
+                if is_piece {
+                    break;
                 }
-            }else if target_column == 1 { // kingside castle
-                for square in (BOARD_SIZE-3)..(BOARD_SIZE-1) {
-                    if (piece.color && is_white(board[square][king_row as usize])) || (!piece.color && is_black(board[square][king_row as usize])) {
-                        break;
+                if get_pieces_attacking_square(piece.color, (square as i8, king_row), &board).pieces_attacking_square.len() == 0 {
+                    if square == last_item_of_iterator {
+                        is_possible = true;
                     }
-                    if get_pieces_attacking_square(piece.color, (square as i8, king_row), &board).len() == 0 {
-                        if square == BOARD_SIZE-2 {
-                            is_possible = true;
-                        }
-                    }else {
-                        break;
-                    }
+                }else {
+                    break;
                 }
             }
         }else {
@@ -180,7 +178,7 @@ impl PlayerMovement {
                         let current_column = piece.positions[pawn_position_index].0;
                         let current_row = piece.positions[pawn_position_index].1;
                         
-                        if (current_row - target_row).abs() == 1 {
+                        if (piece.color && target_row - current_row == 1) || (!piece.color && target_row - current_row == -1) {
                             if self.is_capture {
                                 if (current_column - target_column).abs() == 1 {
                                     if !is_possible {
@@ -202,11 +200,12 @@ impl PlayerMovement {
                                     }
                                 }
                             }
-                        }else if (current_row - target_row).abs() == 2 {
+                        }else if (piece.color && target_row - current_row == 2) || (!piece.color && target_row - current_row == -2) {
                             if !self.is_capture {
                                 if current_column == target_column {
                                     if piece.color {
                                         if current_row == 1 {
+                                            en_passant_column = current_column;
                                             if !is_possible {
                                                 is_possible = true;
                                                 index_position_to_move_from = pawn_position_index;
@@ -217,6 +216,7 @@ impl PlayerMovement {
                                         }
                                     }else {
                                         if current_row == BOARD_SIZE as i8 - 2 {
+                                            en_passant_column = current_column;
                                             if !is_possible {
                                                 is_possible = true;
                                                 index_position_to_move_from = pawn_position_index;
@@ -266,7 +266,7 @@ impl PlayerMovement {
                                 let square_is_not_target = row_index_in_diagonal + current_row != target_row || column_index_in_diagonal + current_column != target_column;
 
                                 if square_is_not_target {
-                                    if is_white(square_character) || is_black(square_character) {
+                                    if get_piece_color(square_character).is_some() {
                                         break;
                                     }
                                 }else {
@@ -305,7 +305,7 @@ impl PlayerMovement {
                             let square_is_not_target = row_index_in_square + current_row != target_row || column_index_in_square + current_column != target_column;
 
                             if square_is_not_target {
-                                if is_white(square_character) || is_black(square_character) {
+                                if get_piece_color(square_character).is_some() {
                                     break;
                                 }
                             }else {
@@ -344,7 +344,7 @@ impl PlayerMovement {
                             let square_is_not_target = row_index_in_square + current_row != target_row || column_index_in_square + current_column != target_column;
 
                             if square_is_not_target {
-                                if is_white(square_character) || is_black(square_character) {
+                                if get_piece_color(square_character).is_some() {
                                     break;
                                 }
                             }else {
@@ -372,7 +372,7 @@ impl PlayerMovement {
                             // both cannot be 0, because that would mean the target position is the same as the current one
                             // and so the sum of the differences in column and row must be either 2 or 1
 
-                            if get_pieces_attacking_square(piece.color, (target_column, target_row), &board).len() == 0 {
+                            if get_pieces_attacking_square(piece.color, (target_column, target_row), &board).pieces_attacking_square.len() == 0 {
                                 if !is_possible {
                                     is_possible = true;
                                     index_position_to_move_from = king_position_index;
@@ -390,7 +390,8 @@ impl PlayerMovement {
         VerifiedPlayerMovement {
             is_possible,
             is_ambiguous,
-            index_position_to_move_from
+            index_position_to_move_from,
+            en_passant_column
         }
 
     }
@@ -550,17 +551,11 @@ pub fn get_player_move() -> PlayerMovement {
 
 }
 
-pub fn is_white(piece: char) -> bool {
+pub fn get_piece_color(piece: char) -> Option<bool> {
     match piece {
-        'i'|'N'|'B'|'R'|'Q'|'K' => true,
-        _ => false
-    }
-}
-
-pub fn is_black(piece: char) -> bool {
-    match piece {
-        'j'|'n'|'b'|'r'|'q'|'k' => true,
-        _ => false
+        'i'|'N'|'B'|'R'|'Q'|'K' => Some(true),
+        'j'|'n'|'b'|'r'|'q'|'k' => Some(false),
+        _ => None
     }
 }
 
