@@ -151,15 +151,15 @@ impl PlayerMovement {
 
             let iterator:std::ops::Range<usize>;
             if target_column == 0 { // queenside castle
-                iterator = 2..4; // 2 to 3
+                iterator = 2..5; // 2 to 4
             }else { // kingside castle
-                iterator = (BOARD_SIZE-3)..(BOARD_SIZE-1); // BOARD_SIZE-3 to BOARD_SIZE-2
+                iterator = (BOARD_SIZE-4)..(BOARD_SIZE-1); // BOARD_SIZE-4 to BOARD_SIZE-2
             }
 
             let last_item_of_iterator = iterator.clone().last().unwrap();
 
             for square in iterator {
-                let is_piece = get_piece_color(board[square][king_row as usize]).is_some();
+                let is_piece = get_piece_color(board[square][king_row as usize]).is_some() && board[square][king_row as usize] != piece.symbol;
                 if is_piece {
                     break;
                 }

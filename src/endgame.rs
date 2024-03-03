@@ -14,6 +14,23 @@ pub fn get_pieces_attacking_square(attacked_piece_color: bool, square_position: 
     let current_column: i8 = square_position.0;
     let current_row: i8 = square_position.1;
 
+    let queen_symbol: char;
+    let rook_symbol: char;
+    let bishop_symbol: char;
+    let knight_symbol: char;
+
+    if attacked_piece_color {
+        queen_symbol = 'q';
+        rook_symbol = 'r';
+        bishop_symbol = 'b';
+        knight_symbol = 'n';
+    }else {
+        queen_symbol = 'Q';
+        rook_symbol = 'R';
+        bishop_symbol = 'B';
+        knight_symbol = 'N';
+    }
+
     for cardinal_direction in [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (1, 1), (-1, 1)].iter() {
     // left, up, right, down, upper-left, upper-right, lower-right, lower-left
         for square in 1..BOARD_SIZE as i8 {
@@ -29,30 +46,21 @@ pub fn get_pieces_attacking_square(attacked_piece_color: bool, square_position: 
             if is_column_in_board && is_row_in_board {
                 let square_character = board[column_index_in_square as usize][current_row as usize];
 
-                if attacked_piece_color {
-                    if is_diagonal_movement {
-                        if square_character == 'q' || square_character == 'b' {
-                            pieces_attacking_square.insert(pinned_pieces_index_offset, position);
-                        }
-                    }else {
-                        if square_character == 'q' || square_character == 'r' {
-                            pieces_attacking_square.insert(pinned_pieces_index_offset, position);
-                        }
+                if square_character == queen_symbol {
+                    pieces_attacking_square.insert(pinned_pieces_index_offset, position);
+                }else if is_diagonal_movement {
+                    if square_character == bishop_symbol {
+                        pieces_attacking_square.insert(pinned_pieces_index_offset, position);
                     }
                 }else {
-                    if is_diagonal_movement {
-                        if square_character == 'Q' || square_character == 'B' {
-                            pieces_attacking_square.insert(pinned_pieces_index_offset, position);
-                        }
-                    }else {
-                        if square_character == 'Q' || square_character == 'R' {
-                            pieces_attacking_square.insert(pinned_pieces_index_offset, position);
-                        }
+                    if square_character == rook_symbol {
+                        pieces_attacking_square.insert(pinned_pieces_index_offset, position);
                     }
                 }
+
                 match get_piece_color(square_character) {
                     Some(b) => { // a piece was identified
-                        if b == attacked_piece_color { 
+                        if b == attacked_piece_color {
                             // if the identified piece is the same color as the piece being attacked, it is a pinned piece
                             if pinned_pieces.len() >= pinned_pieces_index_offset+1 {
                                 // if there are more pieces that are the same color of the attacked on the way, none are pinned
@@ -61,7 +69,7 @@ pub fn get_pieces_attacking_square(attacked_piece_color: bool, square_position: 
                                 pinned_pieces.insert(pinned_pieces_index_offset, position)
                             }
                         }else {
-                            break;
+                            break; // opposite color piece that is not attacking the square
                         }
                     },
                     None => (), // not a piece ('.' / FREE_SQUARE_SYMBOL)
@@ -77,15 +85,9 @@ pub fn get_pieces_attacking_square(attacked_piece_color: bool, square_position: 
             pinned_pieces.remove(pinned_pieces_index_offset);
         }
         if pinned_pieces.len() == pinned_pieces_index_offset+1 {
+            // only one pinned piece may exist per pinning piece
             pinned_pieces_index_offset += 1;
         }
-    }
-
-    let knight_symbol: char;
-    if attacked_piece_color {
-        knight_symbol = 'n';
-    }else {
-        knight_symbol = 'N';
     }
 
     for knight_movement_possibility in [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, 2), (1, -2), (2, 1), (2, -1)].iter() {
