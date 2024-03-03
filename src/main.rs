@@ -33,11 +33,11 @@ fn main() {
     };
 
     loop {
-        show_board(&board);
+        show_board(&board, &processed_move.captured_piece_symbols);
         println!("White moves:");
         processed_move = play_turn(&mut white_pieces, &mut board, &mut black_pieces, processed_move);
 
-        show_board(&board);
+        show_board(&board, &processed_move.captured_piece_symbols);
         println!("Black moves:");
         processed_move = play_turn(&mut black_pieces, &mut board, &mut white_pieces, processed_move);
     }
@@ -49,7 +49,7 @@ struct ProcessedMove {
     captured_piece_symbols: Vec<char>
 }
 
-fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
+fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE], captured_piece_symbols: &Vec<char> ) {
     for row in (0..BOARD_SIZE).rev() {
         for column in 0..BOARD_SIZE {
             if column == 0 {
@@ -67,7 +67,6 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
 
         }
     }
-
     print!("    ");
     for letter in 0..BOARD_SIZE {
         if letter == BOARD_SIZE - 1 {
@@ -75,6 +74,40 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE]) {
         }else {
             print!("[{}]", BOARD_LETTERS[letter]);
         }
+    }
+
+    if captured_piece_symbols.len() > 0 {
+        let mut white_pieces = vec![];
+        let mut black_pieces = vec![];
+
+        for piece in captured_piece_symbols.iter() {
+            match get_piece_color(*piece) {
+                Some(color) => {
+                    if color {
+                        white_pieces.push(piece);
+                    }else {
+                        black_pieces.push(piece);
+                    }
+                },
+                None => ()
+            }
+        }
+
+        if white_pieces.len() > 0 {
+            print!("[");
+            for piece in white_pieces.iter() {
+                print!(" {} ", piece);
+            }
+            println!("]");
+        }
+        if black_pieces.len() > 0 {
+            print!("[");
+            for piece in black_pieces.iter() {
+                print!(" {} ", piece);
+            }
+            println!("]");
+        }
+        println!();
     }
 }
 
@@ -90,7 +123,7 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
         let mut player_move_piece_type: &mut Piece = pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
         let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type, &board, processed_move.en_passant_column.0);
 
-        if en_passant_column.1 == player_move_piece_type.color {
+        if en_passant_column.1 == player_move_piece_type.color && en_passant_column.0 == player_move_verified.en_passant_column {
             en_passant_column.0 = 27;
         }else if en_passant_column.0 != player_move_verified.en_passant_column {
             en_passant_column.0 = player_move_verified.en_passant_column;
@@ -141,14 +174,18 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                         let target_char = board[player_move.target_position.0 as usize][(player_move.target_position.1-1) as usize];
 
                         is_en_passant = player_move_piece_type.color && get_piece_color(target_char).is_some_and(|x|x==false);
-                        player_move.target_position.1 -= 1;
+                        if is_en_passant {
+                            player_move.target_position.1 -= 1;
+                        }
                     }
                 }else {
                     if player_move.target_position.1+1 < BOARD_SIZE as i8 {
                         let target_char = board[player_move.target_position.0 as usize][(player_move.target_position.1+1) as usize];
 
                         is_en_passant = !player_move_piece_type.color && get_piece_color(target_char).is_some_and(|x|x==true);
-                        player_move.target_position.1 += 1;
+                        if is_en_passant {
+                            player_move.target_position.1 += 1;
+                        }
                     }
                 }
             }
