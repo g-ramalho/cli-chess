@@ -1,0 +1,12 @@
+// copy and paste the following sequence into the terminal
+// to get the scholar's mate
+
+// make sure to copy from line 6 to line 13
+
+e4
+e5
+Bc4
+a6
+Qf3
+a5
+Qxf7

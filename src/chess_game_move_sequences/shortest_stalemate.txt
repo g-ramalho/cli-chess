@@ -1,0 +1,24 @@
+// copy and paste the following sequence into the terminal
+// to get the shortest stalemate possible
+
+// make sure to copy from line 6 to line 25
+
+e3
+a5
+Qh5
+Ra6
+Qxa5
+h5
+h4
+Rah6
+Qxc7
+f6
+Qxd7
+Kf7
+Qxb7
+Qd3
+Qxb8
+Qh7
+Qxc8
+Kg6
+Qe6

@@ -1,5 +1,5 @@
 use std::io;
-use crate::{endgame::get_pieces_attacking_square, BOARD_LETTERS, BOARD_SIZE};
+use crate::{endgame::{get_pieces_attacking_square, get_safe_squares_for_king}, BOARD_LETTERS, BOARD_SIZE};
 
 #[derive(PartialEq)]
 pub enum MoveType {
@@ -202,27 +202,32 @@ impl PlayerMovement {
                             }
                         }else if (piece.color && target_row - current_row == 2) || (!piece.color && target_row - current_row == -2) {
                             if !self.is_capture {
+                                let square_character = board[target_column as usize][target_row as usize];
                                 if current_column == target_column {
                                     if piece.color {
                                         if current_row == 1 {
-                                            en_passant_column = current_column;
-                                            if !is_possible {
-                                                is_possible = true;
-                                                index_position_to_move_from = pawn_position_index;
-                                            }else {
-                                                is_ambiguous = true;
-                                                break;
+                                            if get_piece_color(square_character).is_none() && get_piece_color(board[target_column as usize][(target_row - 1) as usize]).is_none() {
+                                                en_passant_column = current_column;
+                                                if !is_possible {
+                                                    is_possible = true;
+                                                    index_position_to_move_from = pawn_position_index;
+                                                }else {
+                                                    is_ambiguous = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }else {
                                         if current_row == BOARD_SIZE as i8 - 2 {
-                                            en_passant_column = current_column;
-                                            if !is_possible {
-                                                is_possible = true;
-                                                index_position_to_move_from = pawn_position_index;
-                                            }else {
-                                                is_ambiguous = true;
-                                                break;
+                                            if get_piece_color(square_character).is_none() && get_piece_color(board[target_column as usize][(target_row + 1) as usize]).is_none() {
+                                                en_passant_column = current_column;
+                                                if !is_possible {
+                                                    is_possible = true;
+                                                    index_position_to_move_from = pawn_position_index;
+                                                }else {
+                                                    is_ambiguous = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
@@ -372,13 +377,17 @@ impl PlayerMovement {
                             // both cannot be 0, because that would mean the target position is the same as the current one
                             // and so the sum of the differences in column and row must be either 2 or 1
 
-                            if get_pieces_attacking_square(piece.color, (target_column, target_row), &board).pieces_attacking_square.len() == 0 {
-                                if !is_possible {
-                                    is_possible = true;
-                                    index_position_to_move_from = king_position_index;
-                                }else {
-                                    is_ambiguous = true;
-                                    break;
+                            let safe_squares = get_safe_squares_for_king(piece.color, (current_column, current_row), &board);
+
+                            for square in safe_squares.iter() {
+                                if *square == (target_column, target_row) {
+                                    if !is_possible {
+                                        is_possible = true;
+                                        index_position_to_move_from = king_position_index;
+                                    }else {
+                                        is_ambiguous = true;
+                                        break;
+                                    }
                                 }
                             }
                         }

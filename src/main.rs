@@ -1,6 +1,9 @@
 mod pieces;
 mod endgame;
+use endgame::{get_game_state, EndgameType};
 use pieces::*;
+
+use crate::endgame::get_pieces_attacking_square;
 
 const BOARD_SIZE: usize = 8; // max board size: 26x26 / min board size: 8x8
 const FREE_SQUARE_SYMBOL: char = '.';
@@ -34,12 +37,18 @@ fn main() {
 
     loop {
         show_board(&board, &processed_move.captured_piece_symbols);
+        if is_endgame(&white_pieces, &board, &black_pieces) { break; }
         println!("White moves:");
-        processed_move = play_turn(&mut white_pieces, &mut board, &mut black_pieces, processed_move);
+        let white_king_position = white_pieces.iter().find(|piece| piece.piece_type == PieceType::King).unwrap().positions[0];
+        let white_pinned_pieces = get_pieces_attacking_square(true, white_king_position, &board).pinned_pieces;
+        processed_move = play_turn(&mut white_pieces, &mut board, &mut black_pieces, processed_move, white_pinned_pieces);
 
         show_board(&board, &processed_move.captured_piece_symbols);
+        if is_endgame(&black_pieces, &board, &white_pieces) { break; }
         println!("Black moves:");
-        processed_move = play_turn(&mut black_pieces, &mut board, &mut white_pieces, processed_move);
+        let black_king_position = black_pieces.iter().find(|piece| piece.piece_type == PieceType::King).unwrap().positions[0];
+        let black_pinned_pieces = get_pieces_attacking_square(false, black_king_position, &board).pinned_pieces;
+        processed_move = play_turn(&mut black_pieces, &mut board, &mut white_pieces, processed_move, black_pinned_pieces);
     }
 }
 
@@ -111,7 +120,7 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE], captured_piece_symbols: &V
     }
 }
 
-fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove) -> ProcessedMove {
+fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove, pinned_pieces: Vec<(i8, i8)>) -> ProcessedMove {
 
     let mut has_rook_moved = processed_move.has_rook_moved;
     let mut en_passant_column = processed_move.en_passant_column;
@@ -131,6 +140,11 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
         }
 
         if player_move_verified.is_possible {
+
+            // if pinned_pieces.iter().find(|position| **position == player_move_piece_type.positions[player_move_verified.index_position_to_move_from]).is_some() {
+            //     println!("That piece is pinned and may not move!");
+            //     continue;
+            // }
             
             if player_move.movement_type == MoveType::Castle {
                 let has_white_rook_moved = (player_move.target_position.0 == 0 && ((has_rook_moved >> 3) & 1) == 1) || (player_move.target_position.0 == 1 && ((has_rook_moved >> 2) & 1) == 1);
@@ -263,6 +277,11 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                             position_to_move_from = player_move_piece_type.positions.iter_mut().find(|position| position.1 == player_move.unambiguous_move_partial_position.1).unwrap();
                         }
 
+                        // if pinned_pieces.iter().find(|position| **position == *position_to_move_from).is_some() {
+                        //     println!("That piece is pinned and may not move!");
+                        //     continue;
+                        // }
+
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
                         board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = FREE_SQUARE_SYMBOL;
 
@@ -300,6 +319,33 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
         captured_piece_symbols
     }
 
+}
+
+fn is_endgame(pieces: &Vec<Piece>, board: &[[char; BOARD_SIZE]; BOARD_SIZE], opposite_side_pieces: &Vec<Piece>) -> bool {
+
+    match get_game_state(pieces, board, opposite_side_pieces) {
+        EndgameType::NotEndgame => false,
+        EndgameType::Checkmate => {
+            if pieces[0].color {
+                println!("CHECKMATE! BLACK WINS!\n");
+            }else {
+                println!("CHECKMATE! WHITE WINS!\n");
+            }
+            true
+        },
+        EndgameType::InsufficientMaterial => {
+            println!("INSUFFICIENT MATERIAL FOR CHECKMATE! IT'S A DRAW!\n");
+            true
+        },
+        EndgameType::Stalemate => {
+            if pieces[0].color {
+                println!("THE WHITE KING HAS NO VALID MOVES AND IS NOT IN CHECK! IT'S A STALEMATE!\n");
+            }else {
+                println!("THE BLACK KING HAS NO VALID MOVES AND IS NOT IN CHECK! IT'S A STALEMATE!\n");
+            }
+            true
+        }
+    }
 }
 
 const BOARD_LETTERS: [char; 26] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', '#', 'y', 'z']; 
