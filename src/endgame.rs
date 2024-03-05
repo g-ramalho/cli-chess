@@ -2,7 +2,7 @@ use crate::{get_piece_color, Piece, PieceType, BOARD_SIZE};
 
 pub struct AttackingPieces {
     pub pieces_attacking_square: Vec<(i8, i8)>,
-    pub pinned_pieces: Vec<(i8, i8)>
+    pub pinned_pieces: Vec<((i8, i8), usize)>
 }
 
 #[derive(PartialEq)]
@@ -16,7 +16,7 @@ pub enum EndgameType {
 pub fn get_pieces_attacking_square(attacked_piece_color: bool, square_position: (i8, i8), board: &[[char; BOARD_SIZE]; BOARD_SIZE]) -> AttackingPieces {
 
     let mut pieces_attacking_square: Vec<(i8, i8)> = vec![];
-    let mut pinned_pieces: Vec<(i8, i8)> = vec![];
+    let mut pinned_pieces: Vec<((i8, i8), usize)> = vec![];
     let mut pinned_pieces_index_offset = 0;
 
     let current_column: i8 = square_position.0;
@@ -92,21 +92,8 @@ pub fn get_pieces_attacking_square(attacked_piece_color: bool, square_position: 
         }
 
         if pinned_pieces_briefing.len() == 1 && path_that_attacking_piece_was_found_in.len() == 1 {
-            pinned_pieces.insert(pinned_pieces_index_offset, pinned_pieces_briefing[0].0);
+            pinned_pieces.insert(pinned_pieces_index_offset, pinned_pieces_briefing[0]);
         }
-
-        // if pieces_attacking_square.len() < pinned_pieces.len() {
-        //     // if there is a "pinned piece" but no "pinning piece",
-        //     // the pinned piece is not actually being pinned by anything
-        //     pinned_pieces.remove(pinned_pieces_index_offset);
-        // }
-        // // if the identified piece is the same color as the piece being attacked, it is a pinned piece
-        // if pinned_pieces.len() >= pinned_pieces_index_offset+1 {
-        //     // if there are more pieces that are the same color of the attacked on the way, none are pinned
-        //     pinned_pieces.remove(pinned_pieces_index_offset);
-        // }else{
-        //     pinned_pieces.insert(pinned_pieces_index_offset, position);
-        // }
 
         if pinned_pieces.len() == pinned_pieces_index_offset+1 {
             // only one pinned piece may exist per pinning piece
@@ -362,7 +349,7 @@ pub fn get_game_state(pieces: &Vec<Piece>, board: &[[char; BOARD_SIZE]; BOARD_SI
                 if piece.piece_type != PieceType::King {
                     for piece_position in piece.positions.iter() {
                         if is_piece_movable(&piece, *piece_position, &board) {
-                            if pieces_attacking_king.pinned_pieces.iter().find(|position| *position == piece_position).is_none() {
+                            if pieces_attacking_king.pinned_pieces.iter().find(|position| position.0 == *piece_position).is_none() {
                                 return EndgameType::NotEndgame;
                             }
                         }

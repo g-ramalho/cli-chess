@@ -40,7 +40,7 @@ e4
 Bxc1
 Rxc1
 Ne7
-Rxc8
+Rxc8 <- 
 Rxc8
 Bd6
 Ng6

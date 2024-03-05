@@ -120,7 +120,51 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE], captured_piece_symbols: &V
     }
 }
 
-fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove, pinned_pieces: Vec<(i8, i8)>) -> ProcessedMove {
+fn is_pinned_piece_movable(position_to_move_from: (i8, i8), direction_index: usize, target_position: (i8, i8)) -> bool {
+
+    match direction_index {
+        0 | 2 => {
+            // horizontal movement
+            if (target_position.1 - position_to_move_from.1).abs() == 0 {
+                true
+            }else {
+                false
+            }
+        },
+        1 | 3 => {
+            // vertical movement
+            if (target_position.0 - position_to_move_from.0).abs() == 0 {
+                true
+            }else {
+                false
+            }
+        },
+        4 | 6 => {
+            // upper-right/lower-left diagonal
+            let is_upper_right_diagonal_movement = target_position.0 - position_to_move_from.0 > 0 && target_position.1 - position_to_move_from.1 > 0;
+            let is_lower_left_diagonal_movement =  target_position.0 - position_to_move_from.0 < 0 && target_position.1 - position_to_move_from.1 < 0;
+            if is_upper_right_diagonal_movement || is_lower_left_diagonal_movement {
+                true
+            }else {
+                false
+            }
+        },
+        5 | 7 => {
+            // upper-left/lower-right diagonal
+            let is_upper_left_diagonal_movement = target_position.0 - position_to_move_from.0 < 0 && target_position.1 - position_to_move_from.1 > 0;
+            let is_lower_right_diagonal_movement = target_position.0 - position_to_move_from.0 > 0 && target_position.1 - position_to_move_from.1 < 0;
+            if is_upper_left_diagonal_movement || is_lower_right_diagonal_movement {
+                true
+            }else {
+                false
+            }
+        },
+        _ => false
+    }
+
+}
+
+fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove, pinned_pieces: Vec<((i8, i8), usize)>) -> ProcessedMove {
 
     let mut has_rook_moved = processed_move.has_rook_moved;
     let mut en_passant_column = processed_move.en_passant_column;
@@ -141,10 +185,13 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
 
         if player_move_verified.is_possible {
 
-            // if pinned_pieces.iter().find(|position| **position == player_move_piece_type.positions[player_move_verified.index_position_to_move_from]).is_some() {
-            //     println!("That piece is pinned and may not move!");
-            //     continue;
-            // }
+            let pinned_piece_position = pinned_pieces.iter().position(|position| position.0 == player_move_piece_type.positions[player_move_verified.index_position_to_move_from]);
+            if pinned_piece_position.is_some() {
+                if !is_pinned_piece_movable(player_move_piece_type.positions[player_move_verified.index_position_to_move_from], pinned_pieces[pinned_piece_position.unwrap()].1, player_move.target_position) {
+                    println!("That piece is pinned and may not move!");
+                    continue;
+                }
+            }
             
             if player_move.movement_type == MoveType::Castle {
                 let has_white_rook_moved = (player_move.target_position.0 == 0 && ((has_rook_moved >> 3) & 1) == 1) || (player_move.target_position.0 == 1 && ((has_rook_moved >> 2) & 1) == 1);
@@ -277,10 +324,13 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
                             position_to_move_from = player_move_piece_type.positions.iter_mut().find(|position| position.1 == player_move.unambiguous_move_partial_position.1).unwrap();
                         }
 
-                        // if pinned_pieces.iter().find(|position| **position == *position_to_move_from).is_some() {
-                        //     println!("That piece is pinned and may not move!");
-                        //     continue;
-                        // }
+                        let pinned_piece_position = pinned_pieces.iter().position(|position| position.0 == *position_to_move_from);
+                        if pinned_piece_position.is_some() {
+                            if !is_pinned_piece_movable(*position_to_move_from, pinned_pieces[pinned_piece_position.unwrap()].1, player_move.target_position) {
+                                println!("That piece is pinned and may not move!");
+                                continue;
+                            }
+                        }
 
                         board[position_to_move_from.0 as usize][position_to_move_from.1 as usize] = FREE_SQUARE_SYMBOL;
                         board[player_move.target_position.0 as usize][player_move.target_position.1 as usize] = FREE_SQUARE_SYMBOL;
