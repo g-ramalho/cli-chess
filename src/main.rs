@@ -31,6 +31,9 @@ fn main() {
         // first and second bit are the kingside and queenside's black rooks, respectively
         // third and fourth are the kingside and queenside's white rooks
         has_rook_moved: 0b0000,
+
+        // if an en passant is possible move, the first value indicates the column in which it may happen
+        // the second value keeps track of the color of the player that may be victim of en passant
         en_passant_column: (27, true),
         captured_piece_symbols: vec![]
     };

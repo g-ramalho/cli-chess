@@ -135,6 +135,15 @@ pub struct VerifiedPlayerMovement {
     pub en_passant_column: i8
 }
 
+fn validate_move(is_possible: &mut bool, is_ambiguous: &mut bool, index_position_to_move_from: &mut usize, current_piece_index: usize) {
+    if !*is_possible {
+        *is_possible = true;
+        *index_position_to_move_from = current_piece_index;
+    }else {
+        *is_ambiguous = true;
+    }
+}
+
 impl PlayerMovement {
     pub fn verify_if_move_is_possible(&self, piece: &Piece, board: &[[char; BOARD_SIZE]; BOARD_SIZE], en_passant_column: i8) -> VerifiedPlayerMovement {
         let target_column = self.target_position.0;
@@ -181,23 +190,13 @@ impl PlayerMovement {
                         if (piece.color && target_row - current_row == 1) || (!piece.color && target_row - current_row == -1) {
                             if self.is_capture {
                                 if (current_column - target_column).abs() == 1 {
-                                    if !is_possible {
-                                        is_possible = true;
-                                        index_position_to_move_from = pawn_position_index;
-                                    }else {
-                                        is_ambiguous = true;
-                                        break;
-                                    }
+                                    validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, pawn_position_index);
+                                    if is_ambiguous { break; }
                                 }
                             }else {
                                 if current_column == target_column {
-                                    if !is_possible {
-                                        is_possible = true;
-                                        index_position_to_move_from = pawn_position_index;
-                                    }else {
-                                        is_ambiguous = true;
-                                        break;
-                                    }
+                                    validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, pawn_position_index);
+                                    if is_ambiguous { break; }
                                 }
                             }
                         }else if (piece.color && target_row - current_row == 2) || (!piece.color && target_row - current_row == -2) {
@@ -208,26 +207,16 @@ impl PlayerMovement {
                                         if current_row == 1 {
                                             if get_piece_color(square_character).is_none() && get_piece_color(board[target_column as usize][(target_row - 1) as usize]).is_none() {
                                                 en_passant_column = current_column;
-                                                if !is_possible {
-                                                    is_possible = true;
-                                                    index_position_to_move_from = pawn_position_index;
-                                                }else {
-                                                    is_ambiguous = true;
-                                                    break;
-                                                }
+                                                validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, pawn_position_index);
+                                                if is_ambiguous { break; }
                                             }
                                         }
                                     }else {
                                         if current_row == BOARD_SIZE as i8 - 2 {
                                             if get_piece_color(square_character).is_none() && get_piece_color(board[target_column as usize][(target_row + 1) as usize]).is_none() {
                                                 en_passant_column = current_column;
-                                                if !is_possible {
-                                                    is_possible = true;
-                                                    index_position_to_move_from = pawn_position_index;
-                                                }else {
-                                                    is_ambiguous = true;
-                                                    break;
-                                                }
+                                                validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, pawn_position_index);
+                                                if is_ambiguous { break; }
                                             }
                                         }
                                     }
@@ -245,13 +234,8 @@ impl PlayerMovement {
                         let is_valid_vertical_movement: bool = (target_column - current_column).abs() == 1 && (target_row - current_row).abs() == 2;
 
                         if is_valid_horizontal_movement || is_valid_vertical_movement {
-                            if !is_possible {
-                                is_possible = true;
-                                index_position_to_move_from = knight_position_index;
-                            }else {
-                                is_ambiguous = true;
-                                break;
-                            }
+                            validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, knight_position_index);
+                            if is_ambiguous { break; }
                         }
                     }
                 },
@@ -262,7 +246,6 @@ impl PlayerMovement {
 
                         let is_diagonal_movement = (target_column - current_column).abs() == (target_row - current_row).abs();
                         if is_diagonal_movement {
-
                             for diagonal in 1..=(target_row - current_row).abs() {
                                 let row_index_in_diagonal = (target_row - current_row).signum() * diagonal;
                                 let column_index_in_diagonal = (target_column - current_column).signum() * diagonal;
@@ -275,17 +258,12 @@ impl PlayerMovement {
                                         break;
                                     }
                                 }else {
-                                    if !is_possible {
-                                        is_possible = true;
-                                        index_position_to_move_from = bishop_position_index;
-                                    }else {
-                                        is_ambiguous = true;
-                                        break;
-                                    }
+                                    validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, bishop_position_index);
+                                    break;
                                 }
                             }
-
                         }
+                        if is_ambiguous { break; }
                     }
                 },
                 PieceType::Rook => {
@@ -314,15 +292,11 @@ impl PlayerMovement {
                                     break;
                                 }
                             }else {
-                                if !is_possible {
-                                    is_possible = true;
-                                    index_position_to_move_from = rook_position_index;
-                                }else {
-                                    is_ambiguous = true;
-                                    break;
-                                }
+                                validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, rook_position_index);
+                                break;
                             }
                         }
+                        if is_ambiguous { break; }
                     }
                 },
                 PieceType::Queen => {
@@ -353,15 +327,11 @@ impl PlayerMovement {
                                     break;
                                 }
                             }else {
-                                if !is_possible {
-                                    is_possible = true;
-                                    index_position_to_move_from = queen_position_index;
-                                }else {
-                                    is_ambiguous = true;
-                                    break;
-                                }
+                                validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, queen_position_index);
+                                break;
                             }
                         }
+                        if is_ambiguous { break; }
                     }
                 },
                 PieceType::King => {
@@ -379,16 +349,9 @@ impl PlayerMovement {
 
                             let safe_squares = get_safe_squares_for_king(piece.color, (current_column, current_row), &board);
 
-                            for square in safe_squares.iter() {
-                                if *square == (target_column, target_row) {
-                                    if !is_possible {
-                                        is_possible = true;
-                                        index_position_to_move_from = king_position_index;
-                                    }else {
-                                        is_ambiguous = true;
-                                        break;
-                                    }
-                                }
+                            if safe_squares.iter().find(|square| **square == (target_column, target_row)).is_some() {
+                                validate_move(&mut is_possible, &mut is_ambiguous, &mut index_position_to_move_from, king_position_index);
+                                break;
                             }
                         }
                     }
