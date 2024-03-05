@@ -1,7 +1,7 @@
 // copy and paste the following sequence into the terminal
 // to get the shortest stalemate possible
 
-// make sure to copy from line 6 to line 25
+// make sure to copy from line 6 to the very end of the last line
 
 e3
 a5

@@ -1,4 +1,4 @@
-use crate::{get_piece_color, Piece, PieceType, BOARD_SIZE};
+use crate::{get_piece_color, Piece, PieceType, BOARD_SIZE, FREE_SQUARE_SYMBOL};
 
 pub struct AttackingPieces {
     pub pieces_attacking_square: Vec<(i8, i8)>,
@@ -201,21 +201,49 @@ pub fn get_pieces_that_can_block_attack(attacking_piece_position: (i8, i8), atta
 
     if board[attacking_piece_position.0 as usize][attacking_piece_position.1 as usize] != knight_symbol { // knight checks can't be blocked
         for square in 1..=iterator {
-            let column_index_in_square = (target_column - current_column).signum() * square;
-            let row_index_in_square = (target_row - current_row).signum() * square;
-    
+            let column_index_in_square = (target_column - current_column).signum() * square + current_column;
+            let row_index_in_square = (target_row - current_row).signum() * square + current_row;
             let position = (column_index_in_square, row_index_in_square);
+
+            let is_column_in_board = column_index_in_square >= 0 && column_index_in_square < BOARD_SIZE as i8;
+            let is_row_in_board = row_index_in_square >= 0 && row_index_in_square < BOARD_SIZE as i8;
         
-            let square_is_not_target = position.0 + current_column != target_column || position.1 + current_row != target_row;
+            let square_is_not_target = position.0 != target_column || position.1 != target_row;
     
-            if square_is_not_target {
-                let pieces_reaching_square = get_pieces_attacking_square(!attacked_piece.0, position, &board).pieces_attacking_square;
-    
-                for piece in pieces_reaching_square.iter() {
-                    pieces_that_can_block_check.push(*piece);
+            if is_column_in_board && is_row_in_board {
+                if square_is_not_target {
+                    let pieces_reaching_square = get_pieces_attacking_square(!attacked_piece.0, position, &board).pieces_attacking_square;
+        
+                    for piece in pieces_reaching_square.iter() {
+                        pieces_that_can_block_check.push(*piece);
+                    }
+
+                    if board[column_index_in_square as usize][row_index_in_square as usize] == FREE_SQUARE_SYMBOL {
+                        if attacked_piece.0 {
+                            if row_index_in_square - 2 >= 0 {
+                                if board[column_index_in_square as usize][(row_index_in_square - 2) as usize] == 'i' && row_index_in_square - 2 == 1 {
+                                    pieces_that_can_block_check.push((column_index_in_square, row_index_in_square - 2));
+                                }
+                            }else if row_index_in_square - 1 >= 0 {
+                                if board[column_index_in_square as usize][(row_index_in_square - 1) as usize] == 'i' {
+                                    pieces_that_can_block_check.push((column_index_in_square, row_index_in_square - 1));
+                                }
+                            }
+                        }else {
+                            if row_index_in_square + 2 < BOARD_SIZE as i8 {
+                                if board[column_index_in_square as usize][(row_index_in_square + 2) as usize] == 'j' && row_index_in_square + 2 == BOARD_SIZE as i8 - 2 {
+                                    pieces_that_can_block_check.push((column_index_in_square, row_index_in_square + 2));
+                                }
+                            }else if row_index_in_square + 1 < BOARD_SIZE as i8 {
+                                if board[column_index_in_square as usize][(row_index_in_square + 1) as usize] == 'j' {
+                                    pieces_that_can_block_check.push((column_index_in_square, row_index_in_square + 1));
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    break;
                 }
-            }else{
-                break;
             }
         }
     }

@@ -1,6 +1,6 @@
 mod pieces;
 mod endgame;
-use endgame::{get_game_state, EndgameType};
+use endgame::{get_game_state, get_pieces_that_can_block_attack, EndgameType};
 use pieces::*;
 
 use crate::endgame::get_pieces_attacking_square;
@@ -40,15 +40,15 @@ fn main() {
         if is_endgame(&white_pieces, &board, &black_pieces) { break; }
         println!("White moves:");
         let white_king_position = white_pieces.iter().find(|piece| piece.piece_type == PieceType::King).unwrap().positions[0];
-        let white_pinned_pieces = get_pieces_attacking_square(true, white_king_position, &board).pinned_pieces;
-        processed_move = play_turn(&mut white_pieces, &mut board, &mut black_pieces, processed_move, white_pinned_pieces);
+        let pieces_attacking_white_king = get_pieces_attacking_square(true, white_king_position, &board);
+        processed_move = play_turn(&mut white_pieces, &mut board, &mut black_pieces, processed_move, pieces_attacking_white_king.pinned_pieces, pieces_attacking_white_king.pieces_attacking_square, white_king_position);
 
         show_board(&board, &processed_move.captured_piece_symbols);
         if is_endgame(&black_pieces, &board, &white_pieces) { break; }
         println!("Black moves:");
         let black_king_position = black_pieces.iter().find(|piece| piece.piece_type == PieceType::King).unwrap().positions[0];
-        let black_pinned_pieces = get_pieces_attacking_square(false, black_king_position, &board).pinned_pieces;
-        processed_move = play_turn(&mut black_pieces, &mut board, &mut white_pieces, processed_move, black_pinned_pieces);
+        let pieces_attacking_black_king = get_pieces_attacking_square(false, black_king_position, &board);
+        processed_move = play_turn(&mut black_pieces, &mut board, &mut white_pieces, processed_move, pieces_attacking_black_king.pinned_pieces, pieces_attacking_black_king.pieces_attacking_square, black_king_position);
     }
 }
 
@@ -89,19 +89,23 @@ fn show_board(board: &[[char;BOARD_SIZE];BOARD_SIZE], captured_piece_symbols: &V
         let mut white_pieces = vec![];
         let mut black_pieces = vec![];
 
-        for piece in captured_piece_symbols.iter() {
-            match get_piece_color(*piece) {
-                Some(color) => {
-                    if color {
-                        white_pieces.push(piece);
-                    }else {
-                        black_pieces.push(piece);
-                    }
-                },
-                None => ()
+        for piece_type in ['Q', 'R', 'B', 'N', 'i'].iter() {
+            for piece in captured_piece_symbols.iter() {
+                if *piece == *piece_type {
+                    white_pieces.push(piece);
+                }
             }
         }
 
+        for piece_type in ['q', 'r', 'b', 'n', 'j'].iter() {
+            for piece in captured_piece_symbols.iter() {
+                if *piece == *piece_type {
+                    black_pieces.push(piece);
+                }
+            }
+        }
+
+        println!("captured pieces:");
         if white_pieces.len() > 0 {
             print!("[");
             for piece in white_pieces.iter() {
@@ -164,7 +168,7 @@ fn is_pinned_piece_movable(position_to_move_from: (i8, i8), direction_index: usi
 
 }
 
-fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove, pinned_pieces: Vec<((i8, i8), usize)>) -> ProcessedMove {
+fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE], opposite_side_pieces: &mut Vec<Piece>, processed_move: ProcessedMove, pinned_pieces: Vec<((i8, i8), usize)>, pieces_attacking_king: Vec<(i8, i8)>, king_position: (i8, i8)) -> ProcessedMove {
 
     let mut has_rook_moved = processed_move.has_rook_moved;
     let mut en_passant_column = processed_move.en_passant_column;
@@ -175,6 +179,20 @@ fn play_turn(pieces: &mut Vec<Piece>, board: &mut [[char;BOARD_SIZE];BOARD_SIZE]
         let mut player_move = get_player_move();
         let mut player_move_piece_type: &mut Piece = pieces.iter_mut().find(|piece: &&mut Piece| piece.piece_type == player_move.p_type).unwrap();
         let player_move_verified: VerifiedPlayerMovement = player_move.verify_if_move_is_possible(player_move_piece_type, &board, processed_move.en_passant_column.0);
+
+        if pieces_attacking_king.len() == 1 && pinned_pieces.len() != pieces_attacking_king.len() {
+            if player_move.p_type != PieceType::King {
+                if get_pieces_that_can_block_attack(pieces_attacking_king[0], (player_move_piece_type.color, &king_position), &board).len() == 0 {
+                    if player_move.target_position != pieces_attacking_king[0] {
+                        println!("Your king is being checked! Either capture the checking piece or block the check!");
+                        continue;
+                    }
+                }
+            }
+        }else if pieces_attacking_king.len() == 2 && player_move.p_type != PieceType::King && pinned_pieces.len() != pieces_attacking_king.len() {
+            println!("Your king is double-checked! You have to move your king!");
+            continue;
+        }
 
         if en_passant_column.1 == player_move_piece_type.color && en_passant_column.0 == player_move_verified.en_passant_column {
             en_passant_column.0 = 27;

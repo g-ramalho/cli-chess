@@ -1,3 +1,8 @@
+// copy and paste the following sequence into the terminal
+// to get a draw by insufficient material
+
+// make sure to copy from line 6 to the very end of the last line
+
 d4
 d5
 Bf4
@@ -40,7 +45,7 @@ e4
 Bxc1
 Rxc1
 Ne7
-Rxc8 <- 
+Rxc8
 Rxc8
 Bd6
 Ng6
