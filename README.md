@@ -13,7 +13,7 @@ Features:
 
 1. **Clone the repository**:
    ```
-   git clone https://github.com/g-ramalho/chess
+   git clone https://github.com/g-ramalho/cli-chess
    cd chess
    ```
 
