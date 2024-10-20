@@ -1,3 +1,5 @@
+use crate::board::Board;
+
 #[derive(Clone, Copy, Debug)]
 pub enum PieceType {
     Queen,
@@ -21,6 +23,11 @@ pub struct Piece {
 }
 
 impl Piece {
+    pub fn move_to(self, row: usize, column: usize, board: &mut Board) {
+        // TODO: remove piece from last position
+        board.0[row][column] = Some(self);
+    }
+
     pub fn new(p_type: PieceType, color: PieceColor) -> Self {
         Self { p_type, color }
     }
